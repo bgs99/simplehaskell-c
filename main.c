@@ -29,13 +29,10 @@ int main()
     apply(d,"s","z",buff);
     printf("%s\n",buff);
 */
-    const char *ip = "f : Nat-Nat\nf x = ";
-    parse_res q = parse_tan(ip);
-    dict *l[1];
-    parse_res fin = parse_left(q.val,l,q.left);
+    const char *ip = "idn : Nat-Nat\nidn x = x";
+    parse_res fin = parse_fun(ip);
     //char buff[256];
     put_t(fin.val->type);
-    printf("%s\n: ", (*l)->value->name);
-    put_t((*l)->value->type);
+    printf("%s",fin.val->def);
     return 0;
 }

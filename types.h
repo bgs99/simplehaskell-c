@@ -20,8 +20,9 @@ typedef union Prim{
 } Prim;
 
 typedef struct Fun{
-    const char * name;
-    const Type * type;
+    const char *name;
+    const Type *type;
+    const char *def;
     Prim val;
 } Fun;
 
@@ -31,6 +32,7 @@ typedef struct Parsed{
     const char *left;
 } Parsed;
 
+const Type* last_type(const Type *t);
 
 bool equal_t(Type a, Type b);
 

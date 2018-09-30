@@ -1,12 +1,12 @@
 #include "eval.h"
 #include "stdio.h"
 
-Fun apply_v(const Fun a, const Fun b){
-    return (Fun){
-        .name = NULL,
-        .val = a.val.f_val(b.val),
-        .type= apply_t(*a.type, *b.type)
-    };
+Fun* apply_v(const Fun a, const Fun b){
+    Fun* res = malloc(sizeof (Fun));
+    res->name = NULL;
+    res->val = a.val.f_val(b.val);
+    res->type = apply_t(*a.type, *b.type);
+    return res;
 }
 
 bool print_res(const Fun f, char* buff){
@@ -26,14 +26,14 @@ bool print_res(const Fun f, char* buff){
 }
 
 bool apply_f(const Fun a, const Fun b, char* buff){
-    Fun res = apply_v(a, b);
-    if(!res.type){
+    Fun *res = apply_v(a, b);
+    if(!res->type){
         return false;
     }
-    buff+=print_t(res.type, buff);
+    buff+=print_t(res->type, buff);
     *buff = '\n';
     buff++;
-    if(!print_res(res,buff)){
+    if(!print_res(*res,buff)){
         sprintf(buff, "Cannot print a function");
     }
     return true;

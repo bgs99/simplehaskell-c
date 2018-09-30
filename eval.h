@@ -1,6 +1,6 @@
 #include "dictionary_t.h"
 
-Fun apply_v(Fun a, Fun b);
+Fun* apply_v(Fun a, Fun b);
 
 bool print_res(const Fun f, char* buff);
 

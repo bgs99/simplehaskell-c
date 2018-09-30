@@ -101,3 +101,10 @@ size_t print_t(const Type *t, char *s){
     s++;
     return print_t(t->val.func.ret, s) + (size_t)(s - origin);
 }
+
+
+const Type* last_type(const Type *t){
+    if(t->simple || !t->val.func.ret)
+        return t;
+    return last_type(t->val.func.ret);
+}
