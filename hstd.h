@@ -1,11 +1,2 @@
-#ifndef HSTD_H
-#define HSTD_H
-
-
-class hstd
-{
-public:
-    hstd();
-};
-
-#endif // HSTD_H
+#include "eval.h"
+const dict* init(void);

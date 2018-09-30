@@ -1,11 +1,9 @@
-#ifndef EVAL_H
-#define EVAL_H
+#include "dictionary_t.h"
 
+Fun apply_v(Fun a, Fun b);
 
-class eval
-{
-public:
-    eval();
-};
+bool print_res(const Fun f, char* buff);
 
-#endif // EVAL_H
+bool apply_f(const Fun a, const Fun b, char* buff);
+
+bool apply(const dict *d, const char * const a, const char * const b, char* buff);
