@@ -9,9 +9,12 @@ Prim inc(Prim a){
 
 Fun* make_f(const char *name, const char* type, const Prim p){
     Fun *ret = malloc(sizeof (Fun));
-    ret->name = name;
+    char *tname = malloc(sizeof (char)*20);
+    strcpy(tname, name);
+    ret->name = tname;
     ret->type = parse_t(type).ret;
-    ret->val = p;
+    ret->val = malloc(sizeof (Prim));
+    *ret->val = p;
     return ret;
 }
 

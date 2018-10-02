@@ -13,7 +13,8 @@ void put_t(const Type *t){
 
 int main()
 {
-    /*const dict *d = init();
+    const dict *d = init();
+    /*
     const Fun *tf = dict_get(d, "s");
     const Fun *ta = dict_get(d, "z");
 
@@ -22,15 +23,21 @@ int main()
 
     printf("Applied to ");
     put_t(ta->type);
-    printf("With value %d\n", ta->val.i_val);
+    printf("With value %d\n", ta->val->i_val);
     printf("Has result ");
 
     char buff[20];
     apply(d,"s","z",buff);
     printf("%s\n",buff);
 */
-    const char *ip = "idn : Nat-Nat\nidn x = x";
-    parse_res fin = parse_fun(ip);
+    list(int) *g = NULL;
+    list(int) *t;
+    int ggg[1] ={1};
+
+    list_put(int,g,ggg);
+    list_get(int, g, 0, t);
+    const char *ip = "idn : Nat-Nat \n idn x = s x";
+    parse_res fin = parse_fun(d, ip);
     //char buff[256];
     put_t(fin.val->type);
     printf("%s",fin.val->def);

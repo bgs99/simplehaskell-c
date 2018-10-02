@@ -23,7 +23,7 @@ typedef struct Fun{
     const char *name;
     const Type *type;
     const char *def;
-    Prim val;
+    Prim *val;
 } Fun;
 
 

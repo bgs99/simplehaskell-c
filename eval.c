@@ -1,10 +1,11 @@
 #include "eval.h"
 #include "stdio.h"
+#include "malloc.h"
 
 Fun* apply_v(const Fun a, const Fun b){
     Fun* res = malloc(sizeof (Fun));
     res->name = NULL;
-    res->val = a.val.f_val(b.val);
+    *res->val = a.val->f_val(*b.val);
     res->type = apply_t(*a.type, *b.type);
     return res;
 }
@@ -12,15 +13,15 @@ Fun* apply_v(const Fun a, const Fun b){
 bool print_res(const Fun f, char* buff){
     if(!f.type->simple) return false;
     if(!strcmp(f.type->val.name, "Nat")){
-        sprintf(buff, "%d", f.val.i_val);
+        sprintf(buff, "%d", f.val->i_val);
     } else if(!strcmp(f.type->val.name, "Double")){
-        sprintf(buff, "%f", f.val.d_val);
+        sprintf(buff, "%f", f.val->d_val);
     } else if(!strcmp(f.type->val.name, "Bool")){
-        if(f.val.b_val)
+        if(f.val->b_val)
             sprintf(buff, "true");
         else sprintf(buff, "false");
     } else if(!strcmp(f.type->val.name, "Char")){
-        sprintf(buff, "%c", f.val.c_val);
+        sprintf(buff, "%c", f.val->c_val);
     }
     return true;
 }
