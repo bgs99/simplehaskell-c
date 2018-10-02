@@ -110,7 +110,6 @@ parse_res parse_fun(const dict *glob, const char *input){
     parse_res c = parse_right(b.val, *l, glob, b.left);
     char * def = malloc(sizeof (char)*256);
     strncpy(def,a.left,(size_t)(c.left-a.left));
-    c.val->def = def;
     return c;
 }
 

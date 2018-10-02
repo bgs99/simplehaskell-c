@@ -18,6 +18,5 @@ int main()
     parse_res fin = parse_fun(d, ip);
     //char buff[256];
     put_t(fin.val->type);
-    printf("%s",fin.val->def);
     return 0;
 }

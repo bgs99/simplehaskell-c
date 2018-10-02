@@ -23,7 +23,6 @@ typedef union Prim{
 typedef struct Fun{
     const char *name;
     const Type *type;
-    const char *def;
     const Prim *val;
 } Fun;
 
