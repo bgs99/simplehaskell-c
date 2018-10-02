@@ -17,7 +17,7 @@ typedef union Prim{
     char c_val;
     double d_val;
     bool b_val;
-    union Prim* (*f_val)(const union Prim*);
+    const union Prim* (*f_val)(const union Prim*);
 } Prim;
 
 typedef struct Fun{

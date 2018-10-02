@@ -14,9 +14,9 @@ typedef struct dict{
 } dict;
 
 
-dict* dict_add(const dict *d, const Fun *value);
+void dict_add(const dict **d, const Fun *value);
 const Fun* dict_get(const dict *d, const char *name);
 
-dict* dict_add_eval(const dict *d, const eval_tree *value);
+void dict_add_eval(const dict **d, const eval_tree *value);
 const eval_tree* dict_get_eval(const dict *d,  const char *name);
 

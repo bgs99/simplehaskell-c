@@ -13,11 +13,11 @@ char s_equal(const char *a, const char *b){
     }
 }
 
-dict* dict_add_eval(const dict *d, const eval_tree *value){
+void dict_add_eval(const dict **d, const eval_tree *value){
     dict *res = malloc(sizeof (dict));
-    res->next = d;
     res->value = value;
-    return res;
+    res->next = *d;
+    *d = res;
 }
 const eval_tree* dict_get_eval(const dict *d, const char *name){
     if(!d) return NULL;
@@ -28,8 +28,8 @@ const eval_tree* dict_get_eval(const dict *d, const char *name){
     return NULL;
 }
 
-dict* dict_add(const dict *d, const Fun *value){
-    return dict_add_eval(d, eval_make(value));
+void dict_add(const dict **d, const Fun *value){
+    dict_add_eval(d, eval_make(value));
 }
 
 

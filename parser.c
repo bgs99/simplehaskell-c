@@ -19,7 +19,7 @@ parse_res parse_tan(const char *input){
     eval_tree *et = eval_make(res);
     return (parse_res){NULL, p.left+1, et};
 }
-parse_res parse_left(const Fun *f, dict **local, const char *input){
+parse_res parse_left(const Fun *f,const dict **local, const char *input){
     input = skip_ws(input);
     char *name = malloc(sizeof (char)*20);
     input = read_word(name, input);
@@ -35,7 +35,7 @@ parse_res parse_left(const Fun *f, dict **local, const char *input){
         const Type *t = i->simple ? i : i->val.func.arg;
         af->type = t;
         af->lid = lid++;
-        *local = dict_add(*local, af);
+        dict_add(local, af);
         input = skip_ws(input);
     }
     input++;
@@ -121,10 +121,10 @@ void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
 
 parse_res parse_fun(const dict *glob, const char *input){
     parse_res a = parse_tan(input);
-    dict **l = malloc(sizeof (dict*));
+    const dict **l = malloc(sizeof (dict*));
     parse_res b = parse_left(a.et->f,l,a.left);
     unsigned int argn = (*l) ? (**l).value->f->lid : 0;
-    *l = dict_add(*l, a.et->f);
+    dict_add(l, a.et->f);
     parse_res c = parse_right(a.et->f->type, *l, glob, b.left);
     eval_tree_wrap(&c, a.et->f, argn);
     return c;
@@ -138,7 +138,7 @@ const dict* parse_all(const char *input){
         if(*input == '\0') break;
         parse_res f = parse_fun(glob, input);
         input = f.left;
-        glob = dict_add_eval(glob, f.et);
+        dict_add_eval(&glob, f.et);
     }
     return glob;
 }
