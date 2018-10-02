@@ -63,7 +63,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
     t->next = arg;
 }
 
-eval_tree* eval_make(Fun *f){
+eval_tree* eval_make(const Fun *f){
     eval_tree *ret = malloc(sizeof (eval_tree));
     ret->f = f;
     return ret;

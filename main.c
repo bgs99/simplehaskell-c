@@ -17,6 +17,6 @@ int main()
     const char *ip = "idn : Nat-Nat \n idn x = s x";
     parse_res fin = parse_fun(d, ip);
     //char buff[256];
-    put_t(fin.val->type);
+    put_t(fin.et->f->type);
     return 0;
 }

@@ -24,7 +24,7 @@ typedef struct Fun{
     const char *name;
     const Type *type;
     const Prim *val;
-    const int *lid;//contains id if Fun is parameter
+    int lid;//0 if not parameter, else is parameter id + 1
 } Fun;
 
 
