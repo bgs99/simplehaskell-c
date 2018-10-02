@@ -47,7 +47,7 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
     input = pr.left;
     Fun *f = pr.val;
     parse_res res;
-    pr.et = NULL
+    pr.et = NULL;
     while((pr = parse_arg(local, glob, input)).val){
         input = pr.left;
         f->type = apply_t(*f->type,*pr.val->type);
