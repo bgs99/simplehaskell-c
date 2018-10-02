@@ -13,8 +13,6 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     strcpy(tname, name);
     ret->name = tname;
     ret->type = parse_t(type).ret;
-    ret->val = malloc(sizeof (Prim));
-    *ret->val = p;
     return ret;
 }
 

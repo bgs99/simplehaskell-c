@@ -5,12 +5,12 @@
 Fun* apply_v(const Fun a, const Fun b){
     Fun* res = malloc(sizeof (Fun));
     res->name = NULL;
-    *res->val = a.val->f_val(*b.val);
+    //*res->val = a.val->f_val(*b.val);
     res->type = apply_t(*a.type, *b.type);
     return res;
 }
 
-bool print_res(const Fun f, char* buff){
+bool print_res(const Fun f, char* buff){/*
     if(!f.type->simple) return false;
     if(!strcmp(f.type->val.name, "Nat")){
         sprintf(buff, "%d", f.val->i_val);
@@ -22,7 +22,7 @@ bool print_res(const Fun f, char* buff){
         else sprintf(buff, "false");
     } else if(!strcmp(f.type->val.name, "Char")){
         sprintf(buff, "%c", f.val->c_val);
-    }
+    }*/
     return true;
 }
 
@@ -68,3 +68,4 @@ eval_tree* eval_make(Fun *f){
     ret->f = f;
     return ret;
 }
+

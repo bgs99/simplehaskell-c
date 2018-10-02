@@ -47,14 +47,14 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
     parse_res pr = parse_f_f(local, glob, input);
     input = pr.left;
     Fun *f = pr.val;
-    parse_res res;
-    pr.et = NULL;
+    eval_tree *ret = pr.et;
     while((pr = parse_arg(local, glob, input)).val){
         input = pr.left;
         f->type = apply_t(*f->type,*pr.val->type);
+        eval_add_arg(ret, pr.et);
     }
     input = pr.left;
-    return (parse_res){f, input};
+    return (parse_res){f, input, ret};
 }
 parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
     input = skip_ws(input);
@@ -74,7 +74,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
         ff->type = dict_get(glob, name)->type;
     else
         ff->type = lt->type;
-    return (parse_res){ff, input};
+    return (parse_res){ff, input, eval_make(ff)};
 }
 
 parse_res parse_arg(const dict *local, const dict *glob, const char *input){
@@ -92,7 +92,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
     ff->type = dict_get(local, name)->type;
     if(!ff->type)
         ff->type = dict_get(glob, name)->type;
-    return (parse_res){ff, input};
+    return (parse_res){ff, input, eval_make(ff)};
 }
 
 
