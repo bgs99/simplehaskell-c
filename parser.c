@@ -58,6 +58,7 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
     eval_tree *ret = pr.et;
     while((pr = parse_arg(local, glob, input)).type){
         input = pr.left;
+
         f = apply_t(*f,*pr.type);
         eval_add_arg(ret, pr.et);
     }

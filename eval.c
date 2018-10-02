@@ -24,15 +24,15 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
     if(!tree){
         return;
     }
+    tree->argn++;
     if(!tree->arg){
         tree->arg = arg;
         return;
     }
     eval_tree *t = tree->arg;//get first arg
-    for(; t; t = t->next);//skip current args
+    for(; t->next; t = t->next);//skip current args
     //now t has last arg
     t->next = arg;
-    tree->argn++;
 }
 
 eval_tree* eval_make(const Fun *f){
@@ -41,31 +41,32 @@ eval_tree* eval_make(const Fun *f){
     return ret;
 }
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim **params);
+const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
 
-const Prim** collect_args(const dict *glob, const eval_tree *tree, const Prim **params, unsigned int argn){
-    Prim const **args = malloc(argn * sizeof(Prim*));
+const Prim* collect_args(const dict *glob, const eval_tree *tree, const Prim *params, unsigned int argn){
+    Prim *args = malloc(argn * sizeof(Prim));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
-        args[i++] = eval_expr(glob, arg, params);
+        args[i++] = *eval_expr(glob, arg, params);
     }
     return args;
 }
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim **params){
+const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params){
     if(!input) return NULL;
     if(!input->f) return NULL;
     const Fun *f = input->f;
 
     const Prim *res = f->val;
+    const Prim *args = collect_args(glob, input, params, input->argn);
     if(!res){
         if(*f->name == '!'){
             int argi;
             sscanf(f->name+1,"%d",&argi);
-            res = params[argi-1];
+            res = &params[argi-1];
         } else {
             const eval_tree *sa =  dict_get_eval(glob, f->name);
-            const Prim **ps = collect_args(glob, input, params, sa->argn);
+            const Prim *ps = collect_args(glob, input, params, sa->argn);
             return eval_expr(glob, sa->arg, ps);
         }
     }
@@ -73,13 +74,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim **par
         return res;
     }
 
-    const eval_tree *arg = input->arg;
-
-    for(; arg; arg = arg->next){
-        res = res->f_val(eval_expr(glob, arg, params));
-    }
-
-    return res;
+    return res->f_val(args);
 }
 
 Fun* eval_string(const dict *glob, const char *input){

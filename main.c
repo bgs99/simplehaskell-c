@@ -23,7 +23,7 @@ int main()
     const dict *ad = parse_all(all);
 
     printf("%s \n", all);
-    const char *ip = "cf";
+    const char *ip = "p g g";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;
