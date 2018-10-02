@@ -17,16 +17,13 @@ void put_f(const Fun *f){
 
 int main()
 {
-    const dict *d = init();
-    const char *cf = "cf : Nat - Nat \ncf x = s (s x)";
-    printf("%s \n", cf);
-    const char *ip = "s (cf z)";
-    const eval_tree *cfet = parse_fun(d,cf).et;
-    d = dict_add_eval(d, cfet);
+    const char *all = "cf:Nat-Nat\ncf x = s (s x)\n g:Nat\n g = s (cf z)";
+
+    const dict *ad = parse_all(all);
+
+    printf("%s \n", all);
+    const char *ip = "g";
     printf("Expression %s\n Evaluates to ", ip);
-    put_f(eval_string(d,ip));
-    //parse_res fin = parse_fun(d, ip);
-    //char buff[256];
-    //put_t(fin.et->f->type);
+    put_f(eval_string(ad,ip));
     return 0;
 }

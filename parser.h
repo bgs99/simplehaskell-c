@@ -13,4 +13,4 @@ parse_res parse_right(const Type *f, const dict *local, const dict* glob, const 
 
 parse_res parse_fun(const dict *glob, const char *input);
 
-void parse_all(Fun **buff, const char *input);
+const dict* parse_all(const char *input);

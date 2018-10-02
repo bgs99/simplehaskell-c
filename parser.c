@@ -26,7 +26,7 @@ parse_res parse_left(const Fun *f, dict **local, const char *input){
     if(strcmp(name, f->name) != 0) return (parse_res){NULL,NULL, NULL};
     input = skip_ws(input);
     const Type *i = f->type;
-    int lid = 1;
+    unsigned int lid = 1;
     while(*input != '='){
         char *id = malloc(sizeof (char)*20);
         input = read_word(id, input);
@@ -122,11 +122,23 @@ parse_res parse_fun(const dict *glob, const char *input){
     parse_res a = parse_tan(input);
     dict **l = malloc(sizeof (dict*));
     parse_res b = parse_left(a.et->f,l,a.left);
-    unsigned int argn = (**l).value->f->lid;
+    unsigned int argn = (*l) ? (**l).value->f->lid : 0;
     *l = dict_add(*l, a.et->f);
     parse_res c = parse_right(a.et->f->type, *l, glob, b.left);
     eval_tree_wrap(&c, a.et->f, argn);
     return c;
 }
 
+const dict* parse_all(const char *input){
+    const dict *glob = init();
+    while(*input != '\0'){
+        while(*input == '\n' || *input == ')')
+            input++;
+        if(*input == '\0') break;
+        parse_res f = parse_fun(glob, input);
+        input = f.left;
+        glob = dict_add_eval(glob, f.et);
+    }
+    return glob;
+}
 
