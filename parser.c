@@ -22,7 +22,7 @@ parse_res parse_left(Fun *f, dict **local, const char *input){
     input = skip_ws(input);
     char *name = malloc(sizeof (char)*20);
     input = read_word(name, input);
-    if(strcmp(name, f->name)) return (parse_res){NULL,NULL, NULL};
+    if(strcmp(name, f->name) != 0) return (parse_res){NULL,NULL, NULL};
     input = skip_ws(input);
     const Type *i = f->type;
     while(*input != '='){

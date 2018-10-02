@@ -4,12 +4,11 @@
 
 bool equal_t(Type a, Type b){
     if(a.simple != b.simple) return false;//if a is function and b is val
-    if(a.simple){
+    if(a.simple)
         return !strcmp(a.val.name, b.val.name);//if both val compare names
-    } else {
-        if(!equal_t(*a.val.func.arg, *b.val.func.arg)) return false;//if args are different
-        return equal_t(*a.val.func.ret, *b.val.func.ret);//comparing return types
-    }
+
+    if(!equal_t(*a.val.func.arg, *b.val.func.arg)) return false;//if args are different
+    return equal_t(*a.val.func.ret, *b.val.func.ret);//comparing return types
 }
 const Type* apply_t(Type a, Type b){
     if(a.simple) return NULL;

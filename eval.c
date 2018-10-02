@@ -5,7 +5,7 @@
 Fun* apply_v(const Fun a, const Fun b){
     Fun* res = malloc(sizeof (Fun));
     res->name = NULL;
-    *res->val = a.val->f_val(*b.val);
+    res->val = a.val->f_val(b.val);
     res->type = apply_t(*a.type, *b.type);
     return res;
 }
