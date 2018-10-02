@@ -3,6 +3,7 @@
 
 typedef struct eval_tree{
     const Fun *f; //Function
+    unsigned int argn;
     struct eval_tree *arg;//pointer to first arg
     struct eval_tree *next;//pointer to next sibling
 } eval_tree;
@@ -18,3 +19,4 @@ const Fun* dict_get(const dict *d, const char *name);
 
 dict* dict_add_eval(const dict *d, const eval_tree *value);
 const eval_tree* dict_get_eval(const dict *d,  const char *name);
+

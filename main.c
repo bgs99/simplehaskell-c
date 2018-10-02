@@ -18,9 +18,9 @@ void put_f(const Fun *f){
 int main()
 {
     const dict *d = init();
-    const char *cf = "cf : Nat\ncf = s z";
+    const char *cf = "cf : Nat - Nat \ncf x = s (s x)";
     printf("%s \n", cf);
-    const char *ip = "s (s (s cf))";
+    const char *ip = "s (cf z)";
     const eval_tree *cfet = parse_fun(d,cf).et;
     d = dict_add_eval(d, cfet);
     printf("Expression %s\n Evaluates to ", ip);

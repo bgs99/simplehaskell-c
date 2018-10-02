@@ -111,19 +111,21 @@ parse_res parse_right(const Type *f, const dict *local, const dict *glob, const 
     return tr;
 }
 
-void eval_tree_wrap(parse_res *pr, const Fun *f){
+void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
     eval_tree *et = eval_make(f);
     eval_add_arg(et, pr->et);
     pr->et = et;
+    pr->et->argn = argn;
 }
 
 parse_res parse_fun(const dict *glob, const char *input){
     parse_res a = parse_tan(input);
     dict **l = malloc(sizeof (dict*));
     parse_res b = parse_left(a.et->f,l,a.left);
+    unsigned int argn = (**l).value->f->lid;
     *l = dict_add(*l, a.et->f);
     parse_res c = parse_right(a.et->f->type, *l, glob, b.left);
-    eval_tree_wrap(&c, a.et->f);
+    eval_tree_wrap(&c, a.et->f, argn);
     return c;
 }
 
