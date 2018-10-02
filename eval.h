@@ -18,3 +18,8 @@ typedef struct eval_tree{
 void eval_add_arg(eval_tree *tree, eval_tree *arg);
 
 eval_tree* eval_make(const Fun *f);
+
+Prim eval_expr(dict *glob, const eval_tree *input);
+
+
+Prim eval_string(dict *glob, const char *input);

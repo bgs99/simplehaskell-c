@@ -69,3 +69,10 @@ eval_tree* eval_make(const Fun *f){
     return ret;
 }
 
+Prim eval_expr(dict *glob, const eval_tree *input){
+
+}
+
+Prim eval_string(dict *glob, const char *input){
+
+}
