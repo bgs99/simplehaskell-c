@@ -10,6 +10,6 @@ bool apply(const dict *d, const char * const a, const char * const b, char* buff
 
 typedef struct eval_tree{
     Fun *f;
-    list(struct eval_tree) arg;
+    struct eval_tree *arg;
 } eval_tree;
 

@@ -2,7 +2,7 @@
 typedef struct parse_res{
   Fun *val;
   const char *left;
-  list(struct parse_res) *et;
+  eval_tree *et;
 } parse_res;
 
 parse_res parse_tan(const char *input);
