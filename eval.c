@@ -30,7 +30,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
         return;
     }
     eval_tree *t = tree->arg;//get first arg
-    for(; t->next; t = t->next);//skip current args
+    for(; t; t = t->next);//skip current args
     //now t has last arg
     t->next = arg;
 }
@@ -41,7 +41,7 @@ eval_tree* eval_make(const Fun *f){
     return ret;
 }
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
+//const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
 
 const Prim* collect_args(const dict *glob, const eval_tree *tree, const Prim *params, unsigned int argn){
     Prim *args = malloc(argn * sizeof(Prim));
