@@ -10,7 +10,7 @@ typedef struct Type{
             const struct Type *ret;
         } func;
     } val;
-    int simple;
+    bool simple;
 } Type;
 typedef union Prim{
     int i_val;
@@ -42,3 +42,5 @@ const Type* apply_t(Type a, Type b);
 Parsed parse_t(const char input[]);
 
 size_t print_t(const Type *t, char *s);
+
+bool generic(Type t);

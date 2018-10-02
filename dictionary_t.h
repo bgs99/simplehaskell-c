@@ -8,9 +8,15 @@ typedef struct eval_tree{
     struct eval_tree *next;//pointer to next sibling
 } eval_tree;
 
+typedef struct generics{
+    const struct generics *next;
+    const char *key;
+    Type *val;
+} generics;
+
 typedef struct dict{
-    const struct dict * next;
-    const eval_tree* value;
+    const struct dict *next;
+    const eval_tree *value;
 } dict;
 
 

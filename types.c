@@ -107,3 +107,10 @@ const Type* last_type(const Type *t){
         return t;
     return last_type(t->val.func.ret);
 }
+
+
+bool generic(Type t){
+    if(!t.simple) return false;
+    char c = *t.val.name;
+    return (c >= 'a') && (c <= 'z');
+}
