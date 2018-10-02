@@ -9,14 +9,20 @@ void put_t(const Type *t){
     print_t(t,buff);
     printf("%s\n",buff);
 }
-
+void put_f(const Fun *f){
+    char buff[20];
+    print_res(*f,buff);
+    printf("%s\n",buff);
+}
 
 int main()
 {
     const dict *d = init();
-    const char *ip = "idn : Nat-Nat \n idn x = s x";
-    parse_res fin = parse_fun(d, ip);
+    const char *ip = "s (s (s z))";
+    printf("Expression %s\n Evaluates to ", ip);
+    put_f(eval_string(d,ip));
+    //parse_res fin = parse_fun(d, ip);
     //char buff[256];
-    put_t(fin.et->f->type);
+    //put_t(fin.et->f->type);
     return 0;
 }

@@ -14,7 +14,9 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     strcpy(tname, name);
     ret->name = tname;
     ret->type = parse_t(type).ret;
-    ret->val = &p;
+    Prim *val = malloc(sizeof (Prim));
+    *val = p;
+    ret->val = val;
     return ret;
 }
 

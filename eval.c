@@ -1,14 +1,7 @@
 #include "eval.h"
 #include "stdio.h"
 #include "malloc.h"
-
-Fun* apply_v(const Fun a, const Fun b){
-    Fun* res = malloc(sizeof (Fun));
-    res->name = NULL;
-    res->val = a.val->f_val(b.val);
-    res->type = apply_t(*a.type, *b.type);
-    return res;
-}
+#include "parser.h"
 
 bool print_res(const Fun f, char* buff){
     if(!f.type->simple) return false;
@@ -24,29 +17,6 @@ bool print_res(const Fun f, char* buff){
         sprintf(buff, "%c", f.val->c_val);
     }
     return true;
-}
-
-bool apply_f(const Fun a, const Fun b, char* buff){
-    Fun *res = apply_v(a, b);
-    if(!res->type){
-        return false;
-    }
-    buff+=print_t(res->type, buff);
-    *buff = '\n';
-    buff++;
-    if(!print_res(*res,buff)){
-        sprintf(buff, "Cannot print a function");
-    }
-    return true;
-}
-
-bool apply(const dict *d, const char * const a, const char * const b, char* buff){
-    const Fun *fa = dict_get(d, a);
-    const Fun *fb = dict_get(d, b);
-    if(!fa || !fb){
-        return false;
-    }
-    return apply_f(*fa,*fb, buff);
 }
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg){
@@ -69,10 +39,33 @@ eval_tree* eval_make(const Fun *f){
     return ret;
 }
 
-Prim eval_expr(dict *glob, const eval_tree *input){
+const Prim* eval_expr(const dict *glob, const eval_tree *input){
+    if(!input) return NULL;
+    if(!input->f) return NULL;
+    const Fun *f = input->f;
 
+    const Prim *res = f->val;
+    if(!res)
+        res = eval_expr(glob, dict_get_eval(glob, f->name));
+
+    if(!input->arg){
+        return res;
+    }
+
+    const eval_tree *arg = input->arg;
+
+    for(; arg; arg = arg->next){
+        res = res->f_val(eval_expr(glob, arg));
+    }
+
+    return res;
 }
 
-Prim eval_string(dict *glob, const char *input){
-
+Fun* eval_string(const dict *glob, const char *input){
+    parse_res pr = parse_app(NULL,glob,input);
+    Fun *ret = malloc(sizeof (Fun));
+    const Prim *val = eval_expr(glob, pr.et);
+    ret->type = pr.type;
+    ret->val = val;
+    return ret;
 }
