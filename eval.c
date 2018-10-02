@@ -4,6 +4,7 @@
 #include "parser.h"
 
 bool print_res(const Fun f, char* buff){
+    if(!f.type) return false;
     if(!f.type->simple) return false;
     if(!strcmp(f.type->val.name, "Nat")){
         sprintf(buff, "%d", f.val->i_val);
@@ -84,6 +85,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim **par
 Fun* eval_string(const dict *glob, const char *input){
     parse_res pr = parse_app(NULL,glob,input);
     Fun *ret = malloc(sizeof (Fun));
+    if(!pr.type->simple) return ret;
     const Prim *val = eval_expr(glob, pr.et, NULL);
     ret->type = pr.type;
     ret->val = val;

@@ -8,6 +8,7 @@ Prim* inc(const Prim *a){
     return ret;
 }
 
+
 Fun* make_f(const char *name, const char* type, const Prim p){
     Fun *ret = malloc(sizeof (Fun));
     char *tname = malloc(sizeof (char)*20);

@@ -11,8 +11,9 @@ void put_t(const Type *t){
 }
 void put_f(const Fun *f){
     char buff[20];
-    print_res(*f,buff);
-    printf("%s\n",buff);
+    if(print_res(*f,buff))
+        printf("%s\n",buff);
+    else printf("function\n");
 }
 
 int main()
@@ -22,7 +23,7 @@ int main()
     const dict *ad = parse_all(all);
 
     printf("%s \n", all);
-    const char *ip = "g";
+    const char *ip = "cf";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;
