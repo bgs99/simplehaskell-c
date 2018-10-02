@@ -18,12 +18,12 @@ void put_f(const Fun *f){
 
 int main()
 {
-    const char *all = "cf:Nat-Nat\ncf x = s (s x)\n g:Nat\n g = s (cf z)";
+    const char *all = "plus_two:Nat-Nat\nplus_two x = s (s x)\n three:Nat\nthree = s (plus_two z)";
 
     const dict *ad = parse_all(all);
 
     printf("%s \n", all);
-    const char *ip = "p g g";
+    const char *ip = "if true (plus three three) z";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;

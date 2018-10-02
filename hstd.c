@@ -33,16 +33,20 @@ Fun* make_f(const char *name, const char* type, const Prim p){
 }
 
 const dict* init(){
-    Fun *z = make_f("z", "Nat", (Prim){.i_val=0}),
-        *s = make_f("s", "Nat-Nat", (Prim){.f_val=&inc}),
-        *p = make_f("plus","Nat-Nat-Nat", (Prim){.f_val=&sum}),
-        *ip = make_f("if", "Bool-Nat-Nat",(Prim){.f_val=&fif});
+    Fun     *z = make_f("z", "Nat", (Prim){.i_val=0}),
+            *s = make_f("s", "Nat-Nat", (Prim){.f_val=&inc}),
+            *p = make_f("plus","Nat-Nat-Nat", (Prim){.f_val=&sum}),
+            *ip = make_f("if", "Bool-Nat-Nat",(Prim){.f_val=&fif}),
+            *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
+            *b_f = make_f("false", "Bool", (Prim){.b_val=false});
 
     const dict **d = malloc(sizeof (dict*));
     dict_add(d, z);
     dict_add(d, s);
     dict_add(d, p);
     dict_add(d, ip);
+    dict_add(d, t_f);
+    dict_add(d, b_f);
     return *d;
 }
 

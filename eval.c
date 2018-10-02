@@ -30,7 +30,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
         return;
     }
     eval_tree *t = tree->arg;//get first arg
-    for(; t; t = t->next);//skip current args
+    for(; t->next; t = t->next);//skip current args
     //now t has last arg
     t->next = arg;
 }
