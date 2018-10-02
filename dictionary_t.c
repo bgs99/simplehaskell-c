@@ -20,6 +20,7 @@ dict* dict_add_eval(const dict *d, const eval_tree *value){
     return res;
 }
 const eval_tree* dict_get_eval(const dict *d, const char *name){
+    if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
         if(s_equal(name, i->value->f->name))
             return i->value;

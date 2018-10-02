@@ -46,7 +46,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input){
 
     const Prim *res = f->val;
     if(!res)
-        res = eval_expr(glob, dict_get_eval(glob, f->name));
+        res = eval_expr(glob, dict_get_eval(glob, f->name)->arg);
 
     if(!input->arg){
         return res;
