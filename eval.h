@@ -11,6 +11,7 @@ bool apply(const dict *d, const char * const a, const char * const b, char* buff
 
 typedef struct eval_tree{
     Fun *f; //Function
+    int argn;//counted from 1;
     struct eval_tree *arg;//pointer to first arg
     struct eval_tree *next;//pointer to next sibling
 } eval_tree;

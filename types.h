@@ -24,6 +24,7 @@ typedef struct Fun{
     const char *name;
     const Type *type;
     const Prim *val;
+    const int *lid;//contains id if Fun is parameter
 } Fun;
 
 
