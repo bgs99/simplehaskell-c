@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "reader.h"
+#include "eval.h"
 #include <malloc.h>
 
 parse_res parse_tan(const char *input){

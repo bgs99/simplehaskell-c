@@ -48,3 +48,23 @@ bool apply(const dict *d, const char * const a, const char * const b, char* buff
     }
     return apply_f(*fa,*fb, buff);
 }
+
+void eval_add_arg(eval_tree *tree, eval_tree *arg){
+    if(!tree){
+        return;
+    }
+    if(!tree->arg){
+        tree->arg = arg;
+        return;
+    }
+    eval_tree *t = tree->arg;//get first arg
+    for(; t; t = t->next);//skip current args
+    //now t has last arg
+    t->next = arg;
+}
+
+eval_tree* eval_make(Fun *f){
+    eval_tree *ret = malloc(sizeof (eval_tree));
+    ret->f = f;
+    return ret;
+}

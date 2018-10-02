@@ -1,3 +1,4 @@
+#pragma once
 #include "dictionary_t.h"
 
 Fun* apply_v(Fun a, Fun b);
@@ -9,7 +10,11 @@ bool apply_f(const Fun a, const Fun b, char* buff);
 bool apply(const dict *d, const char * const a, const char * const b, char* buff);
 
 typedef struct eval_tree{
-    Fun *f;
-    struct eval_tree *arg;
+    Fun *f; //Function
+    struct eval_tree *arg;//pointer to first arg
+    struct eval_tree *next;//pointer to next sibling
 } eval_tree;
 
+void eval_add_arg(eval_tree *tree, eval_tree *arg);
+
+eval_tree* eval_make(Fun *f);

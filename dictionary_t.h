@@ -1,4 +1,6 @@
+#pragma once
 #include "types.h"
+
 typedef struct dict{
     const struct dict * next;
     const Fun * value;

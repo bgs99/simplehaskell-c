@@ -1,3 +1,4 @@
+#pragma once
 #include "hstd.h"
 typedef struct parse_res{
   Fun *val;
