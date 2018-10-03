@@ -29,7 +29,7 @@ const Prim* eqi(const eval_promise *a){
 
 Fun* make_f(const char *name, const char* type, const Prim p){
     Fun *ret = malloc(sizeof (Fun));
-    char *tname = malloc(sizeof (char)*20);
+    char *tname = calloc(20, sizeof (char));
     strcpy(tname, name);
     ret->name = tname;
     ret->type = parse_t(type).ret;

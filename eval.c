@@ -53,7 +53,7 @@ eval_tree* eval_make(const Fun *f){
 //const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
 
 const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const eval_promise *params, unsigned int argn){
-    eval_promise *args = malloc(argn * sizeof(eval_promise));
+    eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
         args[i++] = (eval_promise){glob, arg, params};

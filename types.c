@@ -31,7 +31,7 @@ Parsed _parse_arg(const char input[]){
     }
     res.ret = malloc(sizeof (Type));
     res.ret->simple = true;
-    char *name = malloc(sizeof (char)*20);
+    char *name = calloc(20, sizeof (char));
     int i = 0;
     for(; (*input != '\0') && (*input != '\n');input++){
         char c = *input;

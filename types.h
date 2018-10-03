@@ -1,6 +1,7 @@
 #pragma once
 #include <string.h>
 #include <stdbool.h>
+#define log(...) fprintf(stderr, __VA_ARGS__)
 
 struct generics;
 

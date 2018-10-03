@@ -5,7 +5,7 @@
 
 parse_res parse_tan(const char *input){
     input = skip_ws(input);
-    char *name = malloc(sizeof (char)*20);
+    char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
     input = skip_ws(input);
     if(*input != ':'){
@@ -21,14 +21,14 @@ parse_res parse_tan(const char *input){
 }
 parse_res parse_left(const Fun *f,const dict **local, const char *input){
     input = skip_ws(input);
-    char *name = malloc(sizeof (char)*20);
+    char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
     if(strcmp(name, f->name) != 0) return (parse_res){NULL,NULL, NULL};
     input = skip_ws(input);
     const Type *i = f->type;
     unsigned int lid = 1;
     while(*input != '='){
-        char *id = malloc(sizeof (char)*20);
+        char *id = calloc(20, sizeof (char));
         input = read_word(id, input);
         Fun *af = malloc(sizeof (Fun));
         af->name = id;
@@ -43,7 +43,7 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
 }
 
 char* rename_arg(const Fun *arg){
-    char *ret = malloc(sizeof (char)*20);
+    char *ret = calloc(20, sizeof (char));
     sprintf(ret,"!%d",arg->lid);
     return ret;
 }
@@ -75,7 +75,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
         if(*ret.left == ')') ret.left++;
         return ret;
     }
-    char *name = malloc(sizeof (char)*20);
+    char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
 
     const Fun *ff = dict_get(local, name);
@@ -96,7 +96,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
         return ret;
     }
     Fun *ff = malloc(sizeof (Fun));
-    char *name = malloc(sizeof (char)*20);
+    char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
     const Fun *lt = dict_get(local, name);
 
@@ -112,7 +112,10 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
 
 parse_res parse_right(const Type *f, const dict *local, const dict *glob, const char *input){
     parse_res tr = parse_app(local, glob, input);
-    if(!equal_t(last_type(f), tr.type, f->gen)) return (parse_res){NULL, NULL, NULL};
+    if(!equal_t(last_type(f), tr.type, f->gen)){
+        log("Return types do not match");
+        return (parse_res){NULL, NULL, NULL};
+    }
     return tr;
 }
 
