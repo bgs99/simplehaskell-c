@@ -3,19 +3,25 @@
 #include "reader.h"
 #include "dictionary_t.h"
 
-bool equal_t(Type a, Type b){
-    if(a.simple != b.simple) return false;//if a is function and b is val
-    if(a.simple)
-        return !strcmp(a.name, b.name);//if both val compare names
+bool equal_t(const Type *a, const Type *b, generics *context){
+    if(a->simple && generic(*a)){
+        return generics_bind(context,a->name, b);
+        return true;
+    }
+    if(a->simple != b->simple) return false;//if a is function and b is val
+    if(a->simple)
+        return !strcmp(a->name, b->name);//if both val compare names
 
-    if(!equal_t(*a.arg, *b.arg)) return false;//if args are different
-    return equal_t(*a.ret, *b.ret);//comparing return types
+    if(!equal_t(a->arg, b->arg, context)) return false;//if args are different
+    return equal_t(a->ret, b->ret, context);//comparing return types
 }
 
-const Type* apply_t(Type a, Type b){
-    if(a.simple) return NULL;
-    if(!equal_t(*a.arg, b)) return NULL;
-    return a.ret;
+const Type* apply_t(const Type *a, const Type *b){
+    if(a->simple) return NULL;
+    //char *z = a.name, *r = b.name;
+    //generics *q = a.gen, *y = b.gen;
+    if(!equal_t(a->arg, b, a->gen)) return NULL;
+    return a->ret;
 }
 
 
@@ -45,7 +51,7 @@ Parsed _parse_arg(const char input[]){
     res.ret->name = name;
     res.left = input;
     if(generic(*res.ret))
-        generics_add(&res.ret->gen, name);
+        generics_add(res.ret, name);
     return res;
 }
 Parsed _parse_ret(const char input[]){

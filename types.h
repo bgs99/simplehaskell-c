@@ -104,9 +104,9 @@ typedef  struct generics generics;
 
 const Type* last_type(const Type *t);
 
-bool equal_t(Type a, Type b);
+bool equal_t(const Type *a, const Type *b, generics *context);
 
-const Type* apply_t(Type a, Type b);
+const Type* apply_t(const Type *a, const Type *b);
 
 Parsed parse_t(const char input[]);
 

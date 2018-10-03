@@ -36,7 +36,11 @@ const Fun* dict_get(const dict *d, const char *name){
     const eval_tree *tree = dict_get_eval(d, name);
     return tree ? tree->f : NULL;
 }
-
+/**
+ * @brief generics_add Adds type variable to a type description. NULL-safe. Should be
+ * @param t Destination
+ * @param name Type variable's name
+ */
 void generics_add(Type *t, const char *name){
     for(const generics *i = t->gen; i; i = i->next){
         if(strcmp(i->key, name) == 0)
@@ -47,23 +51,49 @@ void generics_add(Type *t, const char *name){
     ret->next = t->gen;
     t->gen = ret;
 }
-
+/**
+ * @brief generics_free Frees memory of generics struct, leaves names. Currently disabled
+ * @param d Generics struct
+ */
 void generics_free(generics *d){
     if(!d) return;
     generics_free(d->next);
-    free(d);
+    //free(d);
 }
-
+/**
+ * @brief generics_merge Moves type variables from one type to another. NULL-safe
+ * @param to Destination
+ * @param from Source
+ */
 void generics_merge(Type *to,  Type *from){
     if(!from->gen) return;
-    generics **dest = to->gen ? &to->gen : malloc(sizeof (generics *));
     for(const generics *i = from->gen; i; i = i->next){
-        generics_add(dest, i->key);
+        generics_add(to, i->key);
     }
     generics_free(from->gen);
 }
 
+bool generics_bind(generics *g, const char *name, const Type *t){
+    for(generics *i = g; i; i = i->next){
+        if(strcmp(i->key, name)==0){
+            if(i->val) return false;
+            i->val = t;
+            return true;
+        }
+    }
 
+    return false;
+}
+
+void generics_reset(generics *g){
+    for(generics *i = g; i; i = i->next)
+        i->val = NULL;
+}
+
+void dict_generics_reset(dict *d){
+    for(const dict *i = d; i; i = i->next)
+        generics_reset(i->value->f->type->gen);
+}
 
 
 

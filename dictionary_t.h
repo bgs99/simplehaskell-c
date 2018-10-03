@@ -72,3 +72,5 @@ const eval_tree* dict_get_eval(const dict *d,  const char *name);
 void generics_add(Type *t, const char *name);
 
 void generics_merge(Type *to, Type *from);
+bool generics_bind(generics *g, const char *name, const Type *t);
+void dict_generics_reset(dict *d);

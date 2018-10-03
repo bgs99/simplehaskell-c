@@ -21,9 +21,7 @@ int main()
         "plus_two : Nat - Nat \n \
         plus_two x = s (s x) \n \
         three : Nat \n \
-        three = s (plus_two z) \n \
-        mkeq : Nat - Nat - Nat \n \
-        mkeq x y = if (equal x y) x (mkeq (s x) y)";
+        three = s (plus_two z)";
 
     const dict *ad = parse_all(all);
     printf("%s \n", all);
