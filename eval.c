@@ -30,6 +30,7 @@ bool print_res(const Fun f){
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg){
     if(!tree){
+        log("Evaluation tree not provided");
         return;
     }
     tree->argn++;
@@ -63,18 +64,21 @@ const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const 
 
 
 const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
-    if(!input) return NULL;
-    if(!input->f) return NULL;
+    if(!input){
+        log("Nothing to evaluate");
+        return NULL;
+    }
+    if(!input->f){
+        log("Evaluation tree is empty");
+        return NULL;
+    }
     const Fun *f = input->f;
 
     const Prim *res = f->val;
     const eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){
-        if(*f->name == '!'){
-            int argi;
-            sscanf(f->name+1,"%d",&argi);
-            eval_promise ep = params[argi-1];
-            res = eval_expr(ep.glob, ep.input, ep.params);
+        if(f->lid > 0){
+            res = promise_eval(params[f->lid-1]);//eval_expr(ep.glob, ep.input, ep.params);
         } else {
             const eval_tree *sa =  dict_get_eval(glob, f->name);
             const eval_promise *ps = collect_args(glob, input, params, sa->argn);
@@ -90,8 +94,11 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
 
 Fun* eval_string(const dict *glob, const char *input){
     parse_res pr = parse_app(NULL,glob,input);
+    if(!pr.type->simple){
+        log("Expression doesn't have primitive type");
+        return NULL;
+    }
     Fun *ret = malloc(sizeof (Fun));
-    if(!pr.type->simple) return ret;
     const Prim *val = eval_expr(glob, pr.et, NULL);
     ret->type = pr.type;
     ret->val = val;

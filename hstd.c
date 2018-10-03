@@ -35,6 +35,7 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     ret->type = parse_t(type).ret;
     Prim *val = malloc(sizeof (Prim));
     *val = p;
+    ret->lid = 0;
     ret->val = val;
     return ret;
 }
@@ -48,7 +49,7 @@ const dict* init(){
             *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
             *eq_f = make_f("equal", "Nat-Nat-Bool",(Prim){.f_val=&eqi});
 
-    const dict **d = malloc(sizeof (dict*));
+    const dict **d = calloc(1, sizeof (dict*));
     dict_add(d, z);
     dict_add(d, s);
     dict_add(d, p);

@@ -5,6 +5,8 @@
 
 bool equal_t(const Type *a, const Type *b, generics *context){
     if(a->simple && generic(*a)){
+        if(b->simple && generic(*b) && strcmp(a->name, b->name) == 0)
+            return true;
         return generics_bind(context, a->name, b);
     }
     if(a->simple != b->simple) return false;//if a is function and b is val
@@ -16,8 +18,22 @@ bool equal_t(const Type *a, const Type *b, generics *context){
 }
 
 const Type* apply_t(const Type *a, const Type *b){
-    if(a->simple) return NULL;
-    if(!equal_t(a->arg, b, a->gen)) return NULL;
+    if(a->simple){
+        log("Trying to apply function of type ");
+        log_t(b);
+        log("to a primitive value of type ");
+        log_t(a);
+        return NULL;
+    }
+    if(!equal_t(a->arg, b, a->gen)){
+        log("Function of type ");
+        log_t(b);
+        log(" cannot be assigned to a function of type ");
+        log_t(a);
+        log(" in a context: ");
+        log_context(a->gen);
+        return NULL;
+    }
     a->ret->gen = a->gen;
     return a->ret;
 }
@@ -44,6 +60,7 @@ Parsed _parse_arg(const char input[]){
             continue;
         }
         free(name);
+        log("Unexpected sybol \'%c\' in a function name", c);
         return (Parsed){NULL, NULL};
     }
     res.ret->name = name;
@@ -90,21 +107,25 @@ Parsed parse_t(const char input[]){
     return res;
 }
 
-void print_t(const Type *t){
+void fprint_t(const Type *t, FILE *dest){
+    if(!t){
+        fprintf(dest, "No type provided");
+        return;
+    }
     if(t->simple){
-        printf("%s", t->name);
+        fprintf(dest, "%s", t->name);
         return;
     }
     if(t->arg->simple){
-        print_t(t->arg);
+        fprint_t(t->arg, dest);
     } else {
-        printf("(");
-        print_t(t->arg);
-        printf(")");
+        fprintf(dest, "(");
+        fprint_t(t->arg, dest);
+        fprintf(dest, ")");
     }
     if(!t->ret) return;
-    printf(" - ");
-    print_t(t->ret);
+    fprintf(dest, " - ");
+    fprint_t(t->ret, dest);
 }
 
 
@@ -119,4 +140,16 @@ bool generic(Type t){
     if(!t.simple) return false;
     char c = *t.name;
     return (c >= 'a') && (c <= 'z');
+}
+
+void fprint_context(generics *g, FILE *f){
+    if(!g) {
+        fprintf(f, "No type vars");
+        return;
+    }
+    for(generics *i = g; i; i = i->next){
+        fprintf(f, "\t%s = ",g->key);
+        fprint_t(g->val, f);
+        fprintf(f, "\n");
+    }
 }

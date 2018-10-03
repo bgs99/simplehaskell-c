@@ -9,6 +9,7 @@ parse_res parse_tan(const char *input){
     input = read_word(name, input);
     input = skip_ws(input);
     if(*input != ':'){
+        log("Expected \':\' in type annotation of %s", name);
         return (parse_res){NULL,NULL, NULL};
     }
     input++;
@@ -23,29 +24,30 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
     input = skip_ws(input);
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
-    if(strcmp(name, f->name) != 0) return (parse_res){NULL,NULL, NULL};
+    if(strcmp(name, f->name) != 0){
+        log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
+        return (parse_res){NULL,NULL, NULL};
+    }
     input = skip_ws(input);
-    const Type *i = f->type;
+    const Type *i = f->type;//--
     unsigned int lid = 1;
     while(*input != '='){
         char *id = calloc(20, sizeof (char));
         input = read_word(id, input);
         Fun *af = malloc(sizeof (Fun));
         af->name = id;
-        const Type *t = i->simple ? i : i->arg;
-        af->type = t;
+        //const Type *t = i->simple ? i : i->arg;
+        af->type = i->arg;
+
+        i = i->ret;
+
         af->lid = lid++;
         dict_add(local, af);
         input = skip_ws(input);
+
     }
     input++;
     return (parse_res){NULL,input, NULL};
-}
-
-char* rename_arg(const Fun *arg){
-    char *ret = calloc(20, sizeof (char));
-    sprintf(ret,"!%d",arg->lid);
-    return ret;
 }
 
 parse_res parse_arg(const dict *local, const dict *glob, const char *input);
@@ -60,6 +62,11 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
         input = pr.left;
 
         f = apply_t(f, pr.type);
+#ifdef LOGALL
+        log("&&logging context\n");
+        log_context(f->gen);
+        log("\n");
+#endif
         eval_add_arg(ret, pr.et);
     }
     input = pr.left;
@@ -81,7 +88,10 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
     const Fun *ff = dict_get(local, name);
     if(!ff)
         ff = dict_get(glob, name);
-
+    if(!ff){
+        log("Function \"%s\" is not found in global dictionary and arguments", name);
+        return (parse_res){NULL, NULL, NULL};
+    }
     return (parse_res){ff->type, input, eval_make(ff)};
 }
 
@@ -95,16 +105,16 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
         if(*ret.left == ')') ret.left++;
         return ret;
     }
-    Fun *ff = malloc(sizeof (Fun));
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
-    const Fun *lt = dict_get(local, name);
+    const Fun *ff = dict_get(local, name);
 
-    if(lt){
-        ff->name = rename_arg(lt);
-        ff->type = lt->type;
-    } else {
-        memcpy(ff, dict_get(glob, name), sizeof (Fun));
+    if(!ff){
+        ff = dict_get(glob, name);
+    }
+    if(!ff){
+        log("Function \"%s\" is not found in global dictionary and arguments", name);
+        return (parse_res){NULL, NULL, NULL};
     }
     return (parse_res){ff->type, input, eval_make(ff)};
 }
@@ -129,6 +139,11 @@ void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
 parse_res parse_fun(const dict *glob, const char *input){
     parse_res a = parse_tan(input);
     const dict **l = malloc(sizeof (dict*));
+#ifdef LOGALL
+    log("&&Parsing function %s of type ",a.et->f->name);
+    log_t(a.et->f->type);
+    log(" &&\n");
+#endif
     parse_res b = parse_left(a.et->f,l,a.left);
     unsigned int argn = (*l) ? (**l).value->f->lid : 0;
     dict_add(l, a.et->f);

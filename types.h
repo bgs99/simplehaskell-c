@@ -1,7 +1,10 @@
+//#define LOGALL
+
 #pragma once
 #include <string.h>
 #include <stdbool.h>
 #define log(...) fprintf(stderr, __VA_ARGS__)
+#include <stdio.h>
 
 struct generics;
 
@@ -111,6 +114,12 @@ const Type* apply_t(const Type *a, const Type *b);
 
 Parsed parse_t(const char input[]);
 
-void print_t(const Type *t);
+void fprint_t(const Type *t, FILE *f);
+#define print_t(type) fprint_t(type, stdout)
+#define log_t(type) fprint_t(type, stderr)
+
+void fprint_context(generics *g, FILE *f);
+#define print_context(gen) fprint_context(gen, stdout)
+#define log_context(gen) fprint_context(gen, stderr)
 
 bool generic(Type t);
