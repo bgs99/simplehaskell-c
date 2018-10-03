@@ -32,7 +32,7 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
         input = read_word(id, input);
         Fun *af = malloc(sizeof (Fun));
         af->name = id;
-        const Type *t = i->simple ? i : i->val.func.arg;
+        const Type *t = i->simple ? i : i->arg;
         af->type = t;
         af->lid = lid++;
         dict_add(local, af);

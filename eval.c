@@ -6,15 +6,15 @@
 bool print_res(const Fun f, char* buff){
     if(!f.type) return false;
     if(!f.type->simple) return false;
-    if(!strcmp(f.type->val.name, "Nat")){
+    if(!strcmp(f.type->name, "Nat")){
         sprintf(buff, "%d", f.val->i_val);
-    } else if(!strcmp(f.type->val.name, "Double")){
+    } else if(!strcmp(f.type->name, "Double")){
         sprintf(buff, "%f", f.val->d_val);
-    } else if(!strcmp(f.type->val.name, "Bool")){
+    } else if(!strcmp(f.type->name, "Bool")){
         if(f.val->b_val)
             sprintf(buff, "true");
         else sprintf(buff, "false");
-    } else if(!strcmp(f.type->val.name, "Char")){
+    } else if(!strcmp(f.type->name, "Char")){
         sprintf(buff, "%c", f.val->c_val);
     }
     return true;
