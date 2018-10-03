@@ -7,7 +7,7 @@ const Type* generics_sub(const Type *t){
     for(generics *g = t->gen; g; g = g->next)
         if(strcmp(g->key, t->name)==0)
             return g->val;
-    return NULL;
+    return t;
 }
 
 bool print_res(const Fun f, char* buff){

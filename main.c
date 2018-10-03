@@ -18,10 +18,10 @@ void put_f(const Fun *f){
 int main()
 {
     const char *all =
-        "x : a - Int\n"
-        "x a = z\n"
-        "y : a - a - Int\n"
-        "y a b = s z";
+        "x : a - Nat \n \
+        x a = z \n \
+        y : a - a - Nat \n \
+        y a b = s z \n";
 
     const dict *ad = parse_all(all);
     printf("%s \n", all);
