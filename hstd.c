@@ -20,6 +20,13 @@ const Prim* fif(const Prim *a){
     else return a+2;
 }
 
+const Prim* eqi(const Prim *a){
+    Prim *ret = malloc(sizeof (Prim));
+    ret->b_val = a[0].i_val == a[1].i_val;
+    return ret;
+}
+
+
 Fun* make_f(const char *name, const char* type, const Prim p){
     Fun *ret = malloc(sizeof (Fun));
     char *tname = malloc(sizeof (char)*20);
@@ -38,7 +45,8 @@ const dict* init(){
             *p = make_f("plus","Nat-Nat-Nat", (Prim){.f_val=&sum}),
             *ip = make_f("if", "Bool-Nat-Nat",(Prim){.f_val=&fif}),
             *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
-            *b_f = make_f("false", "Bool", (Prim){.b_val=false});
+            *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
+            *eq_f = make_f("equal", "Int-Int-Bool",(Prim){.f_val=&eqi});
 
     const dict **d = malloc(sizeof (dict*));
     dict_add(d, z);
@@ -47,6 +55,7 @@ const dict* init(){
     dict_add(d, ip);
     dict_add(d, t_f);
     dict_add(d, b_f);
+    dict_add(d, eq_f);
     return *d;
 }
 

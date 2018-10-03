@@ -133,6 +133,7 @@ parse_res parse_fun(const dict *glob, const char *input){
 const dict* parse_all(const char *input){
     const dict *glob = init();
     while(*input != '\0'){
+
         while(*input == '\n' || *input == ')')
             input++;
         if(*input == '\0') break;

@@ -1,6 +1,6 @@
 #include "reader.h"
 const char* skip_ws(const char *input){
-    while(*input == ' ')
+    while(*input == ' ' || *input == '\t')
         input++;
     return input;
 }
