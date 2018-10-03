@@ -26,25 +26,7 @@ struct eval_tree{
 typedef struct eval_tree eval_tree;
 
 
-struct generics{
-    /**
-     * @brief Next element of the list
-     */
-    const struct generics *next;
-    /**
-     * @brief Name of generic type
-     */
-    const char *key;
-    /**
-     * @brief Actual type, if present
-     */
-    Type *val;
-};
-/**
- * @struct generics
- * @brief This structure represents list of type substitutions
- */
-typedef  struct generics generics;
+
 
 struct dict{
     /**
@@ -87,3 +69,6 @@ void dict_add_eval(const dict **d, const eval_tree *value);
  */
 const eval_tree* dict_get_eval(const dict *d,  const char *name);
 
+void generics_add(generics **d, const char *name);
+
+void generics_merge(generics **dest, generics **src);

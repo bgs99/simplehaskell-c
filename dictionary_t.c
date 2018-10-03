@@ -32,10 +32,36 @@ void dict_add(const dict **d, const Fun *value){
     dict_add_eval(d, eval_make(value));
 }
 
-
-///At least one value
-const Fun* dict_get(const dict *d, const char* name){
+const Fun* dict_get(const dict *d, const char *name){
     const eval_tree *tree = dict_get_eval(d, name);
     return tree ? tree->f : NULL;
 }
+
+void generics_add(generics **d, const char *name){
+    for(const generics *i = *d; i; i = i->next){
+        if(strcmp(i->key, name) == 0)
+               return;
+    }
+    generics *ret = malloc(sizeof (generics));
+    ret ->key = name;
+    ret->next = *d;
+    *d = ret;
+}
+
+void generics_free(generics *d){
+    if(!d) return;
+    generics_free(d->next);
+    free(d);
+}
+
+void generics_merge(generics **dest, generics **src){
+    for(const generics *i = *src; i; i = i->next){
+        generics_add(dest, i->key);
+    }
+    generics_free(*src);
+}
+
+
+
+
 

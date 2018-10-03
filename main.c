@@ -27,6 +27,7 @@ int main()
 
     const dict *ad = parse_all(all);
 
+    //Parsed pd = parse_t("a-(b-a-Int)-Int");
     printf("%s \n", all);
     const char *ip = "mkeq (plus_two z) three";
     printf("Expression %s\n Evaluates to ", ip);

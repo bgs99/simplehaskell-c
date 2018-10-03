@@ -1,6 +1,7 @@
 #include "types.h"
 #include <malloc.h>
 #include "reader.h"
+#include "dictionary_t.h"
 
 bool equal_t(Type a, Type b){
     if(a.simple != b.simple) return false;//if a is function and b is val
@@ -42,6 +43,8 @@ Parsed _parse_arg(const char input[]){
     }
     res.ret->name = name;
     res.left = input;
+    if(generic(*res.ret))
+        generics_add(&res.ret->gen, name);
     return res;
 }
 Parsed _parse_ret(const char input[]){
@@ -69,11 +72,13 @@ Parsed parse_t(const char input[]){
     input = arg.left;
     res.ret->arg = arg.ret;
     res.ret->simple = false;
+    generics_merge(&res.ret->gen, &arg.ret->gen);
     ret = _parse_ret(input);
     input = ret.left;
     if(!ret.ret){
         res.ret = arg.ret;
     } else {
+        generics_merge(&res.ret->gen, &ret.ret->gen);
         res.ret->ret = ret.ret;
     }
     res.left = input;

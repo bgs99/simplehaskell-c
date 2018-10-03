@@ -17,7 +17,7 @@ const Prim* sum(const eval_promise * a){
 const Prim* fif(const eval_promise *a){
     if(promise_eval(a[0])->b_val)
         return promise_eval(a[1]);
-    else return promise_eval(a[2]);
+    return promise_eval(a[2]);
 }
 
 const Prim* eqi(const eval_promise *a){

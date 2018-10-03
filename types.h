@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+struct generics;
+
 struct Type{
     union{
         /**
@@ -17,6 +19,11 @@ struct Type{
              * @brief Return type of the complex function
              */
             const struct Type *ret;
+            /**
+             * @brief List of type variables and substitutions.
+             * Only useful for complex functions
+             */
+            struct generics *gen;
         };
     };
     /**
@@ -72,6 +79,28 @@ typedef struct Parsed{
     Type *ret;
     const char *left;
 } Parsed;
+
+struct generics{
+    /**
+     * @brief Next element of the list
+     */
+    struct generics *next;
+    /**
+     * @brief Name of generic type
+     */
+    const char *key;
+    /**
+     * @brief Actual type, if present
+     */
+    const Type *val;
+};
+/**
+ * @struct generics
+ * @brief This structure represents list of type substitutions
+ */
+typedef  struct generics generics;
+
+
 
 const Type* last_type(const Type *t);
 
