@@ -71,7 +71,9 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
         return (parse_res){NULL, input, NULL};
     if(*input == '('){
         input++;
-        return parse_app(local, glob, input);
+        parse_res ret = parse_app(local, glob, input);
+        if(*ret.left == ')') ret.left++;
+        return ret;
     }
     char *name = malloc(sizeof (char)*20);
     input = read_word(name, input);
@@ -89,7 +91,9 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
         return (parse_res){NULL, input, NULL};
     if(*input == '('){
         input++;
-        return parse_app(local, glob, input);
+        parse_res ret = parse_app(local, glob, input);
+        if(*ret.left == ')') ret.left++;
+        return ret;
     }
     Fun *ff = malloc(sizeof (Fun));
     char *name = malloc(sizeof (char)*20);

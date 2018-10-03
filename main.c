@@ -28,7 +28,7 @@ int main()
     const dict *ad = parse_all(all);
 
     printf("%s \n", all);
-    const char *ip = "mkeq (plust_two z) three";
+    const char *ip = "mkeq (plus_two z) three";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;
