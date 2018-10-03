@@ -12,12 +12,15 @@ typedef struct Type{
     } val;
     bool simple;
 } Type;
+
+struct eval_promise;
+
 typedef union Prim{
     int i_val;
     char c_val;
     double d_val;
     bool b_val;
-    const union Prim* (*f_val)(const union Prim*);
+    const union Prim* (*f_val)(const struct eval_promise*);
 } Prim;
 
 typedef struct Fun{

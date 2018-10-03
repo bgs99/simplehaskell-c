@@ -41,32 +41,35 @@ eval_tree* eval_make(const Fun *f){
     return ret;
 }
 
+
 //const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
 
-const Prim* collect_args(const dict *glob, const eval_tree *tree, const Prim *params, unsigned int argn){
-    Prim *args = malloc(argn * sizeof(Prim));
+const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const eval_promise *params, unsigned int argn){
+    eval_promise *args = malloc(argn * sizeof(Prim));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
-        args[i++] = *eval_expr(glob, arg, params);
+        args[i++] = (eval_promise){glob, arg, params};
     }
     return args;
 }
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params){
+
+const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
     if(!input) return NULL;
     if(!input->f) return NULL;
     const Fun *f = input->f;
 
     const Prim *res = f->val;
-    const Prim *args = collect_args(glob, input, params, input->argn);
+    const eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){
         if(*f->name == '!'){
             int argi;
             sscanf(f->name+1,"%d",&argi);
-            res = &params[argi-1];
+            eval_promise ep = params[argi-1];
+            res = eval_expr(ep.glob, ep.input, ep.params);
         } else {
             const eval_tree *sa =  dict_get_eval(glob, f->name);
-            const Prim *ps = collect_args(glob, input, params, sa->argn);
+            const eval_promise *ps = collect_args(glob, input, params, sa->argn);
             return eval_expr(glob, sa->arg, ps);
         }
     }
@@ -85,4 +88,8 @@ Fun* eval_string(const dict *glob, const char *input){
     ret->type = pr.type;
     ret->val = val;
     return ret;
+}
+
+const Prim* promise_eval(eval_promise ep){
+    return eval_expr(ep.glob, ep.input, ep.params);
 }

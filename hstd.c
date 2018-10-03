@@ -2,27 +2,27 @@
 #include <malloc.h>
 
 
-const Prim* inc(const Prim *a){
+const Prim* inc(const eval_promise *a){
     Prim *ret = malloc(sizeof (Prim));
-    ret->i_val = a[0].i_val+1;
+    ret->i_val = promise_eval(a[0])->i_val+1;
     return ret;
 }
 
-const Prim* sum(const Prim * a){
+const Prim* sum(const eval_promise * a){
     Prim *ret = malloc(sizeof (Prim));
-    ret->i_val = a[0].i_val + a[1].i_val;
+    ret->i_val = promise_eval(a[0])->i_val + promise_eval(a[1])->i_val;
     return ret;
 }
 
-const Prim* fif(const Prim *a){
-    if(a[0].b_val)
-        return a+1;
-    else return a+2;
+const Prim* fif(const eval_promise *a){
+    if(promise_eval(a[0])->b_val)
+        return promise_eval(a[1]);
+    else return promise_eval(a[2]);
 }
 
-const Prim* eqi(const Prim *a){
+const Prim* eqi(const eval_promise *a){
     Prim *ret = malloc(sizeof (Prim));
-    ret->b_val = a[0].i_val == a[1].i_val;
+    ret->b_val = promise_eval(a[0])->i_val == promise_eval(a[1])->i_val;
     return ret;
 }
 
