@@ -37,15 +37,15 @@ const Fun* dict_get(const dict *d, const char *name){
     return tree ? tree->f : NULL;
 }
 
-void generics_add(generics **d, const char *name){
-    for(const generics *i = *d; i; i = i->next){
+void generics_add(Type *t, const char *name){
+    for(const generics *i = t->gen; i; i = i->next){
         if(strcmp(i->key, name) == 0)
                return;
     }
     generics *ret = malloc(sizeof (generics));
     ret ->key = name;
-    ret->next = *d;
-    *d = ret;
+    ret->next = t->gen;
+    t->gen = ret;
 }
 
 void generics_free(generics *d){
@@ -54,11 +54,13 @@ void generics_free(generics *d){
     free(d);
 }
 
-void generics_merge(generics **dest, generics **src){
-    for(const generics *i = *src; i; i = i->next){
+void generics_merge(Type *to,  Type *from){
+    if(!from->gen) return;
+    generics **dest = to->gen ? &to->gen : malloc(sizeof (generics *));
+    for(const generics *i = from->gen; i; i = i->next){
         generics_add(dest, i->key);
     }
-    generics_free(*src);
+    generics_free(from->gen);
 }
 
 

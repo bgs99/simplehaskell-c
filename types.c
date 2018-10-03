@@ -11,6 +11,7 @@ bool equal_t(Type a, Type b){
     if(!equal_t(*a.arg, *b.arg)) return false;//if args are different
     return equal_t(*a.ret, *b.ret);//comparing return types
 }
+
 const Type* apply_t(Type a, Type b){
     if(a.simple) return NULL;
     if(!equal_t(*a.arg, b)) return NULL;
@@ -72,13 +73,13 @@ Parsed parse_t(const char input[]){
     input = arg.left;
     res.ret->arg = arg.ret;
     res.ret->simple = false;
-    generics_merge(&res.ret->gen, &arg.ret->gen);
+    generics_merge(res.ret, arg.ret);
     ret = _parse_ret(input);
     input = ret.left;
     if(!ret.ret){
         res.ret = arg.ret;
     } else {
-        generics_merge(&res.ret->gen, &ret.ret->gen);
+        generics_merge(res.ret, ret.ret);
         res.ret->ret = ret.ret;
     }
     res.left = input;

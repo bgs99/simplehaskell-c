@@ -43,7 +43,7 @@ const dict* init(){
     Fun     *z = make_f("z", "Nat", (Prim){.i_val=0}),
             *s = make_f("s", "Nat-Nat", (Prim){.f_val=&inc}),
             *p = make_f("plus","Nat-Nat-Nat", (Prim){.f_val=&sum}),
-            *ip = make_f("if", "Bool-Nat-Nat-Nat",(Prim){.f_val=&fif}),
+            *ip = make_f("if", "Bool-a-a-a",(Prim){.f_val=&fif}),
             *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
             *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
             *eq_f = make_f("equal", "Nat-Nat-Bool",(Prim){.f_val=&eqi});

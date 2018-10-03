@@ -69,6 +69,6 @@ void dict_add_eval(const dict **d, const eval_tree *value);
  */
 const eval_tree* dict_get_eval(const dict *d,  const char *name);
 
-void generics_add(generics **d, const char *name);
+void generics_add(Type *t, const char *name);
 
-void generics_merge(generics **dest, generics **src);
+void generics_merge(Type *to, Type *from);

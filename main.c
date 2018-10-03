@@ -26,10 +26,8 @@ int main()
         mkeq x y = if (equal x y) x (mkeq (s x) y)";
 
     const dict *ad = parse_all(all);
-
-    //Parsed pd = parse_t("a-(b-a-Int)-Int");
     printf("%s \n", all);
-    const char *ip = "mkeq (plus_two z) three";
+    const char *ip = "if true z (s z)";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;
