@@ -18,7 +18,7 @@ struct Type{
             /**
              * @brief Return type of the complex function
              */
-            const struct Type *ret;
+            struct Type *ret;
             /**
              * @brief List of type variables and substitutions.
              * Only useful for complex functions

@@ -5,8 +5,7 @@
 
 bool equal_t(const Type *a, const Type *b, generics *context){
     if(a->simple && generic(*a)){
-        return generics_bind(context,a->name, b);
-        return true;
+        return generics_bind(context, a->name, b);
     }
     if(a->simple != b->simple) return false;//if a is function and b is val
     if(a->simple)
@@ -18,9 +17,8 @@ bool equal_t(const Type *a, const Type *b, generics *context){
 
 const Type* apply_t(const Type *a, const Type *b){
     if(a->simple) return NULL;
-    //char *z = a.name, *r = b.name;
-    //generics *q = a.gen, *y = b.gen;
     if(!equal_t(a->arg, b, a->gen)) return NULL;
+    a->ret->gen = a->gen;
     return a->ret;
 }
 

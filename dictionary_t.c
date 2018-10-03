@@ -76,7 +76,7 @@ void generics_merge(Type *to,  Type *from){
 bool generics_bind(generics *g, const char *name, const Type *t){
     for(generics *i = g; i; i = i->next){
         if(strcmp(i->key, name)==0){
-            if(i->val) return false;
+            if(i->val) return equal_t(i->val,t,i->val->gen);
             i->val = t;
             return true;
         }

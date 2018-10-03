@@ -2,8 +2,6 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG ~= s/-O[0123s]//g
-CONFIG += -O0
 
 SOURCES += \
         main.c \
