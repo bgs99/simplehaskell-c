@@ -3,18 +3,19 @@
 #include "malloc.h"
 #include "parser.h"
 
-const Type* generics_sub(const Type *t){
-    for(generics *g = t->gen; g; g = g->next)
+const Type* generics_sub(const Type *t, generics *context){
+    if(!generic(*t)) return t;
+    for(generics *g = context; g; g = g->next)
         if(strcmp(g->key, t->name)==0)
-            return g->val;
+            return g->val ? g->val : t;
     return t;
 }
 
 bool print_res(const Fun f){
-    const Type *valtype = generics_sub(f.type);
+    const Type *valtype = generics_sub(f.type, f.type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
-    if(!strcmp(valtype->name, "Nat")){
+    if(!strcmp(valtype->name, "Int")){
         printf("%d", f.val->i_val);
     } else if(!strcmp(valtype->name, "Double")){
         printf("%f", f.val->d_val);

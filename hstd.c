@@ -41,13 +41,13 @@ Fun* make_f(const char *name, const char* type, const Prim p){
 }
 
 const dict* init(){
-    Fun     *z = make_f("z", "Nat", (Prim){.i_val=0}),
-            *s = make_f("s", "Nat-Nat", (Prim){.f_val=&inc}),
-            *p = make_f("plus","Nat-Nat-Nat", (Prim){.f_val=&sum}),
+    Fun     *z = make_f("z", "Int", (Prim){.i_val=0}),
+            *s = make_f("s", "Int-Int", (Prim){.f_val=&inc}),
+            *p = make_f("sum","Int-Int-Int", (Prim){.f_val=&sum}),
             *ip = make_f("if", "Bool-a-a-a",(Prim){.f_val=&fif}),
             *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
             *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
-            *eq_f = make_f("equal", "Nat-Nat-Bool",(Prim){.f_val=&eqi});
+            *eq_f = make_f("equal", "Int-Int-Bool",(Prim){.f_val=&eqi});
 
     const dict **d = calloc(1, sizeof (dict*));
     dict_add(d, z);

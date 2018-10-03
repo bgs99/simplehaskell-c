@@ -122,8 +122,14 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
 
 parse_res parse_right(const Type *f, const dict *local, const dict *glob, const char *input){
     parse_res tr = parse_app(local, glob, input);
-    if(!equal_t(last_type(f), tr.type, f->gen)){
-        log("Return types do not match");
+    if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
+        log("Return types do not match: \n %s has type ", f->name);
+        log_t(last_type(f));
+        log("\n%s has type ", tr.et->f->name);
+        log_t(last_type(tr.type));
+        log(" in a context: \n");
+        log_context(tr.type->gen);
+        log("\n");
         return (parse_res){NULL, NULL, NULL};
     }
     return tr;

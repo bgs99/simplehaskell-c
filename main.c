@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
     const dict *ad = parse_all(all);
     printf("%s \n", all);
-    const char *ip = "const z z";
+    const char *ip = "make_equal z (sum one one)";
     printf("Expression %s\n Evaluates to ", ip);
     print_res(*eval_string(ad,ip));
     printf("\n");
