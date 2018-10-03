@@ -19,3 +19,6 @@ HEADERS += \
     hstd.h \
     parser.h \
     reader.h
+
+DISTFILES += \
+    README.md
