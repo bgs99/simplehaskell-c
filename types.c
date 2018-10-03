@@ -1,19 +1,25 @@
 #include "types.h"
 #include <malloc.h>
 #include "reader.h"
+#include "dictionary_t.h"
 
-bool equal_t(Type a, Type b){
-    if(a.simple != b.simple) return false;//if a is function and b is val
-    if(a.simple)
-        return !strcmp(a.val.name, b.val.name);//if both val compare names
+bool equal_t(const Type *a, const Type *b, generics *context){
+    if(a->simple && generic(*a)){
+        return generics_bind(context, a->name, b);
+    }
+    if(a->simple != b->simple) return false;//if a is function and b is val
+    if(a->simple)
+        return !strcmp(a->name, b->name);//if both val compare names
 
-    if(!equal_t(*a.val.func.arg, *b.val.func.arg)) return false;//if args are different
-    return equal_t(*a.val.func.ret, *b.val.func.ret);//comparing return types
+    if(!equal_t(a->arg, b->arg, context)) return false;//if args are different
+    return equal_t(a->ret, b->ret, context);//comparing return types
 }
-const Type* apply_t(Type a, Type b){
-    if(a.simple) return NULL;
-    if(!equal_t(*a.val.func.arg, b)) return NULL;
-    return a.val.func.ret;
+
+const Type* apply_t(const Type *a, const Type *b){
+    if(a->simple) return NULL;
+    if(!equal_t(a->arg, b, a->gen)) return NULL;
+    a->ret->gen = a->gen;
+    return a->ret;
 }
 
 
@@ -40,8 +46,10 @@ Parsed _parse_arg(const char input[]){
         free(name);
         return (Parsed){NULL, NULL};
     }
-    res.ret->val.name = name;
+    res.ret->name = name;
     res.left = input;
+    if(generic(*res.ret))
+        generics_add(res.ret, name);
     return res;
 }
 Parsed _parse_ret(const char input[]){
@@ -67,14 +75,16 @@ Parsed parse_t(const char input[]){
             arg = _parse_arg(input);
     }
     input = arg.left;
-    res.ret->val.func.arg = arg.ret;
+    res.ret->arg = arg.ret;
     res.ret->simple = false;
+    generics_merge(res.ret, arg.ret);
     ret = _parse_ret(input);
     input = ret.left;
     if(!ret.ret){
         res.ret = arg.ret;
     } else {
-        res.ret->val.func.ret = ret.ret;
+        generics_merge(res.ret, ret.ret);
+        res.ret->ret = ret.ret;
     }
     res.left = input;
     return res;
@@ -82,35 +92,35 @@ Parsed parse_t(const char input[]){
 
 size_t print_t(const Type *t, char *s){
     if(t->simple){
-        strcpy(s,t->val.name);
-        return strlen(t->val.name);
+        strcpy(s,t->name);
+        return strlen(t->name);
     }
     char *origin = s;
-    if(t->val.func.arg->simple){
-        s += print_t(t->val.func.arg, s);
+    if(t->arg->simple){
+        s += print_t(t->arg, s);
     } else {
         *s = '(';
         s++;
-        s+= print_t(t->val.func.arg,s);
+        s+= print_t(t->arg,s);
         *s=')';
         s++;
     }
-    if(!t->val.func.ret) return (size_t)(s - origin);
+    if(!t->ret) return (size_t)(s - origin);
     *s = '-';
     s++;
-    return print_t(t->val.func.ret, s) + (size_t)(s - origin);
+    return print_t(t->ret, s) + (size_t)(s - origin);
 }
 
 
 const Type* last_type(const Type *t){
-    if(t->simple || !t->val.func.ret)
+    if(t->simple || !t->ret)
         return t;
-    return last_type(t->val.func.ret);
+    return last_type(t->ret);
 }
 
 
 bool generic(Type t){
     if(!t.simple) return false;
-    char c = *t.val.name;
+    char c = *t.name;
     return (c >= 'a') && (c <= 'z');
 }

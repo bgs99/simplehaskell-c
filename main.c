@@ -18,17 +18,14 @@ void put_f(const Fun *f){
 int main()
 {
     const char *all =
-        "plus_two : Nat - Nat \n \
-        plus_two x = s (s x) \n \
-        three : Nat \n \
-        three = s (plus_two z) \n \
-        mkeq : Nat - Nat - Nat \n \
-        mkeq x y = if (equal x y) x (mkeq (s x) y)";
+        "x : a - Nat \n \
+        x a = z \n \
+        y : a - a - Nat \n \
+        y a b = s z \n";
 
     const dict *ad = parse_all(all);
-
     printf("%s \n", all);
-    const char *ip = "mkeq (plus_two z) three";
+    const char *ip = "x y";
     printf("Expression %s\n Evaluates to ", ip);
     put_f(eval_string(ad,ip));
     return 0;

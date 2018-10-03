@@ -32,7 +32,7 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
         input = read_word(id, input);
         Fun *af = malloc(sizeof (Fun));
         af->name = id;
-        const Type *t = i->simple ? i : i->val.func.arg;
+        const Type *t = i->simple ? i : i->arg;
         af->type = t;
         af->lid = lid++;
         dict_add(local, af);
@@ -59,7 +59,7 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
     while((pr = parse_arg(local, glob, input)).type){
         input = pr.left;
 
-        f = apply_t(*f,*pr.type);
+        f = apply_t(f, pr.type);
         eval_add_arg(ret, pr.et);
     }
     input = pr.left;
@@ -112,7 +112,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
 
 parse_res parse_right(const Type *f, const dict *local, const dict *glob, const char *input){
     parse_res tr = parse_app(local, glob, input);
-    if(!equal_t(*last_type(f), *tr.type)) return (parse_res){NULL, NULL, NULL};
+    if(!equal_t(last_type(f), tr.type, f->gen)) return (parse_res){NULL, NULL, NULL};
     return tr;
 }
 
