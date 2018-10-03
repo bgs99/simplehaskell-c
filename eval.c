@@ -10,20 +10,20 @@ const Type* generics_sub(const Type *t){
     return t;
 }
 
-bool print_res(const Fun f, char* buff){
+bool print_res(const Fun f){
     const Type *valtype = generics_sub(f.type);
     if(!valtype) return false;
     if(!valtype->simple) return false;
     if(!strcmp(valtype->name, "Nat")){
-        sprintf(buff, "%d", f.val->i_val);
+        printf("%d", f.val->i_val);
     } else if(!strcmp(valtype->name, "Double")){
-        sprintf(buff, "%f", f.val->d_val);
+        printf("%f", f.val->d_val);
     } else if(!strcmp(valtype->name, "Bool")){
         if(f.val->b_val)
-            sprintf(buff, "true");
-        else sprintf(buff, "false");
+            printf("true");
+        else printf("false");
     } else if(!strcmp(valtype->name, "Char")){
-        sprintf(buff, "%c", f.val->c_val);
+        printf("%c", f.val->c_val);
     } else return false;
     return true;
 }

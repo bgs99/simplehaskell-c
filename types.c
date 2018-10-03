@@ -90,25 +90,21 @@ Parsed parse_t(const char input[]){
     return res;
 }
 
-size_t print_t(const Type *t, char *s){
+void print_t(const Type *t){
     if(t->simple){
-        strcpy(s,t->name);
-        return strlen(t->name);
+        printf("%s", t->name);
+        return;
     }
-    char *origin = s;
     if(t->arg->simple){
-        s += print_t(t->arg, s);
+        print_t(t->arg);
     } else {
-        *s = '(';
-        s++;
-        s+= print_t(t->arg,s);
-        *s=')';
-        s++;
+        printf("(");
+        print_t(t->arg);
+        printf(")");
     }
-    if(!t->ret) return (size_t)(s - origin);
-    *s = '-';
-    s++;
-    return print_t(t->ret, s) + (size_t)(s - origin);
+    if(!t->ret) return;
+    printf(" - ");
+    print_t(t->ret);
 }
 
 

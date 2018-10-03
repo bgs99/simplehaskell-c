@@ -111,6 +111,6 @@ const Type* apply_t(const Type *a, const Type *b);
 
 Parsed parse_t(const char input[]);
 
-size_t print_t(const Type *t, char *s);
+void print_t(const Type *t);
 
 bool generic(Type t);

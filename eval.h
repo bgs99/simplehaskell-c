@@ -1,7 +1,7 @@
 #pragma once
 #include "dictionary_t.h"
 
-bool print_res(const Fun f, char* buff);
+bool print_res(const Fun f);
 
 typedef struct eval_promise{
     const dict *glob;
