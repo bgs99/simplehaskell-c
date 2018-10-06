@@ -3,6 +3,18 @@
 #include "eval.h"
 #include <malloc.h>
 
+const Fun* get_fun(const dict *glob, const dict *local, char *name){
+    const Fun *ret = dict_get(local, name);
+    if(!ret)
+        ret = dict_get(glob, name);
+    if(!ret){
+        log("Function \"%s\" is not found in global dictionary and arguments", name);
+        return NULL;
+    }
+    return ret;
+}
+
+
 parse_res parse_tan(const char *input){
     input = skip_ws(input);
     char *name = calloc(20, sizeof (char));
@@ -85,13 +97,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
 
-    const Fun *ff = dict_get(local, name);
-    if(!ff)
-        ff = dict_get(glob, name);
-    if(!ff){
-        log("Function \"%s\" is not found in global dictionary and arguments", name);
-        return (parse_res){NULL, NULL, NULL};
-    }
+    const Fun *ff = get_fun(glob, local, name);
     return (parse_res){ff->type, input, eval_make(ff)};
 }
 
@@ -107,15 +113,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const char *input){
     }
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
-    const Fun *ff = dict_get(local, name);
-
-    if(!ff){
-        ff = dict_get(glob, name);
-    }
-    if(!ff){
-        log("Function \"%s\" is not found in global dictionary and arguments", name);
-        return (parse_res){NULL, NULL, NULL};
-    }
+    const Fun *ff = get_fun(glob, local, name);
     return (parse_res){ff->type, input, eval_make(ff)};
 }
 
