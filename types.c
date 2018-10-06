@@ -1,6 +1,7 @@
 #include "types.h"
 #include <malloc.h>
 #include "reader.h"
+#include "parser.h"
 #include "dictionary_t.h"
 
 const char* alloc_name(const char* name, unsigned int len){
@@ -45,54 +46,38 @@ const Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(const char **input){
+Parsed _parse_arg(const token_list **input){
     Parsed res;
-    skip_ws(input);
-    if(**input == '('){
+    if(*(*input)->begin == '('){
         return parse_t(input);
     }
     res.ret = malloc(sizeof (Type));
     res.ret->simple = true;
-    char *name = calloc(20, sizeof (char));
-    int i = 0;
-    for(; (**input != '\0') && (**input != '\n');(*input)++){
-        char c = **input;
-        if(c == ')' || c == ' ' || c == '-') {
-            break;
-        }
-        if((c>='a' && c<='z') || (c>='A' && c<='Z')){
-            name[i] = c;
-            i++;
-            continue;
-        }
-        free(name);
-        log("Unexpected sybol \'%c\' in a function name", c);
-        return (Parsed){NULL, NULL};
-    }
+    const char *name = get_name(input);
     res.ret->name = name;
     if(generic(*res.ret))
         generics_add(res.ret, name);
     return res;
 }
-Parsed _parse_ret(const char **input){
-    skip_ws(input);
-    if(**input == '-'){
-        (*input)++;
+Parsed _parse_ret(const token_list **input){
+    if(!*input)
+        return (Parsed){NULL, NULL};
+    if(*(*input)->begin == '-'){
+        *input = (*input)->next;
         return parse_t(input);
     }
-    if(**input == ')')
-        (*input)++;
+    if(*(*input)->begin == ')')
+        *input = (*input)->next;
     return (Parsed){NULL, NULL};
 }
 
-Parsed parse_t(const char **input){
+Parsed parse_t(const token_list **input){
     Parsed res;
-    skip_ws(input);
     res.ret = malloc(sizeof (Type));
     Parsed arg, ret;
-    switch(**input){
+    switch(*(*input)->begin){
         case '(':
-            (*input)++;
+            *input = (*input)->next;
             arg = parse_t(input);
         break;
         default:

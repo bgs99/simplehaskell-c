@@ -5,10 +5,17 @@ typedef struct parse_res{
   eval_tree *et;
 } parse_res;
 
-parse_res parse_app(const dict *local, const dict *glob, const char **input);
-parse_res parse_tan(const char **input);
-void parse_left(const Fun *f, const dict **local, const char **input);
-parse_res parse_right(const Type *f, const dict *local, const dict* glob, const char **input);
+typedef struct token_list{
+    const char *begin;
+    unsigned long len;
+    struct token_list *next;
+} token_list;
+token_list* tokenize(const char **input);
+const char* get_name(const token_list **tl);
+parse_res parse_app(const dict *local, const dict *glob, const token_list **input);
+parse_res parse_tan(const token_list **input);
+void parse_left(const Fun *f, const dict **local, const token_list **input);
+parse_res parse_right(const Type *f, const dict *local, const dict* glob, const token_list **input);
 
 parse_res parse_fun(const dict *glob, const char **input);
 

@@ -9,6 +9,7 @@
 const char* alloc_name(const char* name, unsigned int len);
 
 struct generics;
+struct token_list;
 
 struct Type{
     union{
@@ -114,7 +115,7 @@ bool equal_t(const Type *a, const Type *b, generics *context);
 
 const Type* apply_t(const Type *a, const Type *b);
 
-Parsed parse_t(const char **input);
+Parsed parse_t(const struct token_list **input);
 
 void fprint_t(const Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)

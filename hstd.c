@@ -1,4 +1,5 @@
 #include "hstd.h"
+#include "parser.h"
 #include <malloc.h>
 
 
@@ -32,7 +33,8 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     char *tname = calloc(20, sizeof (char));
     strcpy(tname, name);
     ret->name = tname;
-    ret->type = parse_t(&type).ret;
+    const token_list *tl = tokenize(&type);
+    ret->type = parse_t(&tl).ret;
     Prim *val = malloc(sizeof (Prim));
     *val = p;
     ret->lid = 0;
