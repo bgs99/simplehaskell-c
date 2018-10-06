@@ -3,6 +3,12 @@
 #include "reader.h"
 #include "dictionary_t.h"
 
+const char* alloc_name(const char* name, unsigned int len){
+    char *ret = calloc(len+1, sizeof (char));
+    strcpy(ret, name);
+    return ret;
+}
+
 bool equal_t(const Type *a, const Type *b, generics *context){
     if(a->simple && generic(*a)){
         if(b->simple && generic(*b) && strcmp(a->name, b->name) == 0)

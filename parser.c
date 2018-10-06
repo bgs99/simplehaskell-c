@@ -3,7 +3,53 @@
 #include "eval.h"
 #include <malloc.h>
 
+const Fun* parse_num(const char *str){
+    Fun *f = malloc(sizeof (Fun));
+    f->type = malloc(sizeof (Type));
+    Prim *res = malloc(sizeof (Prim));
+    Type *t = malloc(sizeof (Type));
+    f->val = res;
+    f->type = t;
+    int sign = 1;
+    if(*str == '-'){
+        str ++;
+        sign = -1;
+    }
+    unsigned long val = 0;
+    int incdiv = 0;
+    int div = 0;
+
+    for(const char *i = str; *i !='\0' ; i++, div+=incdiv){
+        if(*i == '.'){
+            incdiv = 1;
+            continue;
+        }
+        val *= 10;
+        val += (unsigned)(*i - '0');
+    }
+    if(incdiv == 0){
+        res->i_val = (int)val * sign;
+        t->simple=true;
+        t->name = alloc_name("Int",3);
+        return f;
+    }
+    double nval = val;
+    div--;
+    for(;div > 0;div--)
+        nval/=10;
+
+    res->d_val = nval*sign;
+    t->simple=true;
+    t->name = alloc_name("Float",5);
+    return f;
+}
+
 const Fun* get_fun(const dict *glob, const dict *local, char *name){
+    char c = *name;
+    if(('0' <= c && '9' >= c) || c == '-'){
+        return parse_num(name);
+    }
+
     const Fun *ret = dict_get(local, name);
     if(!ret)
         ret = dict_get(glob, name);

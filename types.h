@@ -6,6 +6,8 @@
 #define log(...) fprintf(stderr, __VA_ARGS__)
 #include <stdio.h>
 
+const char* alloc_name(const char* name, unsigned int len);
+
 struct generics;
 
 struct Type{
