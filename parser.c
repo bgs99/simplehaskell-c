@@ -18,6 +18,7 @@ token_list* tokenize(const char *input){
     while(*input != '\0' || *input != '\n'){
         skip_ws(&input);
     }
+    return NULL;
 }
 
 const Fun* parse_num(const char *str){
@@ -78,37 +79,37 @@ const Fun* get_fun(const dict *glob, const dict *local, char *name){
 }
 
 
-parse_res parse_tan(const char *input){
-    skip_ws(&input);
+parse_res parse_tan(const char **input){
+    skip_ws(input);
     char *name = calloc(20, sizeof (char));
-    input = read_word(name, input);
-    skip_ws(&input);
-    if(*input != ':'){
+    read_word(name, input);
+    skip_ws(input);
+    if(**input != ':'){
         log("Expected \':\' in type annotation of %s", name);
-        return (parse_res){NULL,NULL, NULL};
+        return (parse_res){NULL,NULL};
     }
-    input++;
+    (*input)++;
     Fun *res = malloc(sizeof (Fun));
     res->name = name;
     Parsed p = parse_t(input);
     res->type = p.ret;
     eval_tree *et = eval_make(res);
-    return (parse_res){NULL, p.left+1, et};
+    (*input)++;
+    return (parse_res){NULL, et};
 }
-parse_res parse_left(const Fun *f,const dict **local, const char *input){
-    skip_ws(&input);
+void parse_left(const Fun *f,const dict **local, const char **input){
+    skip_ws(input);
     char *name = calloc(20, sizeof (char));
-    input = read_word(name, input);
+    read_word(name, input);
     if(strcmp(name, f->name) != 0){
         log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
-        return (parse_res){NULL,NULL, NULL};
     }
-    skip_ws(&input);
+    skip_ws(input);
     const Type *i = f->type;//--
     unsigned int lid = 1;
-    while(*input != '='){
+    while(**input != '='){
         char *id = calloc(20, sizeof (char));
-        input = read_word(id, input);
+        read_word(id, input);
         Fun *af = malloc(sizeof (Fun));
         af->name = id;
         //const Type *t = i->simple ? i : i->arg;
@@ -118,23 +119,20 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
 
         af->lid = lid++;
         dict_add(local, af);
-        skip_ws(&input);
+        skip_ws(input);
 
     }
-    input++;
-    return (parse_res){NULL,input, NULL};
+    (*input)++;
 }
 
-parse_res parse_arg(const dict *local, const dict *glob, const char *input);
-parse_res parse_f_f(const dict *local, const dict *glob, const char *input);
+parse_res parse_arg(const dict *local, const dict *glob, const char **input);
+parse_res parse_f_f(const dict *local, const dict *glob, const char **input);
 
-parse_res parse_app(const dict *local, const dict *glob, const char *input){
+parse_res parse_app(const dict *local, const dict *glob, const char **input){
     parse_res pr = parse_f_f(local, glob, input);
-    input = pr.left;
     const Type *f = pr.type;
     eval_tree *ret = pr.et;
     while((pr = parse_arg(local, glob, input)).type){
-        input = pr.left;
 
         f = apply_t(f, pr.type);
 #ifdef LOGALL
@@ -144,44 +142,43 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
 #endif
         eval_add_arg(ret, pr.et);
     }
-    input = pr.left;
-    return (parse_res){f, input, ret};
+    return (parse_res){f, ret};
 }
-parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
-    skip_ws(&input);
-    if(*input == ')' || *input == '\n' || *input == '\0')
-        return (parse_res){NULL, input, NULL};
-    if(*input == '('){
-        input++;
+parse_res parse_f_f(const dict *local, const dict *glob, const char **input){
+    skip_ws(input);
+    if(**input == ')' || **input == '\n' || **input == '\0')
+        return (parse_res){NULL, NULL};
+    if(**input == '('){
+        (*input)++;
         parse_res ret = parse_app(local, glob, input);
-        if(*ret.left == ')') ret.left++;
+        if(**input == ')') (*input)++;
         return ret;
     }
     char *name = calloc(20, sizeof (char));
-    input = read_word(name, input);
+    read_word(name, input);
 
     const Fun *ff = get_fun(glob, local, name);
-    return (parse_res){ff->type, input, eval_make(ff)};
+    return (parse_res){ff->type, eval_make(ff)};
 }
 
-parse_res parse_arg(const dict *local, const dict *glob, const char *input){
-    skip_ws(&input);
-    if(*input == ')' || *input == '\n' || *input == '\0')
-        return (parse_res){NULL, input, NULL};
-    if(*input == '('){
-        input++;
+parse_res parse_arg(const dict *local, const dict *glob, const char **input){
+    skip_ws(input);
+    if(**input == ')' || **input == '\n' || **input == '\0')
+        return (parse_res){NULL, NULL};
+    if(**input == '('){
+        (*input)++;
         parse_res ret = parse_app(local, glob, input);
-        if(*ret.left == ')') ret.left++;
+        if(**input == ')') (*input)++;
         return ret;
     }
     char *name = calloc(20, sizeof (char));
-    input = read_word(name, input);
+    read_word(name, input);
     const Fun *ff = get_fun(glob, local, name);
-    return (parse_res){ff->type, input, eval_make(ff)};
+    return (parse_res){ff->type, eval_make(ff)};
 }
 
 
-parse_res parse_right(const Type *f, const dict *local, const dict *glob, const char *input){
+parse_res parse_right(const Type *f, const dict *local, const dict *glob, const char **input){
     parse_res tr = parse_app(local, glob, input);
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
         log("Return types do not match: \n %s has type ", f->name);
@@ -191,7 +188,7 @@ parse_res parse_right(const Type *f, const dict *local, const dict *glob, const 
         log(" in a context: \n");
         log_context(tr.type->gen);
         log("\n");
-        return (parse_res){NULL, NULL, NULL};
+        return (parse_res){NULL, NULL};
     }
     return tr;
 }
@@ -203,7 +200,7 @@ void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
     pr->et->argn = argn;
 }
 
-parse_res parse_fun(const dict *glob, const char *input){
+parse_res parse_fun(const dict *glob, const char **input){
     parse_res a = parse_tan(input);
     const dict **l = malloc(sizeof (dict*));
 #ifdef LOGALL
@@ -211,10 +208,10 @@ parse_res parse_fun(const dict *glob, const char *input){
     log_t(a.et->f->type);
     log(" &&\n");
 #endif
-    parse_res b = parse_left(a.et->f,l,a.left);
+    parse_left(a.et->f,l,input);
     unsigned int argn = (*l) ? (**l).value->f->lid : 0;
     dict_add(l, a.et->f);
-    parse_res c = parse_right(a.et->f->type, *l, glob, b.left);
+    parse_res c = parse_right(a.et->f->type, *l, glob, input);
     eval_tree_wrap(&c, a.et->f, argn);
     return c;
 }
@@ -226,8 +223,7 @@ const dict* parse_all(const char *input){
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
-        parse_res f = parse_fun(glob, input);
-        input = f.left;
+        parse_res f = parse_fun(glob, &input);
         dict_add_eval(&glob, f.et);
     }
     return glob;

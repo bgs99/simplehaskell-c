@@ -45,18 +45,18 @@ const Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(const char *input){
+Parsed _parse_arg(const char **input){
     Parsed res;
-    skip_ws(&input);
-    if(*input == '('){
+    skip_ws(input);
+    if(**input == '('){
         return parse_t(input);
     }
     res.ret = malloc(sizeof (Type));
     res.ret->simple = true;
     char *name = calloc(20, sizeof (char));
     int i = 0;
-    for(; (*input != '\0') && (*input != '\n');input++){
-        char c = *input;
+    for(; (**input != '\0') && (**input != '\n');(*input)++){
+        char c = **input;
         if(c == ')' || c == ' ' || c == '-') {
             break;
         }
@@ -70,46 +70,44 @@ Parsed _parse_arg(const char *input){
         return (Parsed){NULL, NULL};
     }
     res.ret->name = name;
-    res.left = input;
     if(generic(*res.ret))
         generics_add(res.ret, name);
     return res;
 }
-Parsed _parse_ret(const char *input){
-    skip_ws(&input);
-    if(*input == '-'){
-        return parse_t(input+1);
+Parsed _parse_ret(const char **input){
+    skip_ws(input);
+    if(**input == '-'){
+        (*input)++;
+        return parse_t(input);
     }
-    if(*input == ')')
-        return (Parsed){NULL, input + 1};
-    return (Parsed){NULL, input};
+    if(**input == ')')
+        (*input)++;
+    return (Parsed){NULL, NULL};
 }
 
-Parsed parse_t(const char *input){
+Parsed parse_t(const char **input){
     Parsed res;
-    skip_ws(&input);
+    skip_ws(input);
     res.ret = malloc(sizeof (Type));
     Parsed arg, ret;
-    switch(*input){
+    switch(**input){
         case '(':
-            arg = parse_t(input+1);
+            (*input)++;
+            arg = parse_t(input);
         break;
         default:
             arg = _parse_arg(input);
     }
-    input = arg.left;
     res.ret->arg = arg.ret;
     res.ret->simple = false;
     generics_merge(res.ret, arg.ret);
     ret = _parse_ret(input);
-    input = ret.left;
     if(!ret.ret){
         res.ret = arg.ret;
     } else {
         generics_merge(res.ret, ret.ret);
         res.ret->ret = ret.ret;
     }
-    res.left = input;
     return res;
 }
 

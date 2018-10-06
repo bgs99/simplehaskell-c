@@ -32,7 +32,7 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     char *tname = calloc(20, sizeof (char));
     strcpy(tname, name);
     ret->name = tname;
-    ret->type = parse_t(type).ret;
+    ret->type = parse_t(&type).ret;
     Prim *val = malloc(sizeof (Prim));
     *val = p;
     ret->lid = 0;

@@ -94,7 +94,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
 }
 
 Fun* eval_string(const dict *glob, const char *input){
-    parse_res pr = parse_app(NULL,glob,input);
+    parse_res pr = parse_app(NULL,glob, &input);
     if(!pr.type->simple){
         log("Expression doesn't have primitive type");
         return NULL;
