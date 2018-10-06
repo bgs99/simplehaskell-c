@@ -1,30 +1,33 @@
 #include "hstd.h"
 #include "parser.h"
 #include <malloc.h>
+//#define log(...) fprintf(stderr, __VA_ARGS__)
+#define getval(i,type) promise_eval(a[i])->type##_val
+#define passval(i) return promise_eval(a[i])
+#define retval(val,type) Prim *ret = malloc(sizeof(Prim)); ret->type##_val = val; return ret;
+#define deff(name) const Prim* name(const eval_promise *a)
 
 
-const Prim* inc(const eval_promise *a){
-    Prim *ret = malloc(sizeof (Prim));
-    ret->i_val = promise_eval(a[0])->i_val+1;
-    return ret;
+deff(inc){
+    retval(getval(0,i)+1,i);
 }
 
-const Prim* sum(const eval_promise * a){
-    Prim *ret = malloc(sizeof (Prim));
-    ret->i_val = promise_eval(a[0])->i_val + promise_eval(a[1])->i_val;
-    return ret;
+deff(dec){
+    retval(getval(0,i)-1,i);
 }
 
-const Prim* fif(const eval_promise *a){
-    if(promise_eval(a[0])->b_val)
-        return promise_eval(a[1]);
-    return promise_eval(a[2]);
+deff(sum){
+    retval(getval(0,i)+getval(1,i),i);
 }
 
-const Prim* eqi(const eval_promise *a){
-    Prim *ret = malloc(sizeof (Prim));
-    ret->b_val = promise_eval(a[0])->i_val == promise_eval(a[1])->i_val;
-    return ret;
+deff(fif){
+    if(getval(0,b))
+        passval(1);
+    passval(2);
+}
+
+deff(eqi){
+    retval(getval(0,i)==getval(1,i),b);
 }
 
 
@@ -49,7 +52,7 @@ const dict* init(){
             *ip = make_f("if", "Bool-a-a-a",(Prim){.f_val=&fif}),
             *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
             *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
-            *eq_f = make_f("equal", "Int-Int-Bool",(Prim){.f_val=&eqi});
+            *eq_f = make_f("equal", "a-a-Bool",(Prim){.f_val=&eqi});
 
     const dict **d = calloc(1, sizeof (dict*));
     dict_add(d, z);
