@@ -4,8 +4,8 @@
 #include <malloc.h>
 
 typedef struct token_list{
-    char *begin;
-    unsigned int len;
+    const char *begin;
+    unsigned long len;
     struct token_list *next;
 } token_list;
 
@@ -14,11 +14,36 @@ typedef struct token_list{
  * @param input string
  * @return tokenized input
  */
-token_list* tokenize(const char *input){
-    while(*input != '\0' || *input != '\n'){
-        skip_ws(&input);
+token_list* tokenize(const char **input){
+    token_list *ret = NULL;
+    while(**input != '\0' || **input != '\n'){
+        skip_ws(input);
+        token_list *new;
+        switch (**input) {
+            case '\0':
+            case '\n':
+                return ret;
+            case '(':
+            case ')':
+            case '-':
+            case '=':
+            case ':':
+                new = malloc(sizeof(token_list));
+                new->len = 1;
+                new->begin = (*input)++;
+                new->next = ret;
+                ret = new;
+                break;
+            default:
+                new = malloc(sizeof (token_list));
+                new->begin = *input;
+                read_word(NULL,input);
+                new->len = (unsigned)(*input - new->begin);
+                new->next = ret;
+                ret = new;
+        }
     }
-    return NULL;
+    return ret;
 }
 
 const Fun* parse_num(const char *str){
@@ -223,6 +248,7 @@ const dict* parse_all(const char *input){
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
+        token_list *tl = tokenize(&input);
         parse_res f = parse_fun(glob, &input);
         dict_add_eval(&glob, f.et);
     }
