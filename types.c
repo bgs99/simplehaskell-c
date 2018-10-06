@@ -45,9 +45,9 @@ const Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(const char input[]){
+Parsed _parse_arg(const char *input){
     Parsed res;
-    input = skip_ws(input);
+    skip_ws(&input);
     if(*input == '('){
         return parse_t(input);
     }
@@ -75,8 +75,8 @@ Parsed _parse_arg(const char input[]){
         generics_add(res.ret, name);
     return res;
 }
-Parsed _parse_ret(const char input[]){
-    input = skip_ws(input);
+Parsed _parse_ret(const char *input){
+    skip_ws(&input);
     if(*input == '-'){
         return parse_t(input+1);
     }
@@ -85,9 +85,9 @@ Parsed _parse_ret(const char input[]){
     return (Parsed){NULL, input};
 }
 
-Parsed parse_t(const char input[]){
+Parsed parse_t(const char *input){
     Parsed res;
-    input = skip_ws(input);
+    skip_ws(&input);
     res.ret = malloc(sizeof (Type));
     Parsed arg, ret;
     switch(*input){

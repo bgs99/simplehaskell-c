@@ -3,6 +3,23 @@
 #include "eval.h"
 #include <malloc.h>
 
+typedef struct token_list{
+    char *begin;
+    unsigned int len;
+    struct token_list *next;
+} token_list;
+
+/**
+ * @brief Splits input into tokens, should only be used on right side of assignment
+ * @param input string
+ * @return tokenized input
+ */
+token_list* tokenize(const char *input){
+    while(*input != '\0' || *input != '\n'){
+        skip_ws(&input);
+    }
+}
+
 const Fun* parse_num(const char *str){
     Fun *f = malloc(sizeof (Fun));
     f->type = malloc(sizeof (Type));
@@ -62,10 +79,10 @@ const Fun* get_fun(const dict *glob, const dict *local, char *name){
 
 
 parse_res parse_tan(const char *input){
-    input = skip_ws(input);
+    skip_ws(&input);
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
-    input = skip_ws(input);
+    skip_ws(&input);
     if(*input != ':'){
         log("Expected \':\' in type annotation of %s", name);
         return (parse_res){NULL,NULL, NULL};
@@ -79,14 +96,14 @@ parse_res parse_tan(const char *input){
     return (parse_res){NULL, p.left+1, et};
 }
 parse_res parse_left(const Fun *f,const dict **local, const char *input){
-    input = skip_ws(input);
+    skip_ws(&input);
     char *name = calloc(20, sizeof (char));
     input = read_word(name, input);
     if(strcmp(name, f->name) != 0){
         log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
         return (parse_res){NULL,NULL, NULL};
     }
-    input = skip_ws(input);
+    skip_ws(&input);
     const Type *i = f->type;//--
     unsigned int lid = 1;
     while(*input != '='){
@@ -101,7 +118,7 @@ parse_res parse_left(const Fun *f,const dict **local, const char *input){
 
         af->lid = lid++;
         dict_add(local, af);
-        input = skip_ws(input);
+        skip_ws(&input);
 
     }
     input++;
@@ -131,7 +148,7 @@ parse_res parse_app(const dict *local, const dict *glob, const char *input){
     return (parse_res){f, input, ret};
 }
 parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
-    input = skip_ws(input);
+    skip_ws(&input);
     if(*input == ')' || *input == '\n' || *input == '\0')
         return (parse_res){NULL, input, NULL};
     if(*input == '('){
@@ -148,7 +165,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const char *input){
 }
 
 parse_res parse_arg(const dict *local, const dict *glob, const char *input){
-    input = skip_ws(input);
+    skip_ws(&input);
     if(*input == ')' || *input == '\n' || *input == '\0')
         return (parse_res){NULL, input, NULL};
     if(*input == '('){
