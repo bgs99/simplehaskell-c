@@ -99,7 +99,7 @@ const Fun* parse_num(const char *str){
     if(incdiv == 0){
         res->i_val = (int)val * sign;
         t->simple=true;
-        t->name = alloc_name("Int",3);
+        t->name = alloc_name("Int");
         return f;
     }
     double nval = val;
@@ -109,7 +109,7 @@ const Fun* parse_num(const char *str){
 
     res->d_val = nval*sign;
     t->simple=true;
-    t->name = alloc_name("Float",5);
+    t->name = alloc_name("Float");
     return f;
 }
 

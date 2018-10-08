@@ -4,7 +4,10 @@
 #include "parser.h"
 #include "dictionary_t.h"
 
-const char* alloc_name(const char* name, unsigned int len){
+const char* alloc_name(const char* name){
+    unsigned int len = 0;
+    for(const char *i = name; *i !='\0';i++)
+        len++;
     char *ret = calloc(len+1, sizeof (char));
     strcpy(ret, name);
     return ret;
@@ -141,4 +144,35 @@ void fprint_context(generics *g, FILE *f){
         fprint_t(g->val, f);
         fprintf(f, "\n");
     }
+}
+
+
+Type* type_make(const char *name){
+    const char *id = alloc_name(name);
+    Type *ret = malloc(sizeof (Type));
+    ret->simple = true;
+    ret->name = id;
+    if(generic(*ret))
+        generics_add(ret, id);
+    return ret;
+}
+
+
+Type* type_add(Type *fun, Type *arg){
+    generics_merge(fun, arg);
+    if(fun->simple){
+        Type *r = malloc(sizeof (r));
+        r->arg = fun;
+        r->ret = arg;
+        r->simple = false;
+        return r;
+    }
+    Type *i;
+    for(i = fun; !i->ret->simple; i = i->ret);
+    Type *r = malloc(sizeof (r));
+    r->arg = i->ret;
+    r->simple = false;
+    r->ret = arg;
+    i->ret = r;
+    return fun;
 }

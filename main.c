@@ -5,6 +5,8 @@
 
 int main(int argc, char **argv)
 {
+
+
     const char *path = "input.shs";
     if(argc > 1)
         path = argv[1];
@@ -26,5 +28,7 @@ int main(int argc, char **argv)
     printf("Expression %s\n Evaluates to ", ip);
     print_res(*eval_string(ad,ip));
     printf("\n");
+
+    print_t(type_add(type_make("Int"),type_make("Int")));
     return 0;
 }

@@ -6,7 +6,7 @@
 #define log(...) fprintf(stderr, __VA_ARGS__)
 #include <stdio.h>
 
-const char* alloc_name(const char* name, unsigned int len);
+const char* alloc_name(const char* name);
 
 struct generics;
 struct token_list;
@@ -126,3 +126,6 @@ void fprint_context(generics *g, FILE *f);
 #define log_context(gen) fprint_context(gen, stderr)
 
 bool generic(Type t);
+
+Type* type_make(const char *name);
+Type* type_add(Type *fun, Type *arg);
