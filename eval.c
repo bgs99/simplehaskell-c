@@ -47,7 +47,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
 }
 
 eval_tree* eval_make(const Fun *f){
-    eval_tree *ret = malloc(sizeof (eval_tree));
+    eval_tree *ret = calloc(1, sizeof (eval_tree));
     ret->f = f;
     return ret;
 }
@@ -100,7 +100,7 @@ Fun* eval_string(const dict *glob, const char *input){
         log("Expression doesn't have primitive type");
         return NULL;
     }
-    Fun *ret = malloc(sizeof (Fun));
+    Fun *ret = calloc(1, sizeof (Fun));
     const Prim *val = eval_expr(glob, pr.et->t, NULL);
     ret->type = pr.type;
     ret->val = val;

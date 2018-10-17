@@ -14,7 +14,7 @@ char s_equal(const char *a, const char *b){
     }
 }
 
-void dict_add_eval(const dict **d, pattern *value){
+void dict_add_eval(dict **d, pattern *value){
     dict *res = calloc(1, sizeof (dict));
     res->value = value;
     res->next = *d;
@@ -45,7 +45,7 @@ const eval_tree* dict_get_eval(const dict *d, const char *name, const eval_promi
     return NULL;
 }
 
-void dict_add(const dict **d, const Fun *value){
+void dict_add(dict **d, const Fun *value){
     dict_add_eval(d, pattern_from_et(eval_make(value)));
 }
 
@@ -63,7 +63,7 @@ void generics_add(Type *t, const char *name){
         if(strcmp(i->key, name) == 0)
                return;
     }
-    generics *ret = malloc(sizeof (generics));
+    generics *ret = calloc(1, sizeof (generics));
     ret ->key = name;
     ret->next = t->gen;
     t->gen = ret;
@@ -117,5 +117,13 @@ void dict_generics_reset(dict *d){
         generics_reset(i->value->t->f->type->gen);
 }
 
-
-
+void dict_merge(dict **d, dict *s){
+    if(!*d){
+        *d = s;
+        return;
+    }
+    dict *i = *d;
+    while(i->next)
+        i = i->next;
+    i->next = s;
+}

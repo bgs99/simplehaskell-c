@@ -54,7 +54,7 @@ Parsed _parse_arg(const token_list **input){
     if(*(*input)->begin == '('){
         return parse_t(input);
     }
-    res.ret = malloc(sizeof (Type));
+    res.ret = calloc(1, sizeof (Type));
     res.ret->simple = true;
     const char *name = get_name(input);
     res.ret->name = name;
@@ -76,7 +76,7 @@ Parsed _parse_ret(const token_list **input){
 
 Parsed parse_t(const token_list **input){
     Parsed res;
-    res.ret = malloc(sizeof (Type));
+    res.ret = calloc(1, sizeof (Type));
     Parsed arg, ret;
     switch(*(*input)->begin){
         case '(':
@@ -149,7 +149,7 @@ void fprint_context(generics *g, FILE *f){
 
 Type* type_make(const char *name){
     const char *id = alloc_name(name);
-    Type *ret = malloc(sizeof (Type));
+    Type *ret = calloc(1, sizeof (Type));
     ret->simple = true;
     ret->name = id;
     if(generic(*ret))
@@ -161,7 +161,7 @@ Type* type_make(const char *name){
 Type* type_add(Type *fun, Type *arg){
     generics_merge(fun, arg);
     if(fun->simple){
-        Type *r = malloc(sizeof (r));
+        Type *r = calloc(1, sizeof (r));
         r->arg = fun;
         r->ret = arg;
         r->simple = false;
@@ -169,7 +169,7 @@ Type* type_add(Type *fun, Type *arg){
     }
     Type *i;
     for(i = fun; !i->ret->simple; i = i->ret);
-    Type *r = malloc(sizeof (r));
+    Type *r = calloc(1, sizeof (r));
     r->arg = i->ret;
     r->simple = false;
     r->ret = arg;

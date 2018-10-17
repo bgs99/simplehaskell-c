@@ -32,33 +32,31 @@ deff(eqi){
 
 
 Fun* make_f(const char *name, const char* type, const Prim p){
-    Fun *ret = malloc(sizeof (Fun));
+    Fun *ret = calloc(1, sizeof (Fun));
     char *tname = calloc(20, sizeof (char));
     strcpy(tname, name);
     ret->name = tname;
     const token_list *tl = tokenize(&type);
     ret->type = parse_t(&tl).ret;
-    Prim *val = malloc(sizeof (Prim));
+    Prim *val = calloc(1, sizeof (Prim));
     *val = p;
     ret->lid = 0;
     ret->val = val;
     return ret;
 }
 
-const dict* init(){
+dict* init(){
     Fun     *z = make_f("z", "Int", (Prim){.i_val=0}),
             *s = make_f("s", "Int-Int", (Prim){.f_val=&inc}),
             *p = make_f("sum","Int-Int-Int", (Prim){.f_val=&sum}),
-            *ip = make_f("if", "Bool-a-a-a",(Prim){.f_val=&fif}),
             *t_f = make_f("True", "Bool", (Prim){.b_val=true}),
             *b_f = make_f("False", "Bool", (Prim){.b_val=false}),
             *eq_f = make_f("equal", "a-a-Bool",(Prim){.f_val=&eqi});
 
-    const dict **d = calloc(1, sizeof (dict*));
+    dict **d = calloc(1, sizeof (dict*));
     dict_add(d, z);
     dict_add(d, s);
     dict_add(d, p);
-    dict_add(d, ip);
     dict_add(d, t_f);
     dict_add(d, b_f);
     dict_add(d, eq_f);

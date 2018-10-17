@@ -2,7 +2,7 @@
 #include "reader.h"
 #include "eval.h"
 #include <malloc.h>
-
+#define PATH "/home/bgs99c/sandbox/shs/"
 
 const char* get_name(const token_list **tl){
     char *name = calloc((*tl)->len+1, sizeof (char));
@@ -46,9 +46,7 @@ token_list* tokenize_r(const char **input){
             case '=':
             case ':':
                 new = malloc(sizeof(token_list));
-                new->len = 1;
-                new->begin = (*input)++;
-                new->next = ret;
+                *new = (token_list){(*input)++, 1, ret};
                 ret = new;
                 break;
             default:
@@ -73,10 +71,10 @@ token_list* tokenize(const char **input){
 }
 
 const Fun* parse_num(const char *str){
-    Fun *f = malloc(sizeof (Fun));
-    f->type = malloc(sizeof (Type));
-    Prim *res = malloc(sizeof (Prim));
-    Type *t = malloc(sizeof (Type));
+    Fun *f = calloc(1, sizeof (Fun));
+    f->type = calloc(1, sizeof (Type));
+    Prim *res = calloc(1, sizeof (Prim));
+    Type *t = calloc(1, sizeof (Type));
     f->val = res;
     f->type = t;
     int sign = 1;
@@ -144,7 +142,7 @@ parse_res parse_tan(const token_list **input){
         return (parse_res){NULL,NULL};
     }
     *input = (*input)->next;
-    Fun *res = malloc(sizeof (Fun));
+    Fun *res = calloc(1, sizeof (Fun));
     res->name = name;
     Parsed p = parse_t(input);
     res->type = p.ret;
@@ -152,7 +150,7 @@ parse_res parse_tan(const token_list **input){
     (*input)++;
     return (parse_res){NULL, pattern_from_et(et)};
 }
-void parse_left(const Fun *f,const dict **local, const token_list **input){
+void parse_left(const Fun *f, dict **local, const token_list **input){
     if(!*input) return;
     const char *name = get_name(input);
     if(strcmp(name, f->name) != 0){
@@ -162,7 +160,7 @@ void parse_left(const Fun *f,const dict **local, const token_list **input){
     unsigned int lid = 1;
     while(*(*input)->begin != '='){
         const char *id = get_name(input);
-        Fun *af = malloc(sizeof (Fun));
+        Fun *af = calloc(1, sizeof (Fun));
         af->name = id;
         //const Type *t = i->simple ? i : i->arg;
         af->type = i->arg;
@@ -299,7 +297,7 @@ parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
             *left = input;
             break;
         }
-        const dict **l = malloc(sizeof (dict*));
+        dict **l = calloc(1, sizeof (dict*));
         parse_left(a.et->t->f,l,&input);
         unsigned int argn = (*l) ? (**l).value->t->f->lid : 0;
         dict_add(l, a.et->t->f);
@@ -312,17 +310,45 @@ parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
     return c;
 }
 
-const dict* parse_all(const char *input){
-    const dict *glob = init();
-    const token_list **tl = malloc(sizeof (token_list *));
+void parse_text(const char *input, dict **glob){
+    const token_list **tl = calloc(1, sizeof (token_list *));
     while(input && *input != '\0'){
 
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
-        parse_res f = parse_fun(glob, &input, tl);
-        dict_add_eval(&glob, f.et);
+
+        if(*input == '!'){
+            input++;
+            *tl = tokenize(&input);
+            char *path = calloc((*tl)->len + 26, sizeof (char));
+            const char *fn = get_name(tl);
+            strcat(path, PATH);
+            strcat(path, fn);
+            strcat(path, ".shs");
+            FILE *in = fopen(path, "r");
+            if(!in){
+                printf("Cannot open file %s, halting", fn);
+                return;
+            }
+            fseek(in, 0, SEEK_END);
+            unsigned long len = (unsigned long)ftell(in);
+            char *all = calloc(len, sizeof (char));
+            rewind(in);
+            fread(all, 1, len, in);
+            fclose(in);
+
+            parse_text(all, glob);
+            continue;
+        }
+        parse_res f = parse_fun(*glob, &input, tl);
+        dict_add_eval(glob, f.et);
     }
+}
+
+dict* parse_all(const char *input){
+    dict *glob = init();
+    parse_text(input, &glob);
     return glob;
 }
 
