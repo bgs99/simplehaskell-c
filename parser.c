@@ -129,6 +129,12 @@ const Fun* get_fun(const dict *glob, const dict *local, const char *name){
     return ret;
 }
 
+pattern* pattern_from_et(eval_tree *et){
+    pattern *p = calloc(1, sizeof (pattern));
+    p->t = et;
+    return p;
+}
+
 
 parse_res parse_tan(const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
@@ -144,7 +150,7 @@ parse_res parse_tan(const token_list **input){
     res->type = p.ret;
     eval_tree *et = eval_make(res);
     (*input)++;
-    return (parse_res){NULL, et};
+    return (parse_res){NULL, pattern_from_et(et)};
 }
 void parse_left(const Fun *f,const dict **local, const token_list **input){
     if(!*input) return;
@@ -177,7 +183,7 @@ parse_res parse_app(const dict *local, const dict *glob, const token_list **inpu
     if(!*input) return (parse_res){NULL,NULL};
     parse_res pr = parse_f_f(local, glob, input);
     const Type *f = pr.type;
-    eval_tree *ret = pr.et;
+    eval_tree *ret = pr.et->t;
     while((pr = parse_arg(local, glob, input)).type){
 
         f = apply_t(f, pr.type);
@@ -186,9 +192,9 @@ parse_res parse_app(const dict *local, const dict *glob, const token_list **inpu
         log_context(f->gen);
         log("\n");
 #endif
-        eval_add_arg(ret, pr.et);
+        eval_add_arg(ret, pr.et->t);
     }
-    return (parse_res){f, ret};
+    return (parse_res){f, pattern_from_et(ret)};
 }
 parse_res parse_f_f(const dict *local, const dict *glob, const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
@@ -203,7 +209,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const token_list **inpu
     const char *name = get_name(input);
 
     const Fun *ff = get_fun(glob, local, name);
-    return (parse_res){ff->type, eval_make(ff)};
+    return (parse_res){ff->type, pattern_from_et(eval_make(ff))};
 }
 
 parse_res parse_arg(const dict *local, const dict *glob, const token_list **input){
@@ -219,7 +225,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const token_list **inpu
     }
     const char *name = get_name(input);
     const Fun *ff = get_fun(glob, local, name);
-    return (parse_res){ff->type, eval_make(ff)};
+    return (parse_res){ff->type, pattern_from_et(eval_make(ff))};
 }
 
 
@@ -229,7 +235,7 @@ parse_res parse_right(const Type *f, const dict *local, const dict *glob, const 
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
         log("Return types do not match: \n %s has type ", f->name);
         log_t(last_type(f));
-        log("\n%s has type ", tr.et->f->name);
+        log("\n%s has type ", tr.et->t->f->name);
         log_t(last_type(tr.type));
         log(" in a context: \n");
         log_context(tr.type->gen);
@@ -239,41 +245,71 @@ parse_res parse_right(const Type *f, const dict *local, const dict *glob, const 
     return tr;
 }
 
-void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
-    eval_tree *et = eval_make(f);
-    eval_add_arg(et, pr->et);
-    pr->et = et;
-    pr->et->argn = argn;
+void pattern_add(parse_res *pr, parse_res np){
+    if(!pr->et){
+        pr->et = np.et;
+        return;
+    }
+
+    pattern *i;
+    for(i = pr->et; i->next; i = i->next);
+
+    i->next = np.et;
 }
 
-parse_res parse_fun(const dict *glob, const char **in){
+void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
+    eval_tree *et = eval_make(f);
+    eval_add_arg(et, pr->et->t);
+    pr->et->t = et;
+    pr->et->t->argn = argn;
+}
 
-    const token_list *input = tokenize(in);
+void skip_el(const char **input){
+    while(**input == '\n' || **input == ')' || **input == ' ' || **input == '\t')
+        (*input)++;
+}
+
+parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
+    const token_list *input = *left ? *left : tokenize(in);
     parse_res a = parse_tan(&input);
-    const dict **l = malloc(sizeof (dict*));
 #ifdef LOGALL
     log("&&Parsing function %s of type ",a.et->f->name);
-    log_t(a.et->f->type);
+    log_t(a.et->t->f->type);
     log(" &&\n");
 #endif
-    input = tokenize(in);
-    parse_left(a.et->f,l,&input);
-    unsigned int argn = (*l) ? (**l).value->f->lid : 0;
-    dict_add(l, a.et->f);
-    parse_res c = parse_right(a.et->f->type, *l, glob, &input);
-    eval_tree_wrap(&c, a.et->f, argn);
+    parse_res c = {NULL, NULL};
+    c.type = a.et->t->f->type;
+    while(true){
+        skip_el(in);
+        if(**in == '\0')
+            break;
+        input = tokenize(in);
+        if(*input->next->begin == ':'){
+            *left = input;
+            break;
+        }
+        const dict **l = malloc(sizeof (dict*));
+        parse_left(a.et->t->f,l,&input);
+        unsigned int argn = (*l) ? (**l).value->f->lid : 0;
+        dict_add(l, a.et->t->f);
+        parse_res t = parse_right(a.et->t->f->type, *l, glob, &input);
+
+        eval_tree_wrap(&t, a.et->t->f, argn);
+        pattern_add(&c, t);
+    }
     return c;
 }
 
 const dict* parse_all(const char *input){
     const dict *glob = init();
+    const token_list **tl = malloc(sizeof (token_list *));
     while(input && *input != '\0'){
 
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
-        parse_res f = parse_fun(glob, &input);
-        dict_add_eval(&glob, f.et);
+        parse_res f = parse_fun(glob, &input, tl);
+        dict_add_eval(&glob, f.et->t);
     }
     return glob;
 }

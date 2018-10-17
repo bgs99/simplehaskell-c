@@ -101,7 +101,7 @@ Fun* eval_string(const dict *glob, const char *input){
         return NULL;
     }
     Fun *ret = malloc(sizeof (Fun));
-    const Prim *val = eval_expr(glob, pr.et, NULL);
+    const Prim *val = eval_expr(glob, pr.et->t, NULL);
     ret->type = pr.type;
     ret->val = val;
     return ret;
