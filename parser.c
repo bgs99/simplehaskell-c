@@ -274,8 +274,7 @@ void pattern_add_matches(pattern *p, const dict *local){
     unsigned int j = p->t->argn-1;
     for(const dict *i = local->next; i; i = i->next, j--){
         if(i->value->t->f->name){
-            char c = *i->value->t->f->name;
-            if(c >= 'A' && c <= 'Z')
+            if(is_const(i->value->t->f->name))
                 p->match[j] = i->value->t->f;
         }
     }

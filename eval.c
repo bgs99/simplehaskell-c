@@ -22,8 +22,8 @@ bool print_res(const Fun f){
         printf("%f", f.val->d_val);
     } else if(!strcmp(valtype->name, "Bool")){
         if(f.val->b_val)
-            printf("true");
-        else printf("false");
+            printf("True");
+        else printf("False");
     } else if(!strcmp(valtype->name, "Char")){
         printf("%c", f.val->c_val);
     } else return false;

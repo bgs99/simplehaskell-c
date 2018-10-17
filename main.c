@@ -5,8 +5,6 @@
 
 int main(int argc, char **argv)
 {
-
-
     const char *path = "input.shs";
     if(argc > 1)
         path = argv[1];
@@ -26,11 +24,13 @@ int main(int argc, char **argv)
     printf("%s \n> ", all);
 
     char *ui = calloc(200, sizeof (char));
-    fgets(ui, 200, stdin);
 
-    printf("Expression %s\n Evaluates to ", ui);
-    print_res(*eval_string(ad,ui));
-    printf("\n");
+    while(fgets(ui, 200, stdin)){
+
+        printf("Expression %s\n Evaluates to ", ui);
+        print_res(*eval_string(ad,ui));
+        printf("\n\n> ");
+    }
 
     //print_t(type_add(type_make("Int"),type_make("Int")));
     return 0;
