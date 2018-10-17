@@ -3,6 +3,7 @@
 typedef struct pattern{
     eval_tree *t;
     struct pattern *next;
+    const Fun **match;
 } pattern;
 
 typedef struct parse_res{
@@ -25,3 +26,5 @@ parse_res parse_right(const Type *f, const dict *local, const dict* glob, const 
 parse_res parse_fun(const dict *glob, const char **input, const token_list **left);
 
 const dict* parse_all(const char *input);
+
+pattern* pattern_from_et(eval_tree *et);

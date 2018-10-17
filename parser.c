@@ -131,7 +131,7 @@ const Fun* get_fun(const dict *glob, const dict *local, const char *name){
 
 pattern* pattern_from_et(eval_tree *et){
     pattern *p = calloc(1, sizeof (pattern));
-    p->t = et;
+    *p = (pattern){et, NULL, NULL};
     return p;
 }
 
@@ -269,6 +269,18 @@ void skip_el(const char **input){
         (*input)++;
 }
 
+void pattern_add_matches(pattern *p, const dict *local){
+    p->match = calloc(p->t->argn, sizeof (Fun));
+    unsigned int j = p->t->argn-1;
+    for(const dict *i = local->next; i; i = i->next, j--){
+        if(i->value->t->f->name){
+            char c = *i->value->t->f->name;
+            if(c >= 'A' && c <= 'Z')
+                p->match[j] = i->value->t->f;
+        }
+    }
+}
+
 parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
     const token_list *input = *left ? *left : tokenize(in);
     parse_res a = parse_tan(&input);
@@ -290,11 +302,12 @@ parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
         }
         const dict **l = malloc(sizeof (dict*));
         parse_left(a.et->t->f,l,&input);
-        unsigned int argn = (*l) ? (**l).value->f->lid : 0;
+        unsigned int argn = (*l) ? (**l).value->t->f->lid : 0;
         dict_add(l, a.et->t->f);
         parse_res t = parse_right(a.et->t->f->type, *l, glob, &input);
 
         eval_tree_wrap(&t, a.et->t->f, argn);
+        pattern_add_matches(t.et,*l);
         pattern_add(&c, t);
     }
     return c;
@@ -309,7 +322,7 @@ const dict* parse_all(const char *input){
             input++;
         if(*input == '\0') break;
         parse_res f = parse_fun(glob, &input, tl);
-        dict_add_eval(&glob, f.et->t);
+        dict_add_eval(&glob, f.et);
     }
     return glob;
 }

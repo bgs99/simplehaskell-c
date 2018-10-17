@@ -50,8 +50,8 @@ const dict* init(){
             *s = make_f("s", "Int-Int", (Prim){.f_val=&inc}),
             *p = make_f("sum","Int-Int-Int", (Prim){.f_val=&sum}),
             *ip = make_f("if", "Bool-a-a-a",(Prim){.f_val=&fif}),
-            *t_f = make_f("true", "Bool", (Prim){.b_val=true}),
-            *b_f = make_f("false", "Bool", (Prim){.b_val=false}),
+            *t_f = make_f("True", "Bool", (Prim){.b_val=true}),
+            *b_f = make_f("False", "Bool", (Prim){.b_val=false}),
             *eq_f = make_f("equal", "a-a-Bool",(Prim){.f_val=&eqi});
 
     const dict **d = calloc(1, sizeof (dict*));

@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "malloc.h"
 #include "parser.h"
+#include "stdio.h"
 
 const Type* generics_sub(const Type *t, generics *context){
     if(!generic(*t)) return t;
@@ -63,7 +64,6 @@ const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const 
     return args;
 }
 
-
 const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
     if(!input){
         log("Nothing to evaluate");
@@ -81,7 +81,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
         if(f->lid > 0){
             res = promise_eval(params[f->lid-1]);//eval_expr(ep.glob, ep.input, ep.params);
         } else {
-            const eval_tree *sa =  dict_get_eval(glob, f->name);
+            const eval_tree *sa =  dict_get_eval(glob, f->name, args);
             const eval_promise *ps = collect_args(glob, input, params, sa->argn);
             return eval_expr(glob, sa->arg, ps);
         }

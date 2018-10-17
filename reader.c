@@ -14,3 +14,8 @@ void read_word(char *buff, const char **input){
         break;
     }
 }
+
+bool is_const(const char *input){
+    char c = *input;
+    return (c >= '0' && c <='9') || (c >= 'A' && c <= 'Z');
+}

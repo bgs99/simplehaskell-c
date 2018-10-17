@@ -1,6 +1,9 @@
 #pragma once
 #include "types.h"
 
+typedef struct pattern pattern;
+struct eval_promise;
+
 struct eval_tree{
     /**
      * @brief A function to be called
@@ -36,7 +39,7 @@ struct dict{
     /**
      * @brief Element's value
      */
-    const eval_tree *value;
+    const pattern *value;
 };
 /**
  * @struct dict
@@ -61,13 +64,13 @@ const Fun* dict_get(const dict *d, const char *name);
  * @param d Modified dictionary
  * @param value Inserted evaluation tree
  */
-void dict_add_eval(const dict **d, const eval_tree *value);
+void dict_add_eval(const dict **d, pattern *value);
 /**
  * @brief Gets evaluation tree from a dictionary
  * @param d Dictionary to search
  * @param name Name of the function to find
  */
-const eval_tree* dict_get_eval(const dict *d,  const char *name);
+const eval_tree* dict_get_eval(const dict *d,  const char *name, const struct eval_promise *args);
 
 void generics_add(Type *t, const char *name);
 

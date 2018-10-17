@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "eval.h"
+#include "parser.h"
 
 
 char s_equal(const char *a, const char *b){
@@ -13,27 +14,43 @@ char s_equal(const char *a, const char *b){
     }
 }
 
-void dict_add_eval(const dict **d, const eval_tree *value){
-    dict *res = malloc(sizeof (dict));
+void dict_add_eval(const dict **d, pattern *value){
+    dict *res = calloc(1, sizeof (dict));
     res->value = value;
     res->next = *d;
     *d = res;
 }
-const eval_tree* dict_get_eval(const dict *d, const char *name){
+bool pattern_match(const pattern *p, const eval_promise *args, const char *name, const dict *glob){
+    if(!p)
+        return false;
+    if(!s_equal(name, p->t->f->name))
+        return false;
+    if(!args)
+        return true;
+    for(unsigned int i = 0; i < p->t->argn; i++){
+        if(!p->match[i])
+            continue;
+        Prim val = *dict_get(glob, p->match[i]->name)->val;
+        if(val.i_val != promise_eval(args[i])->i_val) return false;
+    }
+    return true;
+}
+const eval_tree* dict_get_eval(const dict *d, const char *name, const eval_promise *args){
     if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
-        if(s_equal(name, i->value->f->name))
-            return i->value;
+        for(const pattern *j = i->value; j; j = j->next)
+            if( pattern_match(j, args, name, d))
+                return j->t;
     }
     return NULL;
 }
 
 void dict_add(const dict **d, const Fun *value){
-    dict_add_eval(d, eval_make(value));
+    dict_add_eval(d, pattern_from_et(eval_make(value)));
 }
 
 const Fun* dict_get(const dict *d, const char *name){
-    const eval_tree *tree = dict_get_eval(d, name);
+    const eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
 }
 /**
@@ -97,7 +114,7 @@ void generics_reset(generics *g){
 
 void dict_generics_reset(dict *d){
     for(const dict *i = d; i; i = i->next)
-        generics_reset(i->value->f->type->gen);
+        generics_reset(i->value->t->f->type->gen);
 }
 
 
