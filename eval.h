@@ -11,13 +11,13 @@ typedef struct eval_promise{
 } eval_promise;
 
 
-const Prim* promise_eval(eval_promise ep);
+object* promise_eval(eval_promise ep);
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg);
 
 eval_tree* eval_make(const Fun *f);
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params);
+object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params);
 
 
 Fun* eval_string(const dict *glob, const char *input);

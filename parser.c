@@ -290,15 +290,15 @@ Type* parse_type(token_list **input){
     ret->name = get_name(input);
     return ret;
 }
+
 void parse_datatype(Type *name, token_list **input, dict **glob){
     if(!*input || *(*input)->val->begin == '\n')
            return;
     const char *cname = get_name(input);
     Fun *ret = calloc(1, sizeof(Fun));
     ret->name = cname;
-    object val = {name, cname, NULL};
-    Prim *p = malloc(sizeof (Prim));
-    p->o_val = val;
+    object *p = malloc(sizeof (object));
+    *p = (object){name, cname, NULL};
     ret->val = p;
     ret->type = name;
     Type *last = NULL, *first = NULL;

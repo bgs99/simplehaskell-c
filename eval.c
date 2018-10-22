@@ -21,7 +21,7 @@ bool print_res(const Fun f){
     const Type *valtype = generics_sub(f.type, f.type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
-    print_object(f.val->o_val);
+    print_object(*f.val);
     return true;
 }
 
@@ -59,7 +59,7 @@ const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const 
     return args;
 }
 
-const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
+object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
     if(!input){
         log("Nothing to evaluate");
         return NULL;
@@ -70,7 +70,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
     }
     const Fun *f = input->f;
 
-    const Prim *res = f->val;
+    object *res = f->val;
     const eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){
         if(f->lid > 0){
@@ -84,8 +84,8 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
     if(!input->arg){
         return res;
     }
-
-    return res->f_val(args);
+    res->args = args;
+    return res;
 }
 
 Fun* eval_string(const dict *glob, const char *input){
@@ -96,12 +96,12 @@ Fun* eval_string(const dict *glob, const char *input){
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));
-    const Prim *val = eval_expr(glob, pr.et->val->t, NULL);
+    object *val = eval_expr(glob, pr.et->val->t, NULL);
     ret->type = pr.type;
     ret->val = val;
     return ret;
 }
 
-const Prim* promise_eval(eval_promise ep){
+object* promise_eval(eval_promise ep){
     return eval_expr(ep.glob, ep.input, ep.params);
 }

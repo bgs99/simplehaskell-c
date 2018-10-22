@@ -70,25 +70,15 @@ struct object{
      * @brief Index of type's constructor
      */
     const char *name;
-    struct eval_promise *args;
+    const struct eval_promise *args;
 };
 
 typedef struct object object;
 
-union Prim{
-    const union Prim* (*f_val)(const struct eval_promise*);
-    object o_val;
-};
-/**
- * @union
- * @brief Primitive value/function container
- */
-typedef union Prim Prim;
-
 typedef struct Fun{
     const char *name;
     Type *type;
-    const Prim *val;
+    object *val;
     unsigned int lid;//0 if not parameter, else is parameter id + 1
 } Fun;
 

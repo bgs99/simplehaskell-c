@@ -24,7 +24,7 @@ bool pattern_match(const pattern *p, const eval_promise *args, const char *name,
     for(unsigned int i = 0; i < p->t->argn; i++){
         if(!p->match[i])
             continue;
-        Prim val = *dict_get(glob, p->match[i]->name)->val;
+        object val = *dict_get(glob, p->match[i]->name)->val;
         //if(val.i_val != promise_eval(args[i])->i_val) return false;
     }
     return true;
