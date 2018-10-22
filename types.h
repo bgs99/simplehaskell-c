@@ -65,10 +65,7 @@ typedef struct Type Type;
 struct eval_promise;
 
 struct object{
-    const Type *type;
-    /**
-     * @brief Index of type's constructor
-     */
+    unsigned int argc;
     const char *name;
     const struct eval_promise *args;
 };

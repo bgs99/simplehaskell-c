@@ -298,7 +298,7 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
     Fun *ret = calloc(1, sizeof(Fun));
     ret->name = cname;
     object *p = malloc(sizeof (object));
-    *p = (object){name, cname, NULL};
+    *p = (object){0, cname, NULL};
     ret->val = p;
     ret->type = name;
     Type *last = NULL, *first = NULL;

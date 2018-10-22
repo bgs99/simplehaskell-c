@@ -13,8 +13,12 @@ const Type* generics_sub(const Type *t, generics *context){
 }
 
 void print_object(const object o){
-    printf("%s", o.name);
-    int g;
+    printf("%s ", o.name);
+    for(unsigned int i = 0; i < o.argc; i++){
+        printf("(");
+        print_object(*promise_eval(o.args[i]));
+        printf(")");
+    }
 }
 
 bool print_res(const Fun f){
@@ -85,6 +89,7 @@ object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *
         return res;
     }
     res->args = args;
+    res->argc = input->argn;
     return res;
 }
 
