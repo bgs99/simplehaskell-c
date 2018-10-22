@@ -12,21 +12,16 @@ const Type* generics_sub(const Type *t, generics *context){
     return t;
 }
 
+void print_object(const object o){
+    printf("%s", o.name);
+    int g;
+}
+
 bool print_res(const Fun f){
     const Type *valtype = generics_sub(f.type, f.type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
-    /*if(!strcmp(valtype->name, "Int")){
-        printf("%d", f.val->i_val);
-    } else if(!strcmp(valtype->name, "Double")){
-        printf("%f", f.val->d_val);
-    } else if(!strcmp(valtype->name, "Bool")){
-        if(f.val->b_val)
-            printf("True");
-        else printf("False");
-    } else if(!strcmp(valtype->name, "Char")){
-        printf("%c", f.val->c_val);
-    } else return false;*/
+    print_object(f.val->o_val);
     return true;
 }
 

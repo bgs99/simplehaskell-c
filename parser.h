@@ -8,7 +8,7 @@ typedef struct pattern{
 define_list(pattern, pattern_list)
 
 typedef struct parse_res{
-  const Type *type;
+  Type *type;
   pattern_list *et;
 } parse_res;
 

@@ -39,7 +39,7 @@ struct Type{
             /**
              * @brief Argument of the complex function
              */
-            const struct Type *arg;
+            struct Type *arg;
             /**
              * @brief Return type of the complex function
              */
@@ -87,7 +87,7 @@ typedef union Prim Prim;
 
 typedef struct Fun{
     const char *name;
-    const Type *type;
+    Type *type;
     const Prim *val;
     unsigned int lid;//0 if not parameter, else is parameter id + 1
 } Fun;
@@ -123,7 +123,7 @@ const Type* last_type(const Type *t);
 
 bool equal_t(const Type *a, const Type *b, generics *context);
 
-const Type* apply_t(const Type *a, const Type *b);
+Type *apply_t(const Type *a, const Type *b);
 
 Parsed parse_t(struct token_list **input);
 

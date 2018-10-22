@@ -27,7 +27,7 @@ bool equal_t(const Type *a, const Type *b, generics *context){
     return equal_t(a->ret, b->ret, context);//comparing return types
 }
 
-const Type* apply_t(const Type *a, const Type *b){
+Type* apply_t(const Type *a, const Type *b){
     if(a->simple){
         log("Trying to apply function of type ");
         log_t(b);

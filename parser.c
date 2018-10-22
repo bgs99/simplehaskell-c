@@ -163,7 +163,7 @@ void parse_left(const Fun *f, dict **local, token_list **input){
     if(strcmp(name, f->name) != 0){
         log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
     }
-    const Type *i = f->type;//--
+    Type *i = f->type;//--
     unsigned int lid = 1;
     while(*(*input)->val->begin != '='){
         const char *id = get_name(input);
@@ -187,7 +187,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, token_list **input);
 parse_res parse_app(const dict *local, const dict *glob, token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     parse_res pr = parse_f_f(local, glob, input);
-    const Type *f = pr.type;
+    Type *f = pr.type;
     eval_tree *ret = pr.et->val->t;
     while((pr = parse_arg(local, glob, input)).type){
 
@@ -312,6 +312,7 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
         last = arg;
     }
     if(first){
+        ret->type->simple = false;
         ret->type = first;
         last->ret = name;
     }
