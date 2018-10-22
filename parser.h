@@ -16,6 +16,7 @@ typedef struct token_list{
     unsigned long len;
     struct token_list *next;
 } token_list;
+constructor_list* parse_datatype(const token_list **input, const dict *glob);
 token_list* tokenize(const char **input);
 const char* get_name(const token_list **tl);
 parse_res parse_app(const dict *local, const dict *glob, const token_list **input);

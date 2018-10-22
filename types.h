@@ -14,7 +14,6 @@ struct constructor_list;
 
 struct Type{
     union{
-
         struct{
             struct constructor_list *constructors;
             /**
@@ -64,7 +63,7 @@ typedef struct object object;
 
 struct constructor_list{
     struct constructor_list *next;
-    char *name;
+    const char *name;
     int argc;
     Type **arg_types;
 };

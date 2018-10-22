@@ -45,6 +45,7 @@ token_list* tokenize_r(const char **input){
             case '-':
             case '=':
             case ':':
+            case '|':
                 new = malloc(sizeof(token_list));
                 *new = (token_list){(*input)++, 1, ret};
                 ret = new;
@@ -277,7 +278,31 @@ void pattern_add_matches(pattern *p, const dict *local){
         }
     }
 }
-
+Type* parse_type(const token_list **input, const dict *glob){
+    Type *ret = calloc(1, sizeof(Type));
+    ret->simple = true;
+    ret->name = get_name(input);
+    return NULL;
+}
+constructor_list* parse_datatype(const token_list **input, const dict *glob){
+    if(!*input || *(*input)->begin == '\n')
+           return NULL;
+    const char *cname = get_name(input);
+    constructor_list *ret = calloc(1, sizeof(constructor_list));
+    ret->name = cname;
+    if(!input || !*input){
+        return ret;
+    }
+    while(*(*input)->begin != '|'){
+        Type *arg = parse_type(input, glob);
+        ret->arg_types[ret->argc] = arg;
+        ret->argc++;
+    }
+    get_name(input);
+    constructor_list *tail = parse_datatype(input, glob);
+    ret->next = tail;
+    return ret;
+}
 parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
     const token_list *input = *left ? *left : tokenize(in);
     parse_res a = parse_tan(&input);
@@ -340,6 +365,19 @@ void parse_text(const char *input, dict **glob){
 
             parse_text(all, glob);
             continue;
+        }
+        if(*input == '@'){
+            input++;
+            const token_list **tl = malloc(sizeof(token_list *));
+            *tl = tokenize(&input);
+            const char *name = get_name(tl);
+            get_name(tl);
+            constructor_list *cl = parse_datatype(tl, *glob);
+            Type dt;
+            dt.simple = true;
+            dt.name = name;
+            dt.constructors = cl;
+            int x = 9;
         }
         parse_res f = parse_fun(*glob, &input, tl);
         dict_add_eval(glob, f.et);
