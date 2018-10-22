@@ -1,5 +1,5 @@
 #pragma once
-#include "hstd.h"
+#include "eval.h"
 typedef struct pattern{
     eval_tree *t;
     const Fun **match;
@@ -12,20 +12,20 @@ typedef struct parse_res{
   pattern_list *et;
 } parse_res;
 
-typedef struct token_list{
+typedef struct token{
     const char *begin;
     unsigned long len;
-    struct token_list *next;
-} token_list;
-constructor_list* parse_datatype(const token_list **input);
+} token;
+define_list(token, token_list)
+void parse_datatype(Type *name, token_list **input, dict **glob);
 token_list* tokenize(const char **input);
-const char* get_name(const token_list **tl);
-parse_res parse_app(const dict *local, const dict *glob, const token_list **input);
-parse_res parse_tan(const token_list **input);
-void parse_left(const Fun *f, dict **local, const token_list **input);
-parse_res parse_right(const Type *f, const dict *local, const dict* glob, const token_list **input);
+const char* get_name(token_list **tl);
+parse_res parse_app(const dict *local, const dict *glob, token_list **input);
+parse_res parse_tan(token_list **input);
+void parse_left(const Fun *f, dict **local, token_list **input);
+parse_res parse_right(const Type *f, const dict *local, const dict* glob, token_list **input);
 
-parse_res parse_fun(const dict *glob, const char **input, const token_list **left);
+parse_res parse_fun(const dict *glob, const char **input, token_list **left);
 
 dict *parse_all(const char *input);
 

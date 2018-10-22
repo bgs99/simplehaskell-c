@@ -3,6 +3,7 @@
 
 bool print_res(const Fun f);
 const Type* generics_sub(const Type *t, generics *context);
+
 typedef struct eval_promise{
     const dict *glob;
     const struct eval_tree *input;

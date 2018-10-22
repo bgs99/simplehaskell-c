@@ -16,7 +16,7 @@ bool print_res(const Fun f){
     const Type *valtype = generics_sub(f.type, f.type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
-    if(!strcmp(valtype->name, "Int")){
+    /*if(!strcmp(valtype->name, "Int")){
         printf("%d", f.val->i_val);
     } else if(!strcmp(valtype->name, "Double")){
         printf("%f", f.val->d_val);
@@ -26,7 +26,7 @@ bool print_res(const Fun f){
         else printf("False");
     } else if(!strcmp(valtype->name, "Char")){
         printf("%c", f.val->c_val);
-    } else return false;
+    } else return false;*/
     return true;
 }
 
@@ -94,7 +94,7 @@ const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promi
 }
 
 Fun* eval_string(const dict *glob, const char *input){
-    const token_list *tl = tokenize(&input);
+    token_list *tl = tokenize(&input);
     parse_res pr = parse_app(NULL,glob, &tl);
     if(!pr.type->simple){
         log("Expression doesn't have primitive type");

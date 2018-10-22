@@ -24,12 +24,12 @@ const char* alloc_name(const char* name);
 
 struct generics;
 struct token_list;
-struct constructor_list;
+struct fun_list;
 
 struct Type{
     union{
         struct{
-            struct constructor_list *constructors;
+            struct fun_list *constructors;
             /**
              * @brief Name of the simple function
              */
@@ -65,50 +65,19 @@ typedef struct Type Type;
 struct eval_promise;
 
 struct object{
-    Type *type;
+    const Type *type;
     /**
      * @brief Index of type's constructor
      */
-    int c_id;
+    const char *name;
     struct eval_promise *args;
 };
 
 typedef struct object object;
 
-struct constructor{
-    const char *name;
-    Type **arg_types;
-    int argc;
-};
-
-typedef struct constructor constructor;
-
-define_list(constructor, constructor_list)
-
-
-typedef struct constructor_list constructor_list;
-
 union Prim{
-    /**
-     * @brief Integer value
-     */
-    int i_val;
-    /**
-     * @brief Char value
-     */
-    char c_val;
-    /**
-     * @brief Double precision float value
-     */
-    double d_val;
-    /**
-     * @brief Boolean value
-     */
-    bool b_val;
-    /**
-     * @brief Function value
-     */
     const union Prim* (*f_val)(const struct eval_promise*);
+    object o_val;
 };
 /**
  * @union
@@ -122,7 +91,6 @@ typedef struct Fun{
     const Prim *val;
     unsigned int lid;//0 if not parameter, else is parameter id + 1
 } Fun;
-
 
 typedef struct Parsed{
     Type *ret;
@@ -157,7 +125,7 @@ bool equal_t(const Type *a, const Type *b, generics *context);
 
 const Type* apply_t(const Type *a, const Type *b);
 
-Parsed parse_t(const struct token_list **input);
+Parsed parse_t(struct token_list **input);
 
 void fprint_t(const Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)

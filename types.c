@@ -49,9 +49,9 @@ const Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(const token_list **input){
+Parsed _parse_arg(token_list **input){
     Parsed res;
-    if(*(*input)->begin == '('){
+    if(*(*input)->val->begin == '('){
         return parse_t(input);
     }
     res.ret = calloc(1, sizeof (Type));
@@ -62,23 +62,23 @@ Parsed _parse_arg(const token_list **input){
         generics_add(res.ret, name);
     return res;
 }
-Parsed _parse_ret(const token_list **input){
+Parsed _parse_ret(token_list **input){
     if(!*input)
         return (Parsed){NULL, NULL};
-    if(*(*input)->begin == '-'){
+    if(*(*input)->val->begin == '-'){
         *input = (*input)->next;
         return parse_t(input);
     }
-    if(*(*input)->begin == ')')
+    if(*(*input)->val->begin == ')')
         *input = (*input)->next;
     return (Parsed){NULL, NULL};
 }
 
-Parsed parse_t(const token_list **input){
+Parsed parse_t(token_list **input){
     Parsed res;
     res.ret = calloc(1, sizeof (Type));
     Parsed arg, ret;
-    switch(*(*input)->begin){
+    switch(*(*input)->val->begin){
         case '(':
             *input = (*input)->next;
             arg = parse_t(input);

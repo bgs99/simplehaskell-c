@@ -31,6 +31,8 @@ typedef struct eval_tree eval_tree;
 
 define_list(pattern_list, dict)
 
+define_list(Type, type_list)
+
 /**
  * @brief Gets function from a dictionary
  * @param d Dictionary to search
