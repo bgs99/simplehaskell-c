@@ -1,4 +1,4 @@
 #pragma once
 #include "eval.h"
 
-dict *init(void);
+pattern_list *init(void);

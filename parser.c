@@ -112,7 +112,7 @@ const Fun* parse_num(const char *str){
     return f;
 }
 
-const Fun* get_fun(const dict *glob, const dict *local, const char *name){
+const Fun* get_fun(const pattern_list *glob, const pattern_list *local, const char *name){
     char c = *name;
     if(('0' <= c && '9' >= c) || c == '-'){
         return parse_num(name);
@@ -151,7 +151,7 @@ parse_res parse_tan(const token_list **input){
     (*input)++;
     return (parse_res){NULL, pattern_from_et(et)};
 }
-void parse_left(const Fun *f, dict **local, const token_list **input){
+void parse_left(const Fun *f, pattern_list **local, const token_list **input){
     if(!*input) return;
     const char *name = get_name(input);
     if(strcmp(name, f->name) != 0){
@@ -175,10 +175,10 @@ void parse_left(const Fun *f, dict **local, const token_list **input){
     *input = (*input)->next;
 }
 
-parse_res parse_arg(const dict *local, const dict *glob, const token_list **input);
-parse_res parse_f_f(const dict *local, const dict *glob, const token_list **input);
+parse_res parse_arg(const pattern_list *local, const pattern_list *glob, const token_list **input);
+parse_res parse_f_f(const pattern_list *local, const pattern_list *glob, const token_list **input);
 
-parse_res parse_app(const dict *local, const dict *glob, const token_list **input){
+parse_res parse_app(const pattern_list *local, const pattern_list *glob, const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     parse_res pr = parse_f_f(local, glob, input);
     const Type *f = pr.type;
@@ -195,7 +195,7 @@ parse_res parse_app(const dict *local, const dict *glob, const token_list **inpu
     }
     return (parse_res){f, pattern_from_et(ret)};
 }
-parse_res parse_f_f(const dict *local, const dict *glob, const token_list **input){
+parse_res parse_f_f(const pattern_list *local, const pattern_list *glob, const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     if(*(*input)->begin == ')' || *(*input)->begin == '\n' || *(*input)->begin == '\0')
         return (parse_res){NULL, NULL};
@@ -211,7 +211,7 @@ parse_res parse_f_f(const dict *local, const dict *glob, const token_list **inpu
     return (parse_res){ff->type, pattern_from_et(eval_make(ff))};
 }
 
-parse_res parse_arg(const dict *local, const dict *glob, const token_list **input){
+parse_res parse_arg(const pattern_list *local, const pattern_list *glob, const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     if(*(*input)->begin == ')' || *(*input)->begin == '\n' || *(*input)->begin == '\0')
         return (parse_res){NULL, NULL};
@@ -228,7 +228,7 @@ parse_res parse_arg(const dict *local, const dict *glob, const token_list **inpu
 }
 
 
-parse_res parse_right(const Type *f, const dict *local, const dict *glob, const token_list **input){
+parse_res parse_right(const Type *f, const pattern_list *local, const pattern_list *glob, const token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     parse_res tr = parse_app(local, glob, input);
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
@@ -268,42 +268,43 @@ void skip_el(const char **input){
         (*input)++;
 }
 
-void pattern_add_matches(pattern *p, const dict *local){
+void pattern_add_matches(pattern *p, const pattern_list *local){
     p->match = calloc(p->t->argn, sizeof (Fun));
     unsigned int j = p->t->argn-1;
-    for(const dict *i = local->next; i; i = i->next, j--){
-        if(i->value->t->f->name){
-            if(is_const(i->value->t->f->name))
-                p->match[j] = i->value->t->f;
+    for(const pattern_list *i = local->next; i; i = i->next, j--){
+        if(i->val->t->f->name){
+            if(is_const(i->val->t->f->name))
+                p->match[j] = i->val->t->f;
         }
     }
 }
-Type* parse_type(const token_list **input, const dict *glob){
+Type* parse_type(const token_list **input){
     Type *ret = calloc(1, sizeof(Type));
     ret->simple = true;
     ret->name = get_name(input);
     return NULL;
 }
-constructor_list* parse_datatype(const token_list **input, const dict *glob){
+constructor_list* parse_datatype(const token_list **input){
     if(!*input || *(*input)->begin == '\n')
            return NULL;
     const char *cname = get_name(input);
     constructor_list *ret = calloc(1, sizeof(constructor_list));
-    ret->name = cname;
+    ret->val = calloc(1, sizeof(constructor));
+    ret->val->name = cname;
     if(!input || !*input){
         return ret;
     }
     while(*(*input)->begin != '|'){
-        Type *arg = parse_type(input, glob);
-        ret->arg_types[ret->argc] = arg;
-        ret->argc++;
+        Type *arg = parse_type(input);
+        ret->val->arg_types[ret->val->argc] = arg;
+        ret->val->argc++;
     }
     get_name(input);
-    constructor_list *tail = parse_datatype(input, glob);
+    constructor_list *tail = parse_datatype(input);
     ret->next = tail;
     return ret;
 }
-parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
+parse_res parse_fun(const pattern_list *glob, const char **in, const token_list **left){
     const token_list *input = *left ? *left : tokenize(in);
     parse_res a = parse_tan(&input);
 #ifdef LOGALL
@@ -322,9 +323,9 @@ parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
             *left = input;
             break;
         }
-        dict **l = calloc(1, sizeof (dict*));
+        pattern_list **l = calloc(1, sizeof (pattern_list *));
         parse_left(a.et->t->f,l,&input);
-        unsigned int argn = (*l) ? (**l).value->t->f->lid : 0;
+        unsigned int argn = (*l) ? (**l).val->t->f->lid : 0;
         dict_add(l, a.et->t->f);
         parse_res t = parse_right(a.et->t->f->type, *l, glob, &input);
 
@@ -335,7 +336,7 @@ parse_res parse_fun(const dict *glob, const char **in, const token_list **left){
     return c;
 }
 
-void parse_text(const char *input, dict **glob){
+void parse_text(const char *input, pattern_list **glob){
     const token_list **tl = calloc(1, sizeof (token_list *));
     while(input && *input != '\0'){
 
@@ -372,20 +373,21 @@ void parse_text(const char *input, dict **glob){
             *tl = tokenize(&input);
             const char *name = get_name(tl);
             get_name(tl);
-            constructor_list *cl = parse_datatype(tl, *glob);
+            constructor_list *cl = parse_datatype(tl);
             Type dt;
             dt.simple = true;
             dt.name = name;
             dt.constructors = cl;
             int x = 9;
+            continue;
         }
         parse_res f = parse_fun(*glob, &input, tl);
-        dict_add_eval(glob, f.et);
+        list_add(pattern, glob, f.et);
     }
 }
 
-dict* parse_all(const char *input){
-    dict *glob = init();
+pattern_list* parse_all(const char *input){
+    pattern_list *glob = init();
     parse_text(input, &glob);
     return glob;
 }

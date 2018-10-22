@@ -6,6 +6,20 @@
 #define log(...) fprintf(stderr, __VA_ARGS__)
 #include <stdio.h>
 
+#define define_list(type) \
+    typedef struct type ## _list{ \
+        type *val; \
+        struct type ## _list *next;\
+    } type ## _list;
+#define list_create(type, val) (type ## _list) {val, NULL}
+#define list_add(type, dict, value) \
+    { \
+        type ## _list *ret = malloc(sizeof(type ## _list)); \
+        ret->val = value; \
+        ret->next = *dict; \
+        *dict = ret; \
+    }
+
 const char* alloc_name(const char* name);
 
 struct generics;
@@ -61,12 +75,16 @@ struct object{
 
 typedef struct object object;
 
-struct constructor_list{
-    struct constructor_list *next;
+struct constructor{
     const char *name;
-    int argc;
     Type **arg_types;
+    int argc;
 };
+
+typedef struct constructor constructor;
+
+define_list(constructor)
+
 
 typedef struct constructor_list constructor_list;
 

@@ -14,13 +14,7 @@ char s_equal(const char *a, const char *b){
     }
 }
 
-void dict_add_eval(dict **d, pattern *value){
-    dict *res = calloc(1, sizeof (dict));
-    res->value = value;
-    res->next = *d;
-    *d = res;
-}
-bool pattern_match(const pattern *p, const eval_promise *args, const char *name, const dict *glob){
+bool pattern_match(const pattern *p, const eval_promise *args, const char *name, const pattern_list *glob){
     if(!p)
         return false;
     if(!s_equal(name, p->t->f->name))
@@ -35,21 +29,21 @@ bool pattern_match(const pattern *p, const eval_promise *args, const char *name,
     }
     return true;
 }
-const eval_tree* dict_get_eval(const dict *d, const char *name, const eval_promise *args){
+const eval_tree* dict_get_eval(const pattern_list *d, const char *name, const eval_promise *args){
     if(!d) return NULL;
-    for(const dict* i = d; i; i = i->next){
-        for(const pattern *j = i->value; j; j = j->next)
+    for(const pattern_list* i = d; i; i = i->next){
+        for(const pattern *j = i->val; j; j = j->next)
             if( pattern_match(j, args, name, d))
                 return j->t;
     }
     return NULL;
 }
 
-void dict_add(dict **d, const Fun *value){
-    dict_add_eval(d, pattern_from_et(eval_make(value)));
+void dict_add(pattern_list **d, const Fun *value){
+    list_add(pattern, d, pattern_from_et(eval_make(value)));
 }
 
-const Fun* dict_get(const dict *d, const char *name){
+const Fun* dict_get(const pattern_list *d, const char *name){
     const eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
 }
@@ -112,18 +106,7 @@ void generics_reset(generics *g){
         i->val = NULL;
 }
 
-void dict_generics_reset(dict *d){
-    for(const dict *i = d; i; i = i->next)
-        generics_reset(i->value->t->f->type->gen);
-}
-
-void dict_merge(dict **d, dict *s){
-    if(!*d){
-        *d = s;
-        return;
-    }
-    dict *i = *d;
-    while(i->next)
-        i = i->next;
-    i->next = s;
+void dict_generics_reset(pattern_list *d){
+    for(const pattern_list *i = d; i; i = i->next)
+        generics_reset(i->val->t->f->type->gen);
 }
