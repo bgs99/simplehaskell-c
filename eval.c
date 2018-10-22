@@ -55,7 +55,7 @@ eval_tree* eval_make(const Fun *f){
 
 //const Prim* eval_expr(const dict *glob, const eval_tree *input, const Prim *params);
 
-const eval_promise* collect_args(const pattern_list *glob, const eval_tree *tree, const eval_promise *params, unsigned int argn){
+const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const eval_promise *params, unsigned int argn){
     eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
@@ -64,7 +64,7 @@ const eval_promise* collect_args(const pattern_list *glob, const eval_tree *tree
     return args;
 }
 
-const Prim* eval_expr(const pattern_list *glob, const eval_tree *input, const eval_promise *params){
+const Prim* eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
     if(!input){
         log("Nothing to evaluate");
         return NULL;
@@ -93,7 +93,7 @@ const Prim* eval_expr(const pattern_list *glob, const eval_tree *input, const ev
     return res->f_val(args);
 }
 
-Fun* eval_string(const pattern_list *glob, const char *input){
+Fun* eval_string(const dict *glob, const char *input){
     const token_list *tl = tokenize(&input);
     parse_res pr = parse_app(NULL,glob, &tl);
     if(!pr.type->simple){
@@ -101,7 +101,7 @@ Fun* eval_string(const pattern_list *glob, const char *input){
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));
-    const Prim *val = eval_expr(glob, pr.et->t, NULL);
+    const Prim *val = eval_expr(glob, pr.et->val->t, NULL);
     ret->type = pr.type;
     ret->val = val;
     return ret;

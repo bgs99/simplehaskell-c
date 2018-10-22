@@ -6,15 +6,15 @@
 #define log(...) fprintf(stderr, __VA_ARGS__)
 #include <stdio.h>
 
-#define define_list(type) \
-    typedef struct type ## _list{ \
+#define define_list(type, name) \
+    typedef struct name{ \
         type *val; \
-        struct type ## _list *next;\
-    } type ## _list;
-#define list_create(type, val) (type ## _list) {val, NULL}
-#define list_add(type, dict, value) \
+        struct name *next;\
+    } name;
+#define list_create(name, val) (name) {val, NULL}
+#define list_add(name, dict, value) \
     { \
-        type ## _list *ret = malloc(sizeof(type ## _list)); \
+        name *ret = malloc(sizeof(name)); \
         ret->val = value; \
         ret->next = *dict; \
         *dict = ret; \
@@ -83,7 +83,7 @@ struct constructor{
 
 typedef struct constructor constructor;
 
-define_list(constructor)
+define_list(constructor, constructor_list)
 
 
 typedef struct constructor_list constructor_list;

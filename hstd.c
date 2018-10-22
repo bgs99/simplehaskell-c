@@ -45,7 +45,7 @@ Fun* make_f(const char *name, const char* type, const Prim p){
     return ret;
 }
 
-pattern_list* init(){
+dict* init(){
     Fun     *z = make_f("z", "Int", (Prim){.i_val=0}),
             *s = make_f("s", "Int-Int", (Prim){.f_val=&inc}),
             *p = make_f("sum","Int-Int-Int", (Prim){.f_val=&sum}),
@@ -53,7 +53,7 @@ pattern_list* init(){
             *b_f = make_f("False", "Bool", (Prim){.b_val=false}),
             *eq_f = make_f("equal", "a-a-Bool",(Prim){.f_val=&eqi});
 
-    pattern_list **d = calloc(1, sizeof (pattern_list *));
+    dict **d = calloc(1, sizeof (dict *));
     dict_add(d, z);
     dict_add(d, s);
     dict_add(d, p);
