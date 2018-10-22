@@ -304,16 +304,20 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
     Type *last = NULL, *first = NULL;
     while(*input && *(*input)->val->begin != '|'){
         Type *arg = parse_type(input);
-        if(last != NULL){
-            last->ret = arg;
-        } else {
-            first = arg;
+        if(!last){
+            last = calloc(1, sizeof (Type));
+            last->simple = false;
+            last->arg = arg;
+            first = last;
+            continue;
         }
-        last = arg;
+        last->ret = calloc(1, sizeof (Type));
+        last->ret->simple = false;
+        last->ret->arg = arg;
     }
     if(first){
-        ret->type->simple = false;
         ret->type = first;
+        ret->type->simple = false;
         last->ret = name;
     }
     dict_add(glob, ret);
