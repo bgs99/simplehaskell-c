@@ -10,13 +10,18 @@ const char* alloc_name(const char* name);
 
 struct generics;
 struct token_list;
+struct constructor_list;
 
 struct Type{
     union{
-        /**
-         * @brief Name of the simple function
-         */
-        const char *name;
+
+        struct{
+            struct constructor_list *constructors;
+            /**
+             * @brief Name of the simple function
+             */
+            const char *name;
+        };
         struct {
             /**
              * @brief Argument of the complex function
@@ -45,6 +50,26 @@ struct Type{
 typedef struct Type Type;
 
 struct eval_promise;
+
+struct object{
+    Type *type;
+    /**
+     * @brief Index of type's constructor
+     */
+    int c_id;
+    struct eval_promise *args;
+};
+
+typedef struct object object;
+
+struct constructor_list{
+    struct constructor_list *next;
+    char *name;
+    int argc;
+    Type **arg_types;
+};
+
+typedef struct constructor_list constructor_list;
 
 union Prim{
     /**
