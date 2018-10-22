@@ -164,19 +164,18 @@ void parse_left(const Fun *f, dict **local, token_list **input){
         log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
     }
     Type *i = f->type;//--
-    unsigned int lid = 1;
+    unsigned int lid = 0;
     while(*(*input)->val->begin != '='){
         const char *id = get_name(input);
         Fun *af = calloc(1, sizeof (Fun));
         af->name = id;
         //const Type *t = i->simple ? i : i->arg;
         af->type = i->arg;
-
         i = i->ret;
-
-        af->lid = lid++;
+        af->lid = calloc(1, sizeof (id_list));
+        af->lid->val = malloc(sizeof (unsigned int));
+        *af->lid->val = lid++;
         dict_add(local, af);
-
     }
     *input = (*input)->next;
 }
@@ -276,7 +275,7 @@ void skip_el(const char **input){
 
 void pattern_add_matches(pattern_list *p, const dict *local){
     p->val->match = calloc(p->val->t->argn, sizeof (Fun));
-    unsigned int j = p->val->t->argn-1;
+    unsigned int j = p->val->t->argn;
     for(const dict *i = local->next; i; i = i->next, j--){
         if(i->val->val->t->f->name){
             if(is_const(i->val->val->t->f->name))
@@ -347,7 +346,7 @@ parse_res parse_fun(const dict *glob, const char **in, token_list **left){
         }
         dict **l = calloc(1, sizeof (dict *));
         parse_left(a.et->val->t->f,l,&input);
-        unsigned int argn = (*l) ? (**l).val->val->t->f->lid : 0;
+        unsigned int argn = (*l) ? *(**l).val->val->t->f->lid->val : 0;
         dict_add(l, a.et->val->t->f);
         parse_res t = parse_right(a.et->val->t->f->type, *l, glob, &input);
 
@@ -365,7 +364,11 @@ void parse_text(const char *input, dict **glob){
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
-
+        if(*input == ';'){
+            input++;
+            tokenize(&input);
+            continue;
+        }
         if(*input == '!'){
             input++;
             *tl = tokenize(&input);
