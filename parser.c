@@ -301,12 +301,8 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
     p->o_val = val;
     ret->val = p;
     ret->type = name;
-    if(!input || !*input){
-        dict_add(glob, ret);
-        return;
-    }
     Type *last = NULL, *first = NULL;
-    while(*(*input)->val->begin != '|'){
+    while(*input && *(*input)->val->begin != '|'){
         Type *arg = parse_type(input);
         if(last != NULL){
             last->ret = arg;
@@ -320,6 +316,8 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
         last->ret = name;
     }
     dict_add(glob, ret);
+    if(!*input)
+        return;
     get_name(input);
     parse_datatype(name, input, glob);
 }

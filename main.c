@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     }
     fseek(in, 0, SEEK_END);
     unsigned long len = (unsigned long)ftell(in);
-    char *all = calloc(len, sizeof (char));
+    char *all = calloc(len+1, sizeof (char));
     rewind(in);
     fread(all, 1, len, in);
     fclose(in);
@@ -32,6 +32,5 @@ int main(int argc, char **argv)
         printf("\n\n> ");
     }
 
-    //print_t(type_add(type_make("Int"),type_make("Int")));
     return 0;
 }
