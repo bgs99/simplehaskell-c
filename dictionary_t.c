@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "eval.h"
-#include "parser.h"
+#include "parsing/parser.h"
 
 
 char s_equal(const char *a, const char *b){

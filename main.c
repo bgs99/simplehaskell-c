@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "malloc.h"
-#include "parser.h"
+#include "parsing/parser.h"
 
 
 int main(int argc, char **argv)

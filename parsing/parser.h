@@ -1,25 +1,14 @@
 #pragma once
-#include "eval.h"
-typedef struct pattern{
-    eval_tree *t;
-    const Fun **match;
-} pattern;
-
-define_list(pattern, pattern_list)
+#include "dictionary_t.h"
+#include "tokens.h"
 
 typedef struct parse_res{
   Type *type;
   pattern_list *et;
 } parse_res;
 
-typedef struct token{
-    const char *begin;
-    unsigned long len;
-} token;
-define_list(token, token_list)
 void parse_datatype(Type *name, token_list **input, dict **glob);
 token_list* tokenize(const char **input);
-const char* get_name(token_list **tl);
 parse_res parse_app(const dict *local, const dict *glob, token_list **input);
 parse_res parse_tan(token_list **input);
 void parse_left(const Fun *f, dict **local, token_list **input);

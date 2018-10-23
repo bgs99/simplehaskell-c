@@ -106,6 +106,38 @@ struct generics{
  */
 typedef  struct generics generics;
 
+struct eval_tree{
+    /**
+     * @brief A function to be called
+     */
+    const Fun *f; //Function
+    /**
+     * @brief Number of arguments
+     */
+    unsigned int argn;
+    /**
+     * @brief Pointer to first arg
+     */
+    struct eval_tree *arg;
+    /**
+     * @brief Pointer to next sibling
+     */
+    struct eval_tree *next;
+};
+/**
+ * @struct eval_tree
+ * @brief This structure represents evaluation tree
+ */
+typedef struct eval_tree eval_tree;
+
+
+
+typedef struct pattern{
+    eval_tree *t;
+    const Fun **match;
+} pattern;
+
+define_list(pattern, pattern_list)
 
 
 const Type* last_type(const Type *t);

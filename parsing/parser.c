@@ -4,13 +4,6 @@
 #include <malloc.h>
 #define PATH "/home/bgs99c/sandbox/shs/"
 
-const char* get_name(token_list **tl){
-    char *name = calloc((*tl)->val->len+1, sizeof (char));
-    strncpy(name, (*tl)->val->begin, (*tl)->val->len);
-    *tl = (*tl)->next;
-    return name;
-}
-
 token_list* reverse(token_list *input, token_list **end){
     if(!input) return NULL;
     if(!input->next) {
@@ -49,7 +42,7 @@ token_list* tokenize_r(const char **input){
                 new = malloc(sizeof(token_list));
                 new->val = malloc(sizeof (token));
                 new->val->begin = (*input)++;
-                new->val->len = 1;
+                new->val->length = 1;
                 new->next = ret;
                 ret = new;
                 break;
@@ -58,7 +51,7 @@ token_list* tokenize_r(const char **input){
                 new->val = malloc(sizeof (token));
                 new->val->begin = *input;
                 read_word(NULL,input);
-                new->val->len = (unsigned)(*input - new->val->begin);
+                new->val->length = (unsigned)(*input - new->val->begin);
                 new->next = ret;
                 ret = new;
         }
@@ -372,7 +365,7 @@ void parse_text(const char *input, dict **glob){
         if(*input == '!'){
             input++;
             *tl = tokenize(&input);
-            char *path = calloc((*tl)->val->len + 26, sizeof (char));
+            char *path = calloc((*tl)->val->length + 26, sizeof (char));
             const char *fn = get_name(tl);
             strcat(path, PATH);
             strcat(path, fn);

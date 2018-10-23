@@ -1,33 +1,9 @@
 #pragma once
 #include "types.h"
 
+
 typedef struct pattern_list pattern_list;
 struct eval_promise;
-
-struct eval_tree{
-    /**
-     * @brief A function to be called
-     */
-    const Fun *f; //Function
-    /**
-     * @brief Number of arguments
-     */
-    unsigned int argn;
-    /**
-     * @brief Pointer to first arg
-     */
-    struct eval_tree *arg;
-    /**
-     * @brief Pointer to next sibling
-     */
-    struct eval_tree *next;
-};
-/**
- * @struct eval_tree
- * @brief This structure represents evaluation tree
- */
-typedef struct eval_tree eval_tree;
-
 
 define_list(pattern_list, dict)
 

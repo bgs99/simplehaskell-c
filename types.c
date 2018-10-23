@@ -1,7 +1,7 @@
 #include "types.h"
 #include <malloc.h>
-#include "reader.h"
-#include "parser.h"
+#include "parsing/reader.h"
+#include "parsing/parser.h"
 #include "dictionary_t.h"
 
 const char* alloc_name(const char* name){
