@@ -19,7 +19,6 @@
         ret->next = *dict; \
         *dict = ret; \
     }
-
 const char* alloc_name(const char* name);
 
 struct generics;

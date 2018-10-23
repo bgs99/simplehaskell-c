@@ -5,9 +5,12 @@ typedef unsigned int uint;
 typedef enum token_type{
     DATATYPE,
     TYPE_NAME,
+    FUN_NAME,
     DELIMITER,
-    EQUALS,
-    IMPORT
+    IMPORT,
+    POPEN,
+    PCLOSE,
+    UNDEFINED
 } token_type;
 
 typedef struct token{
@@ -19,3 +22,5 @@ typedef struct token{
 define_list(token, token_list)
 
 char *get_name(token_list **list);
+
+token_list* tokenize(const char **input);

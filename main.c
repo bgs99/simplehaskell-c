@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "malloc.h"
+#include "eval.h"
 #include "parsing/parser.h"
-
 
 int main(int argc, char **argv)
 {
@@ -26,7 +26,9 @@ int main(int argc, char **argv)
     char *ui = calloc(200, sizeof (char));
 
     while(fgets(ui, 200, stdin)){
-
+        printf("%d", *ui);
+        if(*ui == '\n')
+            continue;
         printf("Expression %s\n Evaluates to ", ui);
         print_res(*eval_string(ad,ui));
         printf("\n\n> ");

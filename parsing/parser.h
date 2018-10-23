@@ -8,7 +8,7 @@ typedef struct parse_res{
 } parse_res;
 
 void parse_datatype(Type *name, token_list **input, dict **glob);
-token_list* tokenize(const char **input);
+
 parse_res parse_app(const dict *local, const dict *glob, token_list **input);
 parse_res parse_tan(token_list **input);
 void parse_left(const Fun *f, dict **local, token_list **input);
