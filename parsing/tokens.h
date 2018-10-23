@@ -6,11 +6,14 @@ typedef enum token_type{
     DATATYPE,
     TYPE_NAME,
     FUN_NAME,
+    OF_TYPE,
+    EQUALS,
     DELIMITER,
     IMPORT,
     POPEN,
     PCLOSE,
-    UNDEFINED
+    UNDEFINED,
+    WILDCARD
 } token_type;
 
 typedef struct token{

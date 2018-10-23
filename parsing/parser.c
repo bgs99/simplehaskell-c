@@ -76,10 +76,12 @@ pattern_list *pattern_from_et(eval_tree *et){
 parse_res parse_tan(token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
     const char *name = get_name(input);
-    if(*(*input)->val->begin != ':'){
+
+    if((*input)->val->type != OF_TYPE){
         log("Expected \':\' in type annotation of %s", name);
         return (parse_res){NULL,NULL};
     }
+
     *input = (*input)->next;
     Fun *res = calloc(1, sizeof (Fun));
     res->name = name;
@@ -97,7 +99,7 @@ void parse_left(const Fun *f, dict **local, token_list **input){
     }
     Type *i = f->type;//--
     unsigned int lid = 0;
-    while(*(*input)->val->begin != '='){
+    while((*input)->val->type != EQUALS){
         const char *id = get_name(input);
         Fun *af = calloc(1, sizeof (Fun));
         af->name = id;
@@ -134,12 +136,12 @@ parse_res parse_app(const dict *local, const dict *glob, token_list **input){
 }
 parse_res parse_f_f(const dict *local, const dict *glob, token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
-    if(*(*input)->val->begin == ')' || *(*input)->val->begin == '\n' || *(*input)->val->begin == '\0')
+    if((*input)->val->type == PCLOSE)
         return (parse_res){NULL, NULL};
-    if(*(*input)->val->begin == '('){
+    if((*input)->val->type == POPEN){
         *input = (*input)->next;
         parse_res ret = parse_app(local, glob, input);
-        if(*(*input)->val->begin == ')') *input = (*input)->next;
+        if((*input)->val->type == PCLOSE) *input = (*input)->next;
         return ret;
     }
     const char *name = get_name(input);
@@ -150,12 +152,12 @@ parse_res parse_f_f(const dict *local, const dict *glob, token_list **input){
 
 parse_res parse_arg(const dict *local, const dict *glob, token_list **input){
     if(!*input) return (parse_res){NULL,NULL};
-    if(*(*input)->val->begin == ')' || *(*input)->val->begin == '\n' || *(*input)->val->begin == '\0')
+    if((*input)->val->type == PCLOSE)
         return (parse_res){NULL, NULL};
-    if(*(*input)->val->begin == '('){
+    if((*input)->val->type == POPEN){
         *input = (*input)->next;
         parse_res ret = parse_app(local, glob, input);
-        if(*(*input)->val->begin == ')')
+        if((*input)->val->type == PCLOSE)
             *input = (*input)->next;
         return ret;
     }
@@ -200,14 +202,9 @@ void eval_tree_wrap(parse_res *pr, const Fun *f, unsigned int argn){
     pr->et->val->t->argn = argn;
 }
 
-void skip_el(const char **input){
-    while(**input == '\n' || **input == ')' || **input == ' ' || **input == '\t')
-        (*input)++;
-}
-
 void pattern_add_matches(pattern_list *p, const dict *local){
     p->val->match = calloc(p->val->t->argn, sizeof (Fun));
-    unsigned int j = p->val->t->argn;
+    unsigned int j = p->val->t->argn-1;
     for(const dict *i = local->next; i; i = i->next, j--){
         if(i->val->val->t->f->name){
             if(is_const(i->val->val->t->f->name))
@@ -223,7 +220,7 @@ Type* parse_type(token_list **input){
 }
 
 void parse_datatype(Type *name, token_list **input, dict **glob){
-    if(!*input || *(*input)->val->begin == '\n')
+    if(!*input)
            return;
     const char *cname = get_name(input);
     Fun *ret = calloc(1, sizeof(Fun));
@@ -233,7 +230,7 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
     ret->val = p;
     ret->type = name;
     Type *last = NULL, *first = NULL;
-    while(*input && *(*input)->val->begin != '|'){
+    while(*input && (*input)->val->type != DELIMITER){
         Type *arg = parse_type(input);
         if(!last){
             last = calloc(1, sizeof (Type));
@@ -257,11 +254,12 @@ void parse_datatype(Type *name, token_list **input, dict **glob){
     get_name(input);
     parse_datatype(name, input, glob);
 }
-parse_res parse_fun(const dict *glob, const char **in, token_list **left){
-    token_list *input = *left ? *left : tokenize(in);
+parse_res parse_fun(const dict *glob, const char **in, token_list **line){
+    token_list *input = *line ? *line : tokenize(in);
     parse_res a = parse_tan(&input);
+    const char *name = a.et->val->t->f->name;
 #ifdef LOGALL
-    log("&&Parsing function %s of type ",a.et->f->name);
+    log("&&Parsing function %s of type ", name);
     log_t(a.et->val->t->f->type);
     log(" &&\n");
 #endif
@@ -271,14 +269,17 @@ parse_res parse_fun(const dict *glob, const char **in, token_list **left){
         skip_el(in);
         if(**in == '\0')
             break;
+        const char *start = *in;
         input = tokenize(in);
-        if(*input->next->val->begin == ':'){
-            *left = input;
+        char *name2 = calloc( input->val->length + 1, sizeof (char));
+        strncpy(name2, input->val->begin, input->val->length);
+        if(strcmp(name, name2)){
+            *in = start;
             break;
         }
         dict **l = calloc(1, sizeof (dict *));
         parse_left(a.et->val->t->f,l,&input);
-        unsigned int argn = (*l) ? *(**l).val->val->t->f->lid->val : 0;
+        unsigned int argn = (*l) ? *(**l).val->val->t->f->lid->val + 1 : 0;
         dict_add(l, a.et->val->t->f);
         parse_res t = parse_right(a.et->val->t->f->type, *l, glob, &input);
 
@@ -290,22 +291,19 @@ parse_res parse_fun(const dict *glob, const char **in, token_list **left){
 }
 
 void parse_text(const char *input, dict **glob){
-    token_list **tl = calloc(1, sizeof (token_list *));
+    token_list *tl = NULL;
     while(input && *input != '\0'){
 
         while(*input == '\n' || *input == ')' || *input == ' ' || *input == '\t')
             input++;
         if(*input == '\0') break;
-        if(*input == ';'){
-            input++;
-            tokenize(&input);
+        tl = tokenize(&input);
+        if(!tl)
             continue;
-        }
-        if(*input == '!'){
-            input++;
-            *tl = tokenize(&input);
-            char *path = calloc((*tl)->val->length + 26, sizeof (char));
-            const char *fn = get_name(tl);
+        if(tl->val->type==IMPORT){
+            tl = tl->next;
+            char *path = calloc(tl->val->length + 26, sizeof (char));
+            const char *fn = get_name(&tl);
             strcat(path, PATH);
             strcat(path, fn);
             strcat(path, ".shs");
@@ -324,17 +322,20 @@ void parse_text(const char *input, dict **glob){
             parse_text(all, glob);
             continue;
         }
-        if(*input == '@'){
-            input++;
-            token_list **tl = malloc(sizeof(token_list *));
-            *tl = tokenize(&input);
-            const char *name = get_name(tl);
-            get_name(tl);
+        if(tl->val->type == DATATYPE){
+            tl = tl->next;
+            const char *name = get_name(&tl);
+            if(tl->val->type != EQUALS){
+                log("Expected '=' after datatype name");
+                return;
+            }
+            tl = tl->next;
+
             Type *t = type_make(name);
-            parse_datatype(t, tl, glob);
+            parse_datatype(t, &tl, glob);
             continue;
         }
-        parse_res f = parse_fun(*glob, &input, tl);
+        parse_res f = parse_fun(*glob, &input, &tl);
         list_add(dict, glob, f.et);
     }
 }

@@ -159,3 +159,5 @@ bool generic(Type t);
 
 Type* type_make(const char *name);
 Type* type_add(Type *fun, Type *arg);
+
+bool object_equal(object a, object b);

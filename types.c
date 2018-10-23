@@ -3,6 +3,7 @@
 #include "parsing/reader.h"
 #include "parsing/parser.h"
 #include "dictionary_t.h"
+#include "eval.h"
 
 const char* alloc_name(const char* name){
     unsigned int len = 0;
@@ -51,7 +52,7 @@ Type* apply_t(const Type *a, const Type *b){
 
 Parsed _parse_arg(token_list **input){
     Parsed res;
-    if(*(*input)->val->begin == '('){
+    if((*input)->val->type == POPEN){
         return parse_t(input);
     }
     res.ret = calloc(1, sizeof (Type));
@@ -65,11 +66,11 @@ Parsed _parse_arg(token_list **input){
 Parsed _parse_ret(token_list **input){
     if(!*input)
         return (Parsed){NULL, NULL};
-    if(*(*input)->val->begin == '-'){
+    if((*input)->val->type == DELIMITER){
         *input = (*input)->next;
         return parse_t(input);
     }
-    if(*(*input)->val->begin == ')')
+    if((*input)->val->type == PCLOSE)
         *input = (*input)->next;
     return (Parsed){NULL, NULL};
 }
@@ -78,8 +79,8 @@ Parsed parse_t(token_list **input){
     Parsed res;
     res.ret = calloc(1, sizeof (Type));
     Parsed arg, ret;
-    switch(*(*input)->val->begin){
-        case '(':
+    switch((*input)->val->type){
+        case POPEN:
             *input = (*input)->next;
             arg = parse_t(input);
         break;
@@ -175,4 +176,18 @@ Type* type_add(Type *fun, Type *arg){
     r->ret = arg;
     i->ret = r;
     return fun;
+}
+
+bool object_equal(object a, object b){
+    if(a.argc != b.argc)
+        return false;
+    if(strcmp(a.name, b.name) != 0)
+        return false;
+    for(unsigned i = 0; i < a.argc; i++){
+        object x = *promise_eval(a.args[i]);
+        object y = *promise_eval(b.args[i]);
+        if(!object_equal(x, y))
+            return false;
+    }
+    return true;
 }

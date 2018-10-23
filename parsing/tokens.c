@@ -32,34 +32,45 @@ token_list* tokenize_r(const char **input){
     token_list *ret = NULL;
     while(**input != '\0' && **input != '\n'){
         skip_ws(input);
-        token_list *new;
+
+        if(**input == ';'){
+            while(**input != '\0' && **input != '\n')
+                (*input)++;
+            return ret;
+        }
+
+        token_list *new = malloc(sizeof (token_list));
+        new->val = malloc(sizeof (token));
+        new->val->type = UNDEFINED;
 
         switch (**input) {
         case '\0':
         case '\n':
+            free(new->val);
+            free(new);
             return ret;
         case '@':
-            new = malloc(sizeof (token_list));
-            new->val = malloc(sizeof (token));
             new->val->type = DATATYPE;
             new->next = ret;
+            ret = new;
             break;
         case '!':
-            new = malloc(sizeof (token_list));
-            new->val = malloc(sizeof (token));
             new->val->type = IMPORT;
             new->next = ret;
+            ret = new;
             break;
         case '(':
-            new = malloc(sizeof (token_list));
-            new->val = malloc(sizeof (token));
             new->val->type = POPEN;
             new->next = ret;
+            ret = new;
             break;
         case ')':
-            new = malloc(sizeof (token_list));
-            new->val = malloc(sizeof (token));
             new->val->type = PCLOSE;
+            new->next = ret;
+            ret = new;
+            break;
+        case '_':
+            new->val->type = WILDCARD;
             new->next = ret;
             ret = new;
             break;
@@ -68,8 +79,6 @@ token_list* tokenize_r(const char **input){
             if(ret->val->type == UNDEFINED)
                 ret->val->type = TYPE_NAME;
 
-            new = malloc(sizeof(token_list));
-            new->val = malloc(sizeof (token));
             new->val->type = DELIMITER;
             new->next = ret;
             ret = new;
@@ -79,15 +88,11 @@ token_list* tokenize_r(const char **input){
             if(ret->val->type == UNDEFINED)
                 ret->val->type = FUN_NAME;
 
-            new = malloc(sizeof(token_list));
-            new->val = malloc(sizeof (token));
-            new->val->type = DELIMITER;
+            new->val->type = (**input == '=') ? EQUALS : OF_TYPE;
             new->next = ret;
             ret = new;
             break;
         default:
-            new = malloc(sizeof (token_list));
-            new->val = malloc(sizeof (token));
             new->val->begin = *input;
             read_word(NULL,input);
             new->val->length = (unsigned)(*input - new->val->begin);
@@ -102,6 +107,7 @@ token_list* tokenize_r(const char **input){
 token_list* tokenize(const char **input){
     token_list *ret = tokenize_r(input);
     (*input)++;
+    if(!ret) return NULL;
     if(!ret->next) return ret;
     token_list *end = NULL;
     return reverse(ret, &end);
