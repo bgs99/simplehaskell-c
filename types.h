@@ -9,7 +9,7 @@
 const char* alloc_name(const char* name);
 
 struct generics;
-struct token_list;
+struct syntax_tree;
 struct fun_list;
 
 struct Type{
@@ -132,7 +132,7 @@ bool equal_t(const Type *a, const Type *b, generics *context);
 
 Type *apply_t(const Type *a, const Type *b);
 
-Parsed parse_t(struct token_list **input);
+Parsed parse_t(struct syntax_tree **input);
 
 void fprint_t(const Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)

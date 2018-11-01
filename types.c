@@ -1,7 +1,7 @@
 #include "types.h"
 #include <malloc.h>
 #include "parsing/reader.h"
-#include "parsing/parser_old.h"
+#include "parsing/parser.h"
 #include "dictionary_t.h"
 #include "eval.h"
 
@@ -50,9 +50,9 @@ Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(token_list **input){
+Parsed _parse_arg(struct syntax_tree **input){
     Parsed res;
-    if((*input)->val->type == POPEN){
+    /*if((*input)->val->type == UNDEFINED){
         return parse_t(input);
     }
     res.ret = calloc(1, sizeof (Type));
@@ -60,27 +60,27 @@ Parsed _parse_arg(token_list **input){
     const char *name = get_name(input);
     res.ret->name = name;
     if(generic(*res.ret))
-        generics_add(res.ret, name);
+        generics_add(res.ret, name);*/
     return res;
 }
-Parsed _parse_ret(token_list **input){
+Parsed _parse_ret(struct syntax_tree **input){
     if(!*input)
         return (Parsed){NULL, NULL};
-    if((*input)->val->type == DELIMITER){
+    /*if((*input)->val->type == UNDEFINED){
         *input = (*input)->next;
         return parse_t(input);
     }
-    if((*input)->val->type == PCLOSE)
-        *input = (*input)->next;
+    if((*input)->val->type == UNDEFINED)
+        *input = (*input)->next;*/
     return (Parsed){NULL, NULL};
 }
 
-Parsed parse_t(token_list **input){
+Parsed parse_t(struct syntax_tree **input){
     Parsed res;
     res.ret = calloc(1, sizeof (Type));
     Parsed arg, ret;
-    switch((*input)->val->type){
-        case POPEN:
+    /*switch((*input)->val->type){
+        case UNDEFINED:
             *input = (*input)->next;
             arg = parse_t(input);
         break;
@@ -96,7 +96,7 @@ Parsed parse_t(token_list **input){
     } else {
         generics_merge(res.ret, ret.ret);
         res.ret->ret = ret.ret;
-    }
+    }*/
     return res;
 }
 

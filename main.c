@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include "malloc.h"
 #include "eval.h"
-#include "parsing/parser_old.h"
-#include "parsing_new/parser.h"
+#include "parsing/parser.h"
 
 int main(int argc, char **argv)
 {
@@ -21,7 +20,7 @@ int main(int argc, char **argv)
     fread(all, 1, len, in);
     fclose(in);
 
-    const dict *ad = parse_all(all);
+    /*const dict *ad = parse_all(all);
     printf("%s \n> ", all);
 
     char *ui = calloc(200, sizeof (char));
@@ -35,6 +34,6 @@ int main(int argc, char **argv)
         print_res(*eval_string(ad,ui));
         printf("\n\n> ");
     }
-
+    */
     return 0;
 }

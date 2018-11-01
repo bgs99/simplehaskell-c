@@ -1,7 +1,7 @@
 #include "eval.h"
 #include "stdio.h"
 #include "malloc.h"
-#include "parsing/parser_old.h"
+#include "parsing/parser.h"
 #include "stdio.h"
 
 const Type* generics_sub(const Type *t, generics *context){
@@ -94,7 +94,7 @@ object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *
 }
 
 Fun* eval_string(const dict *glob, const char *input){
-    token_list *tl = tokenize(&input);
+    /*struct syntax_tree *tl = tokenize(&input);
     parse_res pr = parse_app(NULL,glob, &tl);
     if(!pr.type->simple){
         fprintf(stderr, "Expression doesn't have primitive type");
@@ -104,7 +104,7 @@ Fun* eval_string(const dict *glob, const char *input){
     object *val = eval_expr(glob, pr.et->val->t, NULL);
     ret->type = pr.type;
     ret->val = val;
-    return ret;
+    return ret;*/
 }
 
 object* promise_eval(eval_promise ep){

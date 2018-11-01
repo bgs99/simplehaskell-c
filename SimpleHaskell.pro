@@ -9,19 +9,15 @@ SOURCES += \
     dictionary_t.c \
     eval.c \
     parsing/reader.c \
-    parsing/tokens.c \
-    parsing_new/parser.c \
-    parsing/parser_old.c
+    parsing/parser.c
 
 HEADERS += \
     types.h \
     dictionary_t.h \
     eval.h \
     parsing/reader.h \
-    parsing/tokens.h \
-    parsing_new/parser.h \
     list.h \
-    parsing/parser_old.h
+    parsing/parser.h
 
 DISTFILES += \
     README.md \

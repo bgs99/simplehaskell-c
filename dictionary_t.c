@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "eval.h"
-#include "parsing/parser_old.h"
+#include "parsing/parser.h"
 
 
 char s_equal(const char *a, const char *b){
@@ -42,7 +42,7 @@ const eval_tree* dict_get_eval(const dict *d, const char *name, const eval_promi
 }
 
 void dict_add(dict **d, const Fun *value){
-    list_add(dict, d, pattern_from_et(eval_make(value)));
+    //list_add(dict, d, pattern_from_et(eval_make(value)));
 }
 
 const Fun* dict_get(const dict *d, const char *name){
