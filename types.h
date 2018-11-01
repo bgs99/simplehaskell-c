@@ -3,7 +3,6 @@
 #pragma once
 #include <string.h>
 #include <stdbool.h>
-#define log(...) fprintf(stderr, __VA_ARGS__)
 #include <stdio.h>
 
 #define define_list(type, name) \

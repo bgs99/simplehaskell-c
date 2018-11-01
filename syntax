@@ -1,0 +1,16 @@
+<datatype> ::= "data" <word> "=" <constructor_list>
+<constructor_list> ::= <constructor> | <constructor> "|" <constructor_list>
+<constructor> ::= <Word> | <Word> <type_list>
+<type_list> ::= <type> | <type> <type_list>
+<type> ::= <simple_type> | <type> "->" <type>
+<simple_type> ::= <Word> | "(" <constructor> ")"
+
+<import> ::= "!"<word>
+
+<annotation> ::= <word> "::" <type>
+<definition> ::= <word> <arg_list> "=" <expression>
+<arg_list> ::= <arg> | <arg> <arg_list>
+<arg> ::= <word> | <Word> | "(" <complex_arg> ")"
+<complex_arg> ::= <Word> <arg_list>
+
+<expression> ::= <word> | <Wword> <arg_list>

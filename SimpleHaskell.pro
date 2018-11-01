@@ -10,7 +10,8 @@ SOURCES += \
     eval.c \
     parsing/parser.c \
     parsing/reader.c \
-    parsing/tokens.c
+    parsing/tokens.c \
+    parsing_new/parser.c
 
 HEADERS += \
     types.h \
@@ -18,7 +19,9 @@ HEADERS += \
     eval.h \
     parsing/parser.h \
     parsing/reader.h \
-    parsing/tokens.h
+    parsing/tokens.h \
+    parsing_new/parser.h
 
 DISTFILES += \
-    README.md
+    README.md \
+    syntax
