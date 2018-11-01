@@ -1,37 +1,7 @@
-#pragma once
-#include <stdbool.h>
-#include "../list.h"
+#include "parser_common.h"
 
-struct word{
-    const char *begin;
-    long length;
-};
-enum token_type{
-    DATATYPE,
-    CONSTRUCTOR_LIST,
-    CONSTRUCTOR,
-    NAME,
-    TYPE_LIST,
-    VALUE_TYPE,
-    FUN_TYPE,
-    COMPLEX_TYPE,
-    IMPORT,
-    ANNOTATION,
-    DEFINITION,
-    ARG_LIST,
-    VAR,
-    VAL,
-    COMPLEX_ARG,
-    EXPRESSION,
-    UNDEFINED
-};
+struct syntax_tree accept_import(const char **input);
 
-define_list(struct syntax_tree, tree_args)
+struct syntax_tree accept_datatype(const char **input);
 
-struct syntax_tree{
-    enum token_type type;
-    struct word val;
-    tree_args *args;
-};
-
-struct syntax_tree accept_fun_type(const char **input);
+struct syntax_tree accept_annotation(const char **input);

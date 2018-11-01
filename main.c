@@ -35,9 +35,10 @@ int main(int argc, char **argv)
         printf("\n\n> ");
     }
     */
-    const char *input = "Z -> (List (Nat -> Nat) Z) -> Z";
+    const char *input = "f :: Z -> F (List (Nat -> Nat) Z) Z";
 
-    struct syntax_tree res = accept_fun_type(&input);
-
+    struct syntax_tree res = accept_annotation(&input);
+    puts("");
+    free_tree_args(res.args);
     return 0;
 }

@@ -1,7 +1,11 @@
 #include "parser.h"
+#include "type_parser.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <malloc.h>
+
+struct syntax_tree undefined = {UNDEFINED, {NULL, 0}, NULL};
 
 void skip_ws(const char **input){
     while(**input <= ' ' && **input)
@@ -25,17 +29,13 @@ struct word read_word(const char **input){
     }
 
     skip_ws(input);
-    if(!**input){
-        fprintf(stderr, "Expected word after whitespaces in read_word");
-        return ret;
-    }
     ret.begin = *input;
     while((**input >= '0' && **input <= '9') ||
           (**input >= 'A' && **input <= 'Z') ||
           (**input >= 'a' && **input <= 'z') ||
           **input == '_')
         (*input)++;
-    ret.length = *input - ret.begin;
+    ret.length = (unsigned long)(*input - ret.begin);
     return ret;
 }
 bool accept(const char **input, char c){
@@ -57,7 +57,12 @@ bool accept_word(const char **input, const char *word){
     return true;
 }
 
-static struct syntax_tree undefined = {UNDEFINED, {NULL, 0}, NULL};
+void free_tree_args(tree_args *args){
+    if(!args)
+        return;
+    free_tree_args(args->next);
+    free(args);
+}
 
 struct syntax_tree accept_import(const char **input){
     struct syntax_tree ret = undefined;
@@ -72,85 +77,72 @@ struct syntax_tree accept_import(const char **input){
     return ret;
 }
 
-void free_tree_args(tree_args *args){
-    if(!args)
-        return;
-    free_tree_args(args->next);
-    free(args);
+struct syntax_tree accept_datatype(const char **input){
+    struct syntax_tree ret = undefined;
+    const char *start = *input;
+    if(!accept_word(input, "data"))
+        return ret;
+    struct word name = read_word(input);
+    char first = *name.begin;
+    if(!(first >= 'A' && first <= 'Z')){
+        fprintf(stderr, "Datatype name should start with a capital letter");
+        return ret;
+    }
+    if(!accept(input, '=')){
+        fprintf(stderr, "Expected '=' after datatype name");
+        return ret;
+    }
+    ret.val = name;
+    while(true){
+        struct word name = read_word(input);
+        if(!name.length)
+            break;
+        char first = *name.begin;
+        if(!(first >= 'A' && first <= 'Z')){
+            fprintf(stderr, "Constructor name should start with a capital letter");
+            return ret;
+        }
+        struct syntax_tree *constr = malloc(sizeof (struct syntax_tree));
+        constr->type = CONSTRUCTOR;
+        constr->args = NULL;
+        constr->val = name;
+        while(true){
+            struct syntax_tree carg = accept_fun_type(input);
+            if(carg.type == UNDEFINED)
+                break;
+            struct syntax_tree *carg_p = malloc(sizeof (struct syntax_tree));
+            *carg_p = carg;
+            list_add(tree_args, &constr->args, carg_p);
+        }
+        accept(input, '|');
+        list_add(tree_args, &ret.args, constr);
+    }
+    ret.type = ret.args ? DATATYPE : UNDEFINED;
+    return ret;
 }
 
-struct syntax_tree accept_type(const char **input);
-
-struct syntax_tree accept_value_type(const char **input){
+struct syntax_tree accept_annotation(const char **input){
+    const char *start = *input;
     struct syntax_tree ret = undefined;
     struct word name = read_word(input);
     if(!name.length)
         return ret;
-    char first = *name.begin;
-    if(!(first >= 'A' && first <= 'Z'))
+    char c = *name.begin;
+    if(!(c >='a' && c <= 'z')){
+        fprintf(stderr, "Function name should start with a small letter");
         return ret;
-    ret.type = VALUE_TYPE;
+    }
+    if(!accept_word(input, "::")){
+        *input  = start;
+        return ret;
+    }
     ret.val = name;
+    struct syntax_tree type = accept_fun_type(input);
+    if(type.type == UNDEFINED)
+        return ret;
+    struct syntax_tree *type_p = malloc(sizeof (struct syntax_tree));
+    *type_p = type;
+    list_add(tree_args, &ret.args, type_p);
+    ret.type = ANNOTATION;
     return ret;
 }
-
-struct syntax_tree accept_complex_type(const char **input){
-    struct syntax_tree ret = undefined;
-    struct syntax_tree name = accept_value_type(input);
-    if(name.type == UNDEFINED)
-        return ret;
-    ret.val = name.val;
-    ret.args = NULL;
-    while(true){
-        struct syntax_tree arg = accept_fun_type(input);
-        if(arg.type == UNDEFINED){
-            break;
-        }
-        struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
-        *arg_p = arg;
-        list_add(tree_args, &ret.args, arg_p);
-    }
-    ret.type = ret.args ? COMPLEX_TYPE : VALUE_TYPE;
-    return ret;
-}
-
-struct syntax_tree accept_fun_type(const char **input){
-    struct syntax_tree ret = undefined;
-    const char *start = *input;
-    struct syntax_tree head = undefined;
-    if(accept(input, '(')){
-        head = accept_fun_type(input);
-        if(!accept(input, ')')){
-            fprintf(stderr, "Expected ')' after '(' in type");
-            return ret;
-        }
-    } else {
-        head = accept_complex_type(input);
-    }
-
-    if(head.type == UNDEFINED){
-        return ret;
-    }
-
-
-    if(!accept_word(input, "->")){
-        return head;
-    }
-    struct syntax_tree tail = accept_fun_type(input);
-    if(tail.type == UNDEFINED){
-        free_tree_args(head.args);
-        *input = start;
-        return ret;
-    }
-    struct syntax_tree *head_p = malloc(sizeof (struct syntax_tree)),
-            *tail_p = malloc(sizeof (struct syntax_tree));
-    *head_p = head;
-    *tail_p = tail;
-    list_add(tree_args, &ret.args, head_p);
-    list_add(tree_args, &ret.args, tail_p);
-    ret.type = FUN_TYPE;
-    return ret;
-}
-
-
-
