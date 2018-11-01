@@ -1,7 +1,7 @@
 #include "eval.h"
 #include "stdio.h"
 #include "malloc.h"
-#include "parsing/parser.h"
+#include "parsing/parser_old.h"
 #include "stdio.h"
 
 const Type* generics_sub(const Type *t, generics *context){
@@ -31,7 +31,7 @@ bool print_res(const Fun f){
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg){
     if(!tree){
-        log("Evaluation tree not provided");
+        fprintf(stderr, "Evaluation tree not provided");
         return;
     }
     tree->argn++;
@@ -65,11 +65,11 @@ const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const 
 
 object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
     if(!input){
-        log("Nothing to evaluate");
+        fprintf(stderr, "Nothing to evaluate");
         return NULL;
     }
     if(!input->f){
-        log("Evaluation tree is empty");
+        fprintf(stderr, "Evaluation tree is empty");
         return NULL;
     }
     const Fun *f = input->f;
@@ -97,7 +97,7 @@ Fun* eval_string(const dict *glob, const char *input){
     token_list *tl = tokenize(&input);
     parse_res pr = parse_app(NULL,glob, &tl);
     if(!pr.type->simple){
-        log("Expression doesn't have primitive type");
+        fprintf(stderr, "Expression doesn't have primitive type");
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));

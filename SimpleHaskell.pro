@@ -8,19 +8,20 @@ SOURCES += \
     types.c \
     dictionary_t.c \
     eval.c \
-    parsing/parser.c \
     parsing/reader.c \
     parsing/tokens.c \
-    parsing_new/parser.c
+    parsing_new/parser.c \
+    parsing/parser_old.c
 
 HEADERS += \
     types.h \
     dictionary_t.h \
     eval.h \
-    parsing/parser.h \
     parsing/reader.h \
     parsing/tokens.h \
-    parsing_new/parser.h
+    parsing_new/parser.h \
+    list.h \
+    parsing/parser_old.h
 
 DISTFILES += \
     README.md \

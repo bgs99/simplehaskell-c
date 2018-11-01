@@ -4,20 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "list.h"
 
-#define define_list(type, name) \
-    typedef struct name{ \
-        type *val; \
-        struct name *next;\
-    } name;
-#define list_create(name, val) (name) {val, NULL}
-#define list_add(name, dict, value) \
-    { \
-        name *ret = malloc(sizeof(name)); \
-        ret->val = value; \
-        ret->next = *dict; \
-        *dict = ret; \
-    }
 const char* alloc_name(const char* name);
 
 struct generics;

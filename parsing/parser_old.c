@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "parser_old.h"
 #include "reader.h"
 #include "eval.h"
 #include <malloc.h>
@@ -58,7 +58,7 @@ const Fun* get_fun(const dict *glob, const dict *local, const char *name){
     if(!ret)
         ret = dict_get(glob, name);
     if(!ret){
-        log("Function \"%s\" is not found in global dictionary and arguments", name);
+        fprintf(stderr, "Function \"%s\" is not found in global dictionary and arguments", name);
         return NULL;
     }
     return ret;
@@ -78,7 +78,7 @@ parse_res parse_tan(token_list **input){
     const char *name = get_name(input);
 
     if((*input)->val->type != OF_TYPE){
-        log("Expected \':\' in type annotation of %s", name);
+        fprintf(stderr, "Expected \':\' in type annotation of %s", name);
         return (parse_res){NULL,NULL};
     }
 
@@ -95,7 +95,7 @@ void parse_left(const Fun *f, dict **local, token_list **input){
     if(!*input) return;
     const char *name = get_name(input);
     if(strcmp(name, f->name) != 0){
-        log("Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
+        fprintf(stderr, "Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
     }
     Type *i = f->type;//--
     unsigned int lid = 0;
@@ -126,9 +126,9 @@ parse_res parse_app(const dict *local, const dict *glob, token_list **input){
 
         f = apply_t(f, pr.type);
 #ifdef LOGALL
-        log("&&logging context\n");
+        fprintf(stderr, "&&logging context\n");
         log_context(f->gen);
-        log("\n");
+        fprintf(stderr, "\n");
 #endif
         eval_add_arg(ret, pr.et->val->t);
     }
@@ -171,13 +171,13 @@ parse_res parse_right(const Type *f, const dict *local, const dict *glob, token_
     if(!*input) return (parse_res){NULL,NULL};
     parse_res tr = parse_app(local, glob, input);
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
-        log("Return types do not match: \n %s has type ", f->name);
+        fprintf(stderr, "Return types do not match: \n %s has type ", f->name);
         log_t(last_type(f));
-        log("\n%s has type ", tr.et->val->t->f->name);
+        fprintf(stderr, "\n%s has type ", tr.et->val->t->f->name);
         log_t(last_type(tr.type));
-        log(" in a context: \n");
+        fprintf(stderr, " in a context: \n");
         log_context(tr.type->gen);
-        log("\n");
+        fprintf(stderr, "\n");
         return (parse_res){NULL, NULL};
     }
     return tr;
@@ -259,9 +259,9 @@ parse_res parse_fun(const dict *glob, const char **in, token_list **line){
     parse_res a = parse_tan(&input);
     const char *name = a.et->val->t->f->name;
 #ifdef LOGALL
-    log("&&Parsing function %s of type ", name);
+    fprintf(stderr, "&&Parsing function %s of type ", name);
     log_t(a.et->val->t->f->type);
-    log(" &&\n");
+    fprintf(stderr, " &&\n");
 #endif
     parse_res c = {NULL, NULL};
     c.type = a.et->val->t->f->type;
@@ -326,7 +326,7 @@ void parse_text(const char *input, dict **glob){
             tl = tl->next;
             const char *name = get_name(&tl);
             if(tl->val->type != EQUALS){
-                log("Expected '=' after datatype name");
+                fprintf(stderr, "Expected '=' after datatype name");
                 return;
             }
             tl = tl->next;

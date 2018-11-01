@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "eval.h"
-#include "parsing/parser.h"
+#include "parsing/parser_old.h"
 
 
 char s_equal(const char *a, const char *b){
@@ -92,9 +92,9 @@ bool generics_bind(generics *g, const char *name, const Type *t){
             if(i->val) return equal_t(i->val,t,i->val->gen);
             i->val = t;
 #ifdef LOGALL
-            log("&&Assigned type ");
+            fprintf(stderr, "&&Assigned type ");
             log_t(t);
-            log(" to type var %s\n", name);
+            fprintf(stderr, " to type var %s\n", name);
 #endif
             return true;
         }

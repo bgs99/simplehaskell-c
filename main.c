@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "malloc.h"
 #include "eval.h"
-#include "parsing/parser.h"
+#include "parsing/parser_old.h"
+#include "parsing_new/parser.h"
 
 int main(int argc, char **argv)
 {

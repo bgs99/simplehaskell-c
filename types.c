@@ -1,7 +1,7 @@
 #include "types.h"
 #include <malloc.h>
 #include "parsing/reader.h"
-#include "parsing/parser.h"
+#include "parsing/parser_old.h"
 #include "dictionary_t.h"
 #include "eval.h"
 
@@ -30,18 +30,18 @@ bool equal_t(const Type *a, const Type *b, generics *context){
 
 Type* apply_t(const Type *a, const Type *b){
     if(a->simple){
-        log("Trying to apply function of type ");
+        fprintf(stderr, "Trying to apply function of type ");
         log_t(b);
-        log("to a primitive value of type ");
+        fprintf(stderr, "to a primitive value of type ");
         log_t(a);
         return NULL;
     }
     if(!equal_t(a->arg, b, a->gen)){
-        log("Function of type ");
+        fprintf(stderr, "Function of type ");
         log_t(b);
-        log(" cannot be assigned to a function of type ");
+        fprintf(stderr, " cannot be assigned to a function of type ");
         log_t(a);
-        log(" in a context: ");
+        fprintf(stderr, " in a context: ");
         log_context(a->gen);
         return NULL;
     }
