@@ -8,14 +8,12 @@ SOURCES += \
     types.c \
     dictionary_t.c \
     eval.c \
-    parsing/reader.c \
     parsing/parser.c
 
 HEADERS += \
     types.h \
     dictionary_t.h \
     eval.h \
-    parsing/reader.h \
     list.h \
     parsing/parser.h
 

@@ -33,3 +33,5 @@ struct syntax_tree{
     struct word val;
     tree_args *args;
 };
+
+struct syntax_tree accept_fun_type(const char **input);

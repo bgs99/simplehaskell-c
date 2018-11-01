@@ -96,65 +96,61 @@ struct syntax_tree accept_value_type(const char **input){
 
 struct syntax_tree accept_complex_type(const char **input){
     struct syntax_tree ret = undefined;
-    if(!accept(input, '('))
-        return ret;
     struct syntax_tree name = accept_value_type(input);
     if(name.type == UNDEFINED)
         return ret;
     ret.val = name.val;
     ret.args = NULL;
-    while(!accept(input, ')')){
-        struct syntax_tree arg = accept_type(input);
+    while(true){
+        struct syntax_tree arg = accept_fun_type(input);
         if(arg.type == UNDEFINED){
-            free_tree_args(ret.args);
-            return ret;
+            break;
         }
-        list_add(tree_args, &ret.args, &arg);
+        struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
+        *arg_p = arg;
+        list_add(tree_args, &ret.args, arg_p);
     }
-    ret.type =  COMPLEX_TYPE;
-    return ret;
-}
-
-struct syntax_tree accept_simple_type(const char **input){
-    struct syntax_tree ret = accept_value_type(input);
-    if(ret.type == UNDEFINED)
-        ret = accept_complex_type(input);
+    ret.type = ret.args ? COMPLEX_TYPE : VALUE_TYPE;
     return ret;
 }
 
 struct syntax_tree accept_fun_type(const char **input){
     struct syntax_tree ret = undefined;
     const char *start = *input;
-    struct syntax_tree head = accept(input, '(') ? accept_fun_type(input) : accept_simple_type(input);
+    struct syntax_tree head = undefined;
+    if(accept(input, '(')){
+        head = accept_fun_type(input);
+        if(!accept(input, ')')){
+            fprintf(stderr, "Expected ')' after '(' in type");
+            return ret;
+        }
+    } else {
+        head = accept_complex_type(input);
+    }
 
     if(head.type == UNDEFINED){
         return ret;
     }
 
-    accept(input, ')');
 
     if(!accept_word(input, "->")){
-        free_tree_args(head.args);
-        *input = start;
-        return ret;
+        return head;
     }
-    struct syntax_tree tail = accept_type(input);
+    struct syntax_tree tail = accept_fun_type(input);
     if(tail.type == UNDEFINED){
         free_tree_args(head.args);
         *input = start;
         return ret;
     }
-    ret.args = malloc(sizeof (tree_args));
-    *ret.args = list_create(tree_args, &head);
-    list_add(tree_args, &ret.args, &tail);
+    struct syntax_tree *head_p = malloc(sizeof (struct syntax_tree)),
+            *tail_p = malloc(sizeof (struct syntax_tree));
+    *head_p = head;
+    *tail_p = tail;
+    list_add(tree_args, &ret.args, head_p);
+    list_add(tree_args, &ret.args, tail_p);
+    ret.type = FUN_TYPE;
     return ret;
 }
 
-struct syntax_tree accept_type(const char **input){
-    struct syntax_tree ret = accept_fun_type(input);
-    if(ret.type == UNDEFINED)
-        ret =  accept_simple_type(input);
-    return ret;
-}
 
 

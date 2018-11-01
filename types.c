@@ -1,6 +1,5 @@
 #include "types.h"
 #include <malloc.h>
-#include "parsing/reader.h"
 #include "parsing/parser.h"
 #include "dictionary_t.h"
 #include "eval.h"

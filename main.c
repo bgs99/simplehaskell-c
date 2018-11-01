@@ -35,5 +35,9 @@ int main(int argc, char **argv)
         printf("\n\n> ");
     }
     */
+    const char *input = "Z -> (List (Nat -> Nat) Z) -> Z";
+
+    struct syntax_tree res = accept_fun_type(&input);
+
     return 0;
 }

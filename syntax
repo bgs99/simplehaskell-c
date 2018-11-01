@@ -4,9 +4,9 @@
 <constructor_list> ::= <constructor> | <constructor> "|" <constructor_list>
 <constructor> ::= <Word> | <Word> <type_list>
 <type_list> ::= <type> | <type> <type_list>
-<type> ::= <simple_type> | <fun_type>
+<type> ::= <simple_type> | <fun_type> | "(" <type ")"
 <fun_type> ::= <simple_type> "->" <type> | "(" <fun_type> ")" -> <type>
-<simple_type> ::= <Word> | "(" <constructor> ")"
+<simple_type> ::= <Word> | <constructor>
 
 <import> ::= "!"<word>
 
