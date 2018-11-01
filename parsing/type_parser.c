@@ -12,8 +12,6 @@ struct syntax_tree accept_value_type(const char **input){
     if(!name.length)
         return ret;
     char first = *name.begin;
-    if(!(first >= 'A' && first <= 'Z'))
-        return ret;
     ret.type = VALUE_TYPE;
     ret.val = name;
     return ret;
@@ -34,8 +32,16 @@ struct syntax_tree accept_complex_type(const char **input){
         *arg_p = arg;
         list_add(tree_args, &ret.args, arg_p);
     }
-    ret.type = ret.args ? COMPLEX_TYPE : VALUE_TYPE;
-    return ret;
+    if(ret.args){
+        char first = *name.val.begin;
+        if(!(first >= 'A' && first <= 'Z')){
+            free_tree_args(ret.args);
+            return ret;
+        }
+        ret.type = COMPLEX_TYPE;
+        return ret;
+    }
+    return name;
 }
 
 void print_type(const struct syntax_tree tree){

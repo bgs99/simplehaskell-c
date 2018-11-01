@@ -9,6 +9,8 @@ struct word{
 };
 enum token_type{
     DATATYPE,
+    FUNCTION,
+    PROGRAM,
     CONSTRUCTOR,
     VALUE_TYPE,
     FUN_TYPE,

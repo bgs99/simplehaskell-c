@@ -2,6 +2,7 @@
 #include "malloc.h"
 #include "eval.h"
 #include "parsing/parser.h"
+#include "parsing/pattern_parser.h"
 
 int main(int argc, char **argv)
 {
@@ -35,9 +36,8 @@ int main(int argc, char **argv)
         printf("\n\n> ");
     }
     */
-    const char *input = "f :: Z -> F (List (Nat -> Nat) Z) Z";
-
-    struct syntax_tree res = accept_annotation(&input);
+    //const char *input = "length (List _ tail) = S (length tail)";
+    struct syntax_tree res = accept_program(&all);
     puts("");
     free_tree_args(res.args);
     return 0;

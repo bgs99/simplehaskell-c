@@ -1,14 +1,17 @@
 #include "parser.h"
 #include "type_parser.h"
+#include "expression_parser.h"
+#include "pattern_parser.h"
 
 #include <stddef.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 
 struct syntax_tree undefined = {UNDEFINED, {NULL, 0}, NULL};
 
 void skip_ws(const char **input){
-    while(**input <= ' ' && **input)
+    while(**input != '\n' && **input <= ' ' && **input)
         (*input)++;
 }
 /**
@@ -73,13 +76,13 @@ struct syntax_tree accept_import(const char **input){
         fprintf(stderr, "Expected module name after import directive \'!\'");
         return ret;
     }
+    ret.type = IMPORT;
     ret.val = module;
     return ret;
 }
 
 struct syntax_tree accept_datatype(const char **input){
     struct syntax_tree ret = undefined;
-    const char *start = *input;
     if(!accept_word(input, "data"))
         return ret;
     struct word name = read_word(input);
@@ -144,5 +147,101 @@ struct syntax_tree accept_annotation(const char **input){
     *type_p = type;
     list_add(tree_args, &ret.args, type_p);
     ret.type = ANNOTATION;
+    return ret;
+}
+
+struct syntax_tree accept_definition(const char **input){
+    struct syntax_tree ret = undefined;
+    const char *start = *input;
+    struct word name = read_word(input);
+    if(!name.length)
+        return ret;
+    char first = *name.begin;
+    if(!(first >= 'a' && first <= 'z')){
+        *input = start;
+        return ret;
+    }
+    ret.val = name;
+    while (true) {
+        struct syntax_tree arg = accept_pattern(input);
+        if(arg.type == UNDEFINED)
+            break;
+        struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
+        *arg_p = arg;
+        list_add(tree_args, &ret.args, arg_p);
+    }
+    if(!accept(input, '=')){
+        *input = start;
+        free_tree_args(ret.args);
+        return ret;
+    }
+    struct syntax_tree *exp_p = malloc(sizeof (struct syntax_tree));
+    *exp_p = accept_expression(input);
+    if(exp_p->type == UNDEFINED){
+        *input = start;
+        free_tree_args(ret.args);
+        free(exp_p);
+        return ret;
+    }
+    list_add(tree_args, &ret.args, exp_p);
+    ret.type = DEFINITION;
+    return ret;
+}
+
+void skip_el(const char **input){
+    while (**input <= ' ' && **input) {
+        (*input)++;
+    }
+}
+
+struct syntax_tree accept_function(const char **input){
+    skip_el(input);
+    struct syntax_tree *ann = malloc(sizeof (struct syntax_tree));
+    *ann = accept_annotation(input);
+    if(ann->type == UNDEFINED)
+        return *ann;
+    struct syntax_tree ret = undefined;
+    ret.val = ann->val;
+    skip_el(input);
+    while(true){
+        const char *line = *input;
+
+        struct syntax_tree pat = accept_definition(input);
+        if(pat.val.length != ret.val.length){
+            *input = line;
+            break;
+        }
+        if(strncmp(pat.val.begin, ret.val.begin, ret.val.length) != 0){
+            *input = line;
+            break;
+        }
+        struct syntax_tree *pat_p = malloc(sizeof (struct syntax_tree));
+        *pat_p = pat;
+        list_add(tree_args, &ret.args, pat_p);
+        skip_el(input);
+    }
+    list_add(tree_args, &ret.args, ann);
+    ret.type =FUNCTION;
+    return ret;
+}
+
+struct syntax_tree accept_program(const char **input){
+    struct syntax_tree ret = undefined;
+    ret.type = PROGRAM;
+    while (**input) {
+        skip_el(input);
+        struct syntax_tree *block = malloc(sizeof (struct syntax_tree));
+        *block = accept_import(input);
+        if(block->type == UNDEFINED)
+            *block = accept_datatype(input);
+        if(block->type == UNDEFINED)
+            *block = accept_function(input);
+        if(block->type == UNDEFINED){
+            fprintf(stderr, "Cannot parse block");
+            free(block);
+            break;
+        }
+        list_add(tree_args, &ret.args, block);
+    }
     return ret;
 }
