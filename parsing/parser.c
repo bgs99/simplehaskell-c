@@ -69,7 +69,7 @@ void free_tree_args(tree_args *args){
 
 struct syntax_tree accept_import(const char **input){
     struct syntax_tree ret = undefined;
-    if(!accept(input, '!'))
+    if(!accept_word(input, "import "))
         return ret;
     struct word module = read_word(input);
     if(!module.length){
@@ -217,7 +217,7 @@ struct syntax_tree accept_function(const char **input){
         }
         struct syntax_tree *pat_p = malloc(sizeof (struct syntax_tree));
         *pat_p = pat;
-        list_add(tree_args, &ret.args, pat_p);
+        list_add_last(tree_args, ret.args, pat_p);
         skip_el(input);
     }
     list_add(tree_args, &ret.args, ann);

@@ -1,6 +1,7 @@
 #include "process.h"
 #include "../parsing/parser.h"
 #include "../eval.h"
+#include "../types.h"
 #include <malloc.h>
 #define PATH "/home/bgs99c/sandbox/shs/"
 
@@ -62,7 +63,6 @@ void process_left(const Fun *f, dict **local, struct syntax_tree input){
         *af->lid->val = lid++;
         dict_add(local, af);
     }
-    return;
 }
 
 struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tree input);
@@ -100,6 +100,7 @@ struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tr
         return (struct fun_def){NULL,NULL};
     if(input.args){
         struct fun_def ret = process_app(local, glob, input);
+        reset_generics(ret.type);
         return ret;
     }
     const char *name = get_name(input);
@@ -122,6 +123,7 @@ struct fun_def process_right(const Type *f, const dict *local, const dict *glob,
         fprintf(stderr, "\n");
         return (struct fun_def){NULL, NULL};
     }
+    reset_generics(tr.type);
     return tr;
 }
 

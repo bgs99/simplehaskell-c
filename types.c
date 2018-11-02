@@ -179,3 +179,9 @@ bool object_equal(object a, object b){
     }
     return true;
 }
+
+void reset_generics(Type *t){
+    for(generics *i = t->gen; i; i = i->next){
+        i->val = NULL;
+    }
+}

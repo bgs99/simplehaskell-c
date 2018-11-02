@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "parsing/expression_parser.h"
 #include "processing/process.h"
+#include "types.h"
 
 const Type* generics_sub(const Type *t, generics *context){
     if(!generic(*t)) return t;
@@ -94,9 +95,12 @@ object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *
     return res;
 }
 
+void reset_generics(Type *t);
+
 Fun* eval_string(const dict *glob, const char *input){
     struct syntax_tree tl = accept_expression(&input);
     struct fun_def pr = process_app(NULL,glob, tl);
+    reset_generics(pr.type);
     if(!pr.type->simple){
         fprintf(stderr, "Expression doesn't have primitive type");
         return NULL;
