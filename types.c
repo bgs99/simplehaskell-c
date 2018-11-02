@@ -26,7 +26,7 @@ bool equal_t(const Type *a, const Type *b, generics *context){
     if(!equal_t(a->arg, b->arg, context)) return false;//if args are different
     return equal_t(a->ret, b->ret, context);//comparing return types
 }
-Parsed parse_t(struct syntax_tree *input);
+Parsed parse_t(struct syntax_tree input);
 Type* apply_t(const Type *a, const Type *b){
     if(a->simple){
         fprintf(stderr, "Trying to apply function of type ");
@@ -49,53 +49,42 @@ Type* apply_t(const Type *a, const Type *b){
 }
 
 
-Parsed _parse_arg(struct syntax_tree *input){
+Parsed _parse_arg(struct syntax_tree input){
     Parsed res;
-    if(input->type == UNDEFINED){
+    if(input.type == FUN_TYPE){
         return parse_t(input);
     }
     res.ret = calloc(1, sizeof (Type));
     res.ret->simple = true;
-    const char *name = get_name(*input);
+    const char *name = get_name(input);
     res.ret->name = name;
     if(generic(*res.ret))
         generics_add(res.ret, name);
     return res;
 }
-Parsed _parse_ret(struct syntax_tree *input){
-    if(!input)
-        return (Parsed){NULL, NULL};
-    /*if((*input)->val->type == UNDEFINED){
-        *input = (*input)->next;
-        return parse_t(input);
-    }
-    if((*input)->val->type == UNDEFINED)
-        *input = (*input)->next;*/
-    return (Parsed){NULL, NULL};
-}
 
-Parsed parse_t(struct syntax_tree *input){
+Parsed parse_t(struct syntax_tree input){
+    if(input.type == VALUE_TYPE)
+        return _parse_arg(input);
     Parsed res;
     res.ret = calloc(1, sizeof (Type));
     Parsed arg, ret;
-    /*switch((*input)->val->type){
-        case UNDEFINED:
-            *input = (*input)->next;
-            arg = parse_t(input);
-        break;
-        default:
-            arg = _parse_arg(input);
-    }
+
+    arg = _parse_arg(*input.args->val);
+
     res.ret->arg = arg.ret;
     res.ret->simple = false;
+
     generics_merge(res.ret, arg.ret);
-    ret = _parse_ret(input);
+
+    ret = parse_t(*input.args->next->val);
+
     if(!ret.ret){
         res.ret = arg.ret;
     } else {
         generics_merge(res.ret, ret.ret);
         res.ret->ret = ret.ret;
-    }*/
+    }
     return res;
 }
 

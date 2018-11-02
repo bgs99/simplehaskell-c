@@ -2,6 +2,12 @@
 #include "../parsing/parser.h"
 #include "../eval.h"
 #include <malloc.h>
+#define PATH "/home/bgs99c/sandbox/shs/"
+
+bool is_const(const char *input){
+    char c = *input;
+    return (c >= '0' && c <='9') || (c >= 'A' && c <= 'Z');
+}
 
 const Fun* get_fun(const dict *glob, const dict *local, const char *name){
     char c = *name;
@@ -29,7 +35,7 @@ pattern_list* pattern_from_et(eval_tree *et){
 
 Parsed parse_t(struct syntax_tree input);
 
-struct fun_def parse_tan(struct syntax_tree input){
+struct fun_def process_tan(struct syntax_tree input){
     if(input.type != ANNOTATION) return (struct fun_def){NULL,NULL};
     const char *name = get_name(input);
     Fun *res = calloc(1, sizeof (Fun));
@@ -39,16 +45,13 @@ struct fun_def parse_tan(struct syntax_tree input){
     eval_tree *et = eval_make(res);
     return (struct fun_def){NULL, pattern_from_et(et)};
 }
-void parse_left(const Fun *f, dict **local, struct syntax_tree input){
-    if(input.type == DEFINITION) return;
+void process_left(const Fun *f, dict **local, struct syntax_tree input){
+    if(input.type != DEFINITION) return;
     const char *name = get_name(input);
-    if(strcmp(name, f->name) != 0){
-        fprintf(stderr, "Annotation's name \"%s\" and definition name \"%s\" do not match", name, f->name);
-    }
     Type *i = f->type;
     unsigned int lid = 0;
     struct tree_args *cur;
-    for(cur = input.args; cur->val->type != EXPRESSION; cur = cur->next){
+    for(cur = input.args->next; cur; cur = cur->next){
         const char *id = get_name(*cur->val);
         Fun *af = calloc(1, sizeof (Fun));
         af->name = id;
@@ -60,6 +63,7 @@ void parse_left(const Fun *f, dict **local, struct syntax_tree input){
         *af->lid->val = lid++;
         dict_add(local, af);
     }
+    return;
 }
 
 struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tree input);
@@ -68,10 +72,10 @@ struct fun_def process_f_f(const dict *local, const dict *glob, struct syntax_tr
 struct fun_def process_app(const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type == UNDEFINED) return (struct fun_def){NULL,NULL};
     struct fun_def pr = process_f_f(local, glob, input);
-    const Type *f = pr.type;
+    Type *f = pr.type;
     eval_tree *ret = pr.et->val->t;
-    while((pr = process_arg(local, glob, input)).type){
-
+    for(tree_args *i = input.args; i; i = i->next){
+        pr = process_arg(local, glob, input);
         f = apply_t(f, pr.type);
 #ifdef LOGALL
         log("&&logging context\n");
@@ -105,7 +109,7 @@ struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tr
 }
 
 
-struct fun_def parse_right(const Type *f, const dict *local, const dict *glob, struct syntax_tree input){
+struct fun_def process_right(const Type *f, const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
     struct fun_def tr = process_app(local, glob, input);
@@ -120,4 +124,148 @@ struct fun_def parse_right(const Type *f, const dict *local, const dict *glob, s
         return (struct fun_def){NULL, NULL};
     }
     return tr;
+}
+
+
+void pattern_add(struct fun_def *pr, struct fun_def np){
+    if(!pr->et){
+        pr->et = np.et;
+        return;
+    }
+
+    pattern_list *i;
+    for(i = pr->et; i->next; i = i->next);
+
+    i->next = np.et;
+}
+
+void eval_tree_wrap(struct fun_def *pr, const Fun *f, unsigned int argn){
+    eval_tree *et = eval_make(f);
+    eval_add_arg(et, pr->et->val->t);
+    pr->et->val->t = et;
+    pr->et->val->t->argn = argn;
+}
+
+void pattern_add_matches(pattern_list *p, const dict *local){
+    p->val->match = calloc(p->val->t->argn, sizeof (Fun));
+    unsigned int j = p->val->t->argn-1;
+    for(const dict *i = local->next; i; i = i->next, j--){
+        if(i->val->val->t->f->name){
+            if(is_const(i->val->val->t->f->name))
+                p->val->match[j] = i->val->val->t->f;
+        }
+    }
+}
+Type* process_type(struct syntax_tree input){
+    Type *ret = calloc(1, sizeof(Type));
+    ret->simple = true;
+    ret->name = get_name(input);
+    return ret;
+}
+
+void process_constructor(Type *name, struct syntax_tree input, dict **glob){
+    if(input.type != CONSTRUCTOR)
+        return;
+    const char *cname = get_name(input);
+    Fun *ret = calloc(1, sizeof(Fun));
+    ret->name = cname;
+    object *p = malloc(sizeof (object));
+    *p = (object){0, cname, NULL};
+    ret->val = p;
+    ret->type = name;
+    Type *last = NULL, *first = NULL;
+
+    for(tree_args *i = input.args; i; i = i->next){
+        Type *arg = process_type(*i->val);
+        if(!last){
+            last = calloc(1, sizeof (Type));
+            last->simple = false;
+            last->arg = arg;
+            first = last;
+            continue;
+        }
+        last->ret = calloc(1, sizeof (Type));
+        last->ret->simple = false;
+        last->ret->arg = arg;
+    }
+    if(first){
+        ret->type = first;
+        ret->type->simple = false;
+        last->ret = name;
+    }
+    dict_add(glob, ret);
+}
+
+void process_datatype(Type *name, struct syntax_tree input, dict **glob){
+    if(input.type != DATATYPE)
+           return;
+    for(tree_args *i = input.args; i; i = i->next){
+        process_constructor(name, *i->val, glob);
+    }
+}
+struct fun_def process_fun(const dict *glob, struct syntax_tree block){
+    struct fun_def a = process_tan(*block.args->val);
+#ifdef LOGALL
+    log("&&Parsing function %s of type ", name);
+    log_t(a.et->val->t->f->type);
+    log(" &&\n");
+#endif
+    struct fun_def c = {NULL, NULL};
+    c.type = a.et->val->t->f->type;
+    for(tree_args *i = block.args->next; i; i = i->next){
+
+        dict **l = calloc(1, sizeof (dict *));
+
+        process_left(a.et->val->t->f, l, *i->val);
+        unsigned int argn = (*l) ? *(**l).val->val->t->f->lid->val + 1 : 0;
+        dict_add(l, a.et->val->t->f);
+
+        struct fun_def t = process_right(a.et->val->t->f->type, *l, glob, *i->val->args->val);
+
+        eval_tree_wrap(&t, a.et->val->t->f, argn);
+        pattern_add_matches(t.et,*l);
+        pattern_add(&c, t);
+    }
+    return c;
+}
+
+void parse_text(const char *input, dict **glob){
+    struct syntax_tree tl = undefined;
+    while((tl = accept_block(&input)).type != UNDEFINED){
+        if(tl.type==IMPORT){
+            char *path = calloc(tl.val.length + 26, sizeof (char));
+            const char *fn = get_name(tl);
+            strcat(path, PATH);
+            strcat(path, fn);
+            strcat(path, ".shs");
+            FILE *in = fopen(path, "r");
+            if(!in){
+                printf("Cannot open file %s, halting", fn);
+                return;
+            }
+            fseek(in, 0, SEEK_END);
+            unsigned long len = (unsigned long)ftell(in);
+            char *all = calloc(len, sizeof (char));
+            rewind(in);
+            fread(all, 1, len, in);
+            fclose(in);
+
+            parse_text(all, glob);
+            continue;
+        }
+        if(tl.type == DATATYPE){
+            const char *name = get_name(tl);
+            Type *t = type_make(name);
+            process_datatype(t, tl, glob);
+            continue;
+        }
+        struct fun_def f = process_fun(*glob, tl);
+        list_add(dict, glob, f.et);
+    }
+}
+
+dict* parse_all(const char *input){
+    dict **glob = calloc(1, sizeof (dict *));
+    parse_text(input, glob);
+    return *glob;
 }

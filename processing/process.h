@@ -3,7 +3,7 @@
 #include "../dictionary_t.h"
 
 struct fun_def{
-  const Type *type;
+  Type *type;
   pattern_list *et;
 };
 

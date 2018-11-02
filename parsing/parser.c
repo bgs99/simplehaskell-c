@@ -225,25 +225,20 @@ struct syntax_tree accept_function(const char **input){
     return ret;
 }
 
-struct syntax_tree accept_program(const char **input){
-    struct syntax_tree ret = undefined;
-    ret.type = PROGRAM;
-    while (**input) {
-        skip_el(input);
-        struct syntax_tree *block = malloc(sizeof (struct syntax_tree));
-        *block = accept_import(input);
-        if(block->type == UNDEFINED)
-            *block = accept_datatype(input);
-        if(block->type == UNDEFINED)
-            *block = accept_function(input);
-        if(block->type == UNDEFINED){
-            fprintf(stderr, "Cannot parse block");
-            free(block);
-            break;
-        }
-        list_add(tree_args, &ret.args, block);
+struct syntax_tree accept_block(const char **input){
+    skip_el(input);
+    struct syntax_tree *block = malloc(sizeof (struct syntax_tree));
+    *block = accept_import(input);
+    if(block->type == UNDEFINED)
+        *block = accept_datatype(input);
+    if(block->type == UNDEFINED)
+        *block = accept_function(input);
+    if(block->type == UNDEFINED){
+        fprintf(stderr, "Cannot parse block");
+        free(block);
+        return undefined;
     }
-    return ret;
+    return *block;
 }
 
 char *get_name(struct syntax_tree tree){

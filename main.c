@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     fread(all, 1, len, in);
     fclose(in);
 
-    /*const dict *ad = parse_all(all);
+    const dict *ad = parse_all(all);
     printf("%s \n> ", all);
 
     char *ui = calloc(200, sizeof (char));
@@ -35,13 +35,6 @@ int main(int argc, char **argv)
         print_res(*eval_string(ad,ui));
         printf("\n\n> ");
     }
-    */
-    //const char *input = "length (List _ tail) = S (length tail)";
-    const char *allf = (const char *)all;
 
-    struct syntax_tree res = accept_program(&allf);
-
-    puts("");
-    free_tree_args(res.args);
     return 0;
 }

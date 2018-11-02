@@ -3,6 +3,7 @@
 #include <string.h>
 #include "eval.h"
 #include "parsing/parser.h"
+#include "processing/process.h"
 
 
 char s_equal(const char *a, const char *b){

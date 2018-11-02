@@ -11,7 +11,6 @@ struct syntax_tree accept_value_type(const char **input){
     struct word name = read_word(input);
     if(!name.length)
         return ret;
-    char first = *name.begin;
     ret.type = VALUE_TYPE;
     ret.val = name;
     return ret;
@@ -107,8 +106,8 @@ struct syntax_tree accept_fun_type(const char **input){
             *tail_p = malloc(sizeof (struct syntax_tree));
     *head_p = head;
     *tail_p = tail;
-    list_add(tree_args, &ret.args, head_p);
     list_add(tree_args, &ret.args, tail_p);
+    list_add(tree_args, &ret.args, head_p);
     ret.type = FUN_TYPE;
     return ret;
 }

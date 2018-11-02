@@ -26,7 +26,7 @@ struct syntax_tree accept_expression(const char **input){
             break;
         struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
         *arg_p = arg;
-        list_add(tree_args, &ret.args, arg_p);
+        list_add_last(tree_args, ret.args, arg_p);
     }
     ret.type = EXPRESSION;
     return ret;
