@@ -245,3 +245,9 @@ struct syntax_tree accept_program(const char **input){
     }
     return ret;
 }
+
+char *get_name(struct syntax_tree tree){
+    char *ret = calloc(tree.val.length+1, 1);
+    strncpy(ret, tree.val.begin, tree.val.length);
+    return ret;
+}

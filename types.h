@@ -132,8 +132,6 @@ bool equal_t(const Type *a, const Type *b, generics *context);
 
 Type *apply_t(const Type *a, const Type *b);
 
-Parsed parse_t(struct syntax_tree **input);
-
 void fprint_t(const Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)
 #define log_t(type) fprint_t(type, stderr)

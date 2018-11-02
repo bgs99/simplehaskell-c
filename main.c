@@ -37,7 +37,10 @@ int main(int argc, char **argv)
     }
     */
     //const char *input = "length (List _ tail) = S (length tail)";
-    struct syntax_tree res = accept_program(&all);
+    const char *allf = (const char *)all;
+
+    struct syntax_tree res = accept_program(&allf);
+
     puts("");
     free_tree_args(res.args);
     return 0;
