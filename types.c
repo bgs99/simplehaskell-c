@@ -38,7 +38,7 @@ Type* apply_t(const Type *a, const Type *b){
     if(!equal_t(a->arg, b, a->gen)){
         fprintf(stderr, "Function of type ");
         log_t(b);
-        fprintf(stderr, " cannot be assigned to a function of type ");
+        fprintf(stderr, " cannot be passed to a function of type ");
         log_t(a);
         fprintf(stderr, " in a context: ");
         log_context(a->gen);

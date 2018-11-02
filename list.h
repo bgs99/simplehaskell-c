@@ -22,8 +22,10 @@
             name *ret_list = malloc(sizeof(name)); \
             ret_list->val = value; \
             ret_list->next = NULL; \
-            for(name *i = dict; i; i = i->next)\
-                if(!i->next)\
-                    i->next = ret_list;\
+            for(name *i = dict; i; i = i->next) \
+                if(!i->next){ \
+                    i->next = ret_list; \
+                    break; \
+            } \
         } \
     }

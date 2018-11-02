@@ -47,7 +47,6 @@ struct fun_def process_tan(struct syntax_tree input){
 }
 void process_left(const Fun *f, dict **local, struct syntax_tree input){
     if(input.type != DEFINITION) return;
-    const char *name = get_name(input);
     Type *i = f->type;
     unsigned int lid = 0;
     struct tree_args *cur;
@@ -75,7 +74,7 @@ struct fun_def process_app(const dict *local, const dict *glob, struct syntax_tr
     Type *f = pr.type;
     eval_tree *ret = pr.et->val->t;
     for(tree_args *i = input.args; i; i = i->next){
-        pr = process_arg(local, glob, input);
+        pr = process_arg(local, glob, *i->val);
         f = apply_t(f, pr.type);
 #ifdef LOGALL
         log("&&logging context\n");
@@ -113,7 +112,7 @@ struct fun_def process_right(const Type *f, const dict *local, const dict *glob,
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
     struct fun_def tr = process_app(local, glob, input);
-    if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), tr.type->gen)){
+    if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), f->gen)){
         fprintf(stderr, "Return types do not match: \n %s has type ", f->name);
         log_t(last_type(f));
         fprintf(stderr, "\n%s has type ", tr.et->val->t->f->name);
@@ -229,7 +228,7 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
     return c;
 }
 
-void parse_text(const char *input, dict **glob){
+void process_text(const char *input, dict **glob){
     struct syntax_tree tl = undefined;
     while((tl = accept_block(&input)).type != UNDEFINED){
         if(tl.type==IMPORT){
@@ -250,7 +249,7 @@ void parse_text(const char *input, dict **glob){
             fread(all, 1, len, in);
             fclose(in);
 
-            parse_text(all, glob);
+            process_text(all, glob);
             continue;
         }
         if(tl.type == DATATYPE){
@@ -264,8 +263,8 @@ void parse_text(const char *input, dict **glob){
     }
 }
 
-dict* parse_all(const char *input){
+dict* process_all(const char *input){
     dict **glob = calloc(1, sizeof (dict *));
-    parse_text(input, glob);
+    process_text(input, glob);
     return *glob;
 }

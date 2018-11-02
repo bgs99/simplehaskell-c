@@ -168,7 +168,7 @@ struct syntax_tree accept_definition(const char **input){
             break;
         struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
         *arg_p = arg;
-        list_add(tree_args, &ret.args, arg_p);
+        list_add_last(tree_args, ret.args, arg_p);
     }
     if(!accept(input, '=')){
         *input = start;
@@ -234,7 +234,6 @@ struct syntax_tree accept_block(const char **input){
     if(block->type == UNDEFINED)
         *block = accept_function(input);
     if(block->type == UNDEFINED){
-        fprintf(stderr, "Cannot parse block");
         free(block);
         return undefined;
     }
