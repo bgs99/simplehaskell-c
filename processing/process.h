@@ -7,6 +7,6 @@ struct fun_def{
   pattern_list *et;
 };
 
-struct fun_def process_app(const dict *loc, const dict *glob, struct syntax_tree input);
+struct fun_def process_app(const arg_list *loc, const dict *glob, struct syntax_tree input);
 dict *process_all(const char *input);
 pattern_list* pattern_from_et(eval_tree *et);

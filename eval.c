@@ -111,8 +111,8 @@ object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *
     object *res = f->val;
     const eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){
-        if(f->lid){
-            res = promise_eval(params[*f->lid->val]);//eval_expr(ep.glob, ep.input, ep.params);
+        if(f->ids){
+            res = promise_eval(params[*f->ids]);//eval_expr(ep.glob, ep.input, ep.params);
         } else {
             const eval_tree *sa =  dict_get_eval(glob, f->name, args);
             const eval_promise *ps = collect_args(glob, input, params, sa->argn);

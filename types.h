@@ -58,13 +58,13 @@ struct object{
 
 typedef struct object object;
 
-define_list(unsigned int, id_list)
 
 typedef struct Fun{
     const char *name;
     Type *type;
     object *val;
-    id_list *lid;//NULL if not parameter
+    unsigned int id_depth;
+    unsigned int *ids;//NULL if not parameter
 } Fun;
 
 struct generics{

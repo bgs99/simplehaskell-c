@@ -89,6 +89,16 @@ eval_tree *dict_get_eval(const dict *d, const char *name, const eval_promise *ar
 void dict_add(dict **d, Fun *value){
     list_add(dict, d, pattern_from_et(eval_make(value)));
 }
+void args_add(arg_list **d, struct arg *value){
+    list_add(arg_list, d, value);
+}
+void args_add_self(arg_list **d, Fun *value){
+    struct arg *self = malloc(sizeof (struct arg));
+    self->args = NULL;
+    self->complex = false;
+    self->match = value;
+    list_add(arg_list, d, self);
+}
 /**
  * @brief Gets function from dictionary
  * @param d dictionary of names
@@ -98,6 +108,12 @@ void dict_add(dict **d, Fun *value){
 Fun* dict_get(const dict *d, const char *name){
     const eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
+}
+struct arg* args_get(const arg_list *d, const char *name){
+    for(const arg_list *i = d; i; i = i->next)
+        if(strcmp(i->val->match->name, name) == 0)
+            return i->val;
+    return NULL;
 }
 /**
  * @brief Adds type variable to a type description
