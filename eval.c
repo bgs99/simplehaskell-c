@@ -122,7 +122,7 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
     eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){//if function is not constant
         if(f->ids){//if it is variable
-            res = promise_eval(params + (*f->ids));//evaluate it
+            res = promise_eval(extract_var(f->id_depth, f->ids+1, params + (*f->ids)));//evaluate it
         } else {//if it is indeed a function
             const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
             return eval_expr(glob, sa->arg, args);//and perform the calculation

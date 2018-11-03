@@ -61,21 +61,24 @@ struct fun_def process_tan(struct syntax_tree input){
     return (struct fun_def){NULL, pattern_from_et(et)};
 }
 
-struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth){
+struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth, const dict *glob){
     const char *id = get_name(input);
+    Fun *f = dict_get(glob, id);
     struct arg *af = calloc(1, sizeof (struct arg));
     af->match = calloc(1, sizeof (Fun));
     af->match->name = id;
-    af->match->type = t;
+    af->match->type = f ? f->type : t;
     af->match->ids = lid;
     af->match->id_depth = depth;
-
+    if(!input.args)
+        return af;
+    Type *i = f->type;
     unsigned int liid = 0;
-    for(struct tree_args *cur = input.args; cur; cur = cur->next){
+    for(struct tree_args *cur = input.args; cur; cur = cur->next, i = i->ret){
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
         memcpy(ll, lid, depth+1);
         ll[depth+1] = liid;
-        list_add_last(arg_list, &af->args, process_par(t, *cur->val, ll, depth +1 ));
+        list_add_last(arg_list, &af->args, process_par(i->arg, *cur->val, ll, depth +1, glob));
     }
     return af;
 }
@@ -86,14 +89,14 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
  * @param local dictionary of local names, 'out' parameter
  * @param input syntax tree of the function definition
  */
-void process_left(Type *t, arg_list **local, struct syntax_tree input){
+void process_left(Type *t, arg_list **local, struct syntax_tree input, const dict *glob){
     if(input.type != DEFINITION) return;
     unsigned int liid = 0;
     Type *at = t;
     for(struct tree_args *cur = input.args->next; cur; cur = cur->next, liid++){
         unsigned *lid = malloc(sizeof (unsigned));
         *lid = liid;
-        args_add(local, process_par(at->arg, *cur->val, lid, 0));
+        args_add(local, process_par(at->arg, *cur->val, lid, 0, glob));
         at = at->ret;
     }
 }
@@ -308,7 +311,7 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
 
         arg_list **l = calloc(1, sizeof (arg_list *));
 
-        process_left(c.type, l, *i->val);
+        process_left(c.type, l, *i->val, glob);
 
 
         unsigned int argn = 0;
