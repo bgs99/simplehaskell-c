@@ -110,12 +110,12 @@ struct syntax_tree accept_datatype(const char **input){
         constr->args = NULL;
         constr->val = name;
         while(true){
-            struct syntax_tree carg = accept_fun_type(input);
+            struct syntax_tree carg = accept_value_type(input);
             if(carg.type == UNDEFINED)
                 break;
             struct syntax_tree *carg_p = malloc(sizeof (struct syntax_tree));
             *carg_p = carg;
-            list_add(tree_args, &constr->args, carg_p);
+            list_add_last(tree_args, &constr->args, carg_p);
         }
         accept(input, '|');
         list_add(tree_args, &ret.args, constr);

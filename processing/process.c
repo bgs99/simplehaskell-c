@@ -75,7 +75,7 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
         memcpy(ll, lid, depth+1);
         ll[depth+1] = liid;
-        list_add(arg_list, &af->args, process_par(t, *cur->val, ll, depth +1 ));
+        list_add_last(arg_list, &af->args, process_par(t, *cur->val, ll, depth +1 ));
     }
     return af;
 }
@@ -267,6 +267,7 @@ void process_constructor(Type *name, struct syntax_tree input, dict **glob){
         last->ret = calloc(1, sizeof (Type));
         last->ret->simple = false;
         last->ret->arg = arg;
+        last = last->ret;
     }
     if(first){
         ret->type = first;
