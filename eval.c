@@ -36,11 +36,13 @@ void print_object(const object o){
  * @param f Function to be printed
  * @return true if function is value-type function, false otherwise
  */
-bool print_res(const Fun f){
-    const Type *valtype = generics_sub(f.type, f.type->gen);
+bool print_res(const Fun *f){
+    if(!f)
+        return false;
+    const Type *valtype = generics_sub(f->type, f->type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
-    print_object(*f.val);
+    print_object(*f->val);
     return true;
 }
 /**
@@ -50,7 +52,7 @@ bool print_res(const Fun f){
  */
 void eval_add_arg(eval_tree *tree, eval_tree *arg){
     if(!tree){
-        fprintf(stderr, "Evaluation tree not provided");
+        fprintf(stderr, "Evaluation tree not provided\n");
         return;
     }
     tree->argn++;
@@ -109,11 +111,11 @@ eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise
  */
 object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params){
     if(!input){
-        fprintf(stderr, "Nothing to evaluate");
+        fprintf(stderr, "Nothing to evaluate\n");
         return NULL;
     }
     if(!input->f){
-        fprintf(stderr, "Evaluation tree is empty");
+        fprintf(stderr, "Evaluation tree is empty\n");
         return NULL;
     }
     const Fun *f = input->f;
@@ -148,9 +150,13 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
 Fun* eval_string(const dict *glob, const char *input){
     struct syntax_tree tl = accept_expression(&input);
     struct fun_def pr = process_app(NULL,glob, tl);
+    if(!pr.type){
+        fprintf(stderr, "Cannot evaluate\n");
+        return NULL;
+    }
     reset_generics(pr.type);
     if(!pr.type->simple){
-        fprintf(stderr, "Expression doesn't have primitive type");
+        fprintf(stderr, "Expression doesn't have primitive type\n");
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));

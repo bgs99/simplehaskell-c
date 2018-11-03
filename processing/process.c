@@ -25,7 +25,7 @@ Fun* get_fun(const dict *glob, const arg_list *local, const char *name){
     else ret = loc->match;
 
     if(!ret){
-        fprintf(stderr, "Function \"%s\" is not found in global dictionary and arguments", name);
+        fprintf(stderr, "Function \"%s\" is not found in global dictionary and arguments\n", name);
         return NULL;
     }
     return ret;
@@ -111,9 +111,13 @@ struct fun_def process_f_f(const arg_list *local, const dict *glob, struct synta
  * @return defined function on success, empty struct on fail
  */
 struct fun_def process_app(const arg_list *local, const dict *glob, struct syntax_tree input){
-    if(input.type == UNDEFINED) return (struct fun_def){NULL,NULL};
+    if(input.type == UNDEFINED)
+        return (struct fun_def){NULL, NULL};
     struct fun_def pr = process_f_f(local, glob, input);
     Type *f = pr.type;
+    if(!f){
+        return (struct fun_def){NULL, NULL};
+    }
     eval_tree *ret = pr.et->val->t;
     for(tree_args *i = input.args; i; i = i->next){
         pr = process_arg(local, glob, *i->val);

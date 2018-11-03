@@ -51,6 +51,7 @@ Type* apply_t(const Type *a, const Type *b){
         log_t(b);
         fprintf(stderr, "to a primitive value of type ");
         log_t(a);
+        fprintf(stderr, "\n");
         return NULL;
     }
     if(!equal_t(a->arg, b, a->gen)){
@@ -60,6 +61,7 @@ Type* apply_t(const Type *a, const Type *b){
         log_t(a);
         fprintf(stderr, " in a context: ");
         log_context(a->gen);
+        fprintf(stderr, "\n");
         return NULL;
     }
     a->ret->gen = a->gen;
@@ -119,7 +121,7 @@ Type *parse_t(struct syntax_tree input){
  */
 void fprint_t(const Type *t, FILE *dest){
     if(!t){
-        fprintf(dest, "No type provided");
+        fprintf(dest, "No type provided\n");
         return;
     }
     if(t->simple){
@@ -134,7 +136,7 @@ void fprint_t(const Type *t, FILE *dest){
         fprintf(dest, ")");
     }
     if(!t->ret) return;
-    fprintf(dest, " - ");
+    fprintf(dest, " -> ");
     fprint_t(t->ret, dest);
 }
 
@@ -166,7 +168,7 @@ bool generic(Type t){
  */
 void fprint_context(generics *g, FILE *f){
     if(!g) {
-        fprintf(f, "No type vars");
+        fprintf(f, "No type vars\n");
         return;
     }
     for(generics *i = g; i; i = i->next){

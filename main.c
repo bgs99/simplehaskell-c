@@ -12,6 +12,7 @@ char * function_name_generator(const char *text, int state);
 char **function_completion(const char *text, int start, int end){
     rl_attempted_completion_over = 1;
     end = start;
+    start = end;
     return rl_completion_matches(text, function_name_generator);
 }
 
@@ -74,8 +75,8 @@ int main(int argc, char **argv)
         if(*ui == '\0'){
             continue;
         }
-        printf("Expression %s\n Evaluates to ", ui);
-        print_res(*eval_string(ad,ui));
+
+        if(print_res(eval_string(ad,ui)))
         printf("\n");
         add_history(ui);
         free(ui);
