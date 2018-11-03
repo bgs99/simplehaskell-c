@@ -77,7 +77,7 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
     for(struct tree_args *cur = input.args; cur; cur = cur->next, i = i->ret){
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
         memcpy(ll, lid, depth+1);
-        ll[depth+1] = liid;
+        ll[depth+1] = liid++;
         list_add_last(arg_list, &af->args, process_par(i->arg, *cur->val, ll, depth +1, glob));
     }
     return af;
