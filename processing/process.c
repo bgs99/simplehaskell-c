@@ -89,10 +89,12 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
 void process_left(Type *t, arg_list **local, struct syntax_tree input){
     if(input.type != DEFINITION) return;
     unsigned int liid = 0;
+    Type *at = t;
     for(struct tree_args *cur = input.args->next; cur; cur = cur->next, liid++){
         unsigned *lid = malloc(sizeof (unsigned));
         *lid = liid;
-        args_add(local, process_par(t, *cur->val, lid, 0));
+        args_add(local, process_par(at->arg, *cur->val, lid, 0));
+        at = at->ret;
     }
 }
 

@@ -29,11 +29,13 @@ bool equal_t(const Type *a, const Type *b, generics *context){
             return true;
         return generics_bind(context, a->name, b);
     }
-    if(a->simple != b->simple) return false;//if a is function and b is val
+    if(a->simple != b->simple)
+        return false;//if a is function and b is val
     if(a->simple)
         return !strcmp(a->name, b->name);//if both val compare names
 
-    if(!equal_t(a->arg, b->arg, context)) return false;//if args are different
+    if(!equal_t(a->arg, b->arg, context))
+        return false;//if args are different
     return equal_t(a->ret, b->ret, context);//comparing return types
 }
 Type *parse_t(struct syntax_tree input);
