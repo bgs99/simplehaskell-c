@@ -2,6 +2,8 @@
 #include "malloc.h"
 #include "eval.h"
 #include "processing/process.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 int main(int argc, char **argv)
 {
@@ -21,18 +23,19 @@ int main(int argc, char **argv)
     fclose(in);
 
     const dict *ad = process_all(all);
-    printf("%s \n> ", all);
+    printf("%s \n", all);
 
-    char *ui = calloc(200, sizeof (char));
+    char *ui;
 
-    while(fgets(ui, 200, stdin)){
-        if(*ui == '\n'){
-            printf("> ");
+    while((ui = readline("> "))!=NULL){
+        if(*ui == '\0'){
             continue;
         }
         printf("Expression %s\n Evaluates to ", ui);
         print_res(*eval_string(ad,ui));
-        printf("\n\n> ");
+        printf("\n");
+        add_history(ui);
+        free(ui);
     }
 
     return 0;
