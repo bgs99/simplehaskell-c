@@ -13,7 +13,7 @@ typedef struct eval_promise{
 } eval_promise;
 
 
-object* promise_eval(eval_promise ep);
+object* promise_eval(eval_promise *ep);
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg);
 

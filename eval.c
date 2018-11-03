@@ -27,7 +27,7 @@ void print_object(const object o){
     printf("%s ", o.name);
     for(int i = 0; i < o.argc; i++){
         printf("(");
-        print_object(*promise_eval(o.args[i] ));
+        print_object(*promise_eval(o.args + i));
         printf(")");
     }
 }
@@ -80,21 +80,31 @@ eval_tree* eval_make(Fun *f){
  * @param tree Evaluation tree of a function
  * @param params Parameters
  * @param argn Number of arguments
- * @return Array of evaluation promises
+ * @return Evaluation promises of arguments
  */
+eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *param){
+    if(depth == 0)
+        return param;
+    return extract_var(depth-1, lid+1, param->val->args + (*lid));
+}
 eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn){
     eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
-        args[i++] = (eval_promise){glob, arg, params, NULL};
+        if(!params){
+            args[i++] = (eval_promise){glob, arg, params, NULL};
+        } else {
+            args[i++] = *extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
+        }
     }
     return args;
 }
+//equals (S (S Z)) (S Z)
 /**
  * @brief Evaluates an expression
  * @param glob Global dictionary of names
  * @param input Evaluation tree of an expression
- * @param params Parameters
+ * @param params Passed values
  * @return Result value
  */
 object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params){
@@ -110,19 +120,20 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
 
     object *res = f->val;
     eval_promise *args = collect_args(glob, input, params, input->argn);
-    if(!res){
-        if(f->ids){
-            res = promise_eval(params[*f->ids]);
-        } else {
-            const eval_tree *sa =  dict_get_eval(glob, f->name, args);
-            eval_promise *ps = collect_args(glob, input, params, sa->argn);
-            return eval_expr(glob, sa->arg, ps);
+    if(!res){//if function is not constant
+        if(f->ids){//if it is variable
+            res = promise_eval(params + (*f->ids));//evaluate it
+        } else {//if it is indeed a function
+            const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
+            return eval_expr(glob, sa->arg, args);//and perform the calculation
         }
     }
     if(!input->arg){
         return res;
     }
-
+    const char *name = res->name;
+    res = malloc(sizeof (object));
+    res->name = name;
     res->args = args;
     res->argc = (int)input->argn;
     return res;
@@ -153,8 +164,10 @@ Fun* eval_string(const dict *glob, const char *input){
  * @param ep Evaluation promise
  * @return Result value
  */
-object* promise_eval(eval_promise ep){
-    if(ep.val)
-        return ep.val;
-    return eval_expr(ep.glob, ep.input, ep.params);
+object* promise_eval(eval_promise *ep){
+    if(ep->val)
+        return ep->val;
+    object *ret = eval_expr(ep->glob, ep->input, ep->params);
+    ep->val = ret;
+    return ret;
 }

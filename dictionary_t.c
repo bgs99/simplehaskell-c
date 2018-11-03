@@ -32,10 +32,7 @@ bool s_equal(const char *a, const char *b){
 bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
     if(!is_const(pat->match->name))
         return true;
-    object *par = arg->val ? arg->val : promise_eval(*arg);
-    if(!arg->val)
-        arg->val = par;
-
+    object *par = promise_eval(arg);
 
     if(!s_equal(pat->match->name, par->name))
         return false;

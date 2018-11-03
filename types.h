@@ -63,7 +63,7 @@ typedef struct Fun{
     const char *name;
     Type *type;
     object *val;
-    unsigned int id_depth;
+    unsigned id_depth;
     unsigned int *ids;//NULL if not parameter
 } Fun;
 
