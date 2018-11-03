@@ -25,9 +25,9 @@ const Type* generics_sub(const Type *t, generics *context){
  */
 void print_object(const object o){
     printf("%s ", o.name);
-    for(unsigned int i = 0; i < o.argc; i++){
+    for(int i = 0; i < o.argc; i++){
         printf("(");
-        print_object(*promise_eval(o.args[i]));
+        print_object(*promise_eval(o.args[i] ));
         printf(")");
     }
 }
@@ -82,11 +82,11 @@ eval_tree* eval_make(Fun *f){
  * @param argn Number of arguments
  * @return Array of evaluation promises
  */
-const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const eval_promise *params, unsigned int argn){
+eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn){
     eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
     for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
-        args[i++] = (eval_promise){glob, arg, params};
+        args[i++] = (eval_promise){glob, arg, params, NULL};
     }
     return args;
 }
@@ -97,7 +97,7 @@ const eval_promise* collect_args(const dict *glob, const eval_tree *tree, const 
  * @param params Parameters
  * @return Result value
  */
-object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params){
+object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params){
     if(!input){
         fprintf(stderr, "Nothing to evaluate");
         return NULL;
@@ -109,21 +109,22 @@ object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *
     const Fun *f = input->f;
 
     object *res = f->val;
-    const eval_promise *args = collect_args(glob, input, params, input->argn);
+    eval_promise *args = collect_args(glob, input, params, input->argn);
     if(!res){
         if(f->ids){
-            res = promise_eval(params[*f->ids]);//eval_expr(ep.glob, ep.input, ep.params);
+            res = promise_eval(params[*f->ids]);
         } else {
             const eval_tree *sa =  dict_get_eval(glob, f->name, args);
-            const eval_promise *ps = collect_args(glob, input, params, sa->argn);
+            eval_promise *ps = collect_args(glob, input, params, sa->argn);
             return eval_expr(glob, sa->arg, ps);
         }
     }
     if(!input->arg){
         return res;
     }
+
     res->args = args;
-    res->argc = input->argn;
+    res->argc = (int)input->argn;
     return res;
 }
 
@@ -153,5 +154,7 @@ Fun* eval_string(const dict *glob, const char *input){
  * @return Result value
  */
 object* promise_eval(eval_promise ep){
+    if(ep.val)
+        return ep.val;
     return eval_expr(ep.glob, ep.input, ep.params);
 }

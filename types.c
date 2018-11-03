@@ -227,7 +227,7 @@ bool object_equal(object a, object b){
         return false;
     if(strcmp(a.name, b.name) != 0)
         return false;
-    for(unsigned i = 0; i < a.argc; i++){
+    for(int i = 0; i < a.argc; i++){
         object x = *promise_eval(a.args[i]);
         object y = *promise_eval(b.args[i]);
         if(!object_equal(x, y))

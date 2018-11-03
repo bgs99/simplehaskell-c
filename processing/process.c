@@ -308,7 +308,13 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
         arg_list **l = calloc(1, sizeof (arg_list *));
 
         process_left(c.type, l, *i->val);
-        unsigned int argn = (*l) ? 100 : 100;
+
+
+        unsigned int argn = 0;
+
+        for(arg_list *i = *l; i; i = i->next)
+            argn++;
+
         args_add_self(l, a.et->val->t->f);
 
         struct fun_def t = process_right(a.et->val->t->f->type, *l, glob, *i->val->args->val);

@@ -51,9 +51,9 @@ typedef struct Type Type;
 struct eval_promise;
 
 struct object{
-    unsigned int argc;
+    int argc;
     const char *name;
-    const struct eval_promise *args;
+    struct eval_promise *args;
 };
 
 typedef struct object object;

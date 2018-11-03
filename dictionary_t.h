@@ -8,7 +8,7 @@ define_list(Type, type_list)
 Fun *dict_get(const dict *d, const char *name);
 struct arg *args_get(const arg_list *d, const char *name);
 
-eval_tree* dict_get_eval(const dict *d,  const char *name, const struct eval_promise *args);
+eval_tree* dict_get_eval(const dict *d,  const char *name, struct eval_promise *args);
 bool is_const(const char *input);
 void dict_add(dict **d, Fun *value);
 void args_add(arg_list **d, struct arg *value);

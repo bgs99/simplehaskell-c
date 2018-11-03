@@ -29,15 +29,19 @@ bool s_equal(const char *a, const char *b){
     }
 }
 
-bool match_arg(const struct arg *pat, const eval_promise arg, const dict *glob){
+bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
     if(!is_const(pat->match->name))
         return true;
-    object par = *promise_eval(arg);
-    if(!s_equal(pat->match->name, par.name))
+    object *par = arg->val ? arg->val : promise_eval(*arg);
+    if(!arg->val)
+        arg->val = par;
+
+
+    if(!s_equal(pat->match->name, par->name))
         return false;
     int n = 0;
     for(arg_list *i = pat->args; i; i = i->next, n++){
-        if(!match_arg(i->val, par.args[n], glob)){
+        if(!match_arg(i->val, par->args + n, glob)){
             return false;
         }
     }
@@ -50,7 +54,7 @@ bool match_arg(const struct arg *pat, const eval_promise arg, const dict *glob){
  * @param glob global dictionary of names
  * @return true if they correspond, false otherwise
  */
-bool pattern_match(const pattern *p, const eval_promise *args, const dict *glob){
+bool pattern_match(const pattern *p, eval_promise *args, const dict *glob){
     if(!p)
         return false;
     if(!args)
@@ -59,7 +63,7 @@ bool pattern_match(const pattern *p, const eval_promise *args, const dict *glob)
     for(arg_list *i = p->args->next; i; i = i->next, n++){
         if(*i->val->match->name == '_')
             continue;
-        if(!match_arg(i->val, args[n], glob)){
+        if(!match_arg(i->val, args + n, glob)){
             return false;
         }
     }
@@ -72,7 +76,7 @@ bool pattern_match(const pattern *p, const eval_promise *args, const dict *glob)
  * @param args array of arguments
  * @return evaluation tree on success, NULL on fail
  */
-eval_tree *dict_get_eval(const dict *d, const char *name, const eval_promise *args){
+eval_tree *dict_get_eval(const dict *d, const char *name, eval_promise *args){
     if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
         if(!s_equal(name, i->val->val->t->f->name))
@@ -112,9 +116,13 @@ Fun* dict_get(const dict *d, const char *name){
     return tree ? tree->f : NULL;
 }
 struct arg* args_get(const arg_list *d, const char *name){
-    for(const arg_list *i = d; i; i = i->next)
-        if(strcmp(i->val->match->name, name) == 0)
+    for(const arg_list *i = d; i; i = i->next){
+        if((!i->val->args) && (strcmp(i->val->match->name, name) == 0))
             return i->val;
+        struct arg *rec = args_get(i->val->args, name);
+        if(rec)
+            return rec;
+    }
     return NULL;
 }
 /**
