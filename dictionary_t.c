@@ -197,3 +197,7 @@ void dict_generics_reset(dict *d){
     for(const dict *i = d; i; i = i->next)
         generics_reset(i->val->val->t->f->type->gen);
 }
+
+void dict_free(dict *d){
+
+}

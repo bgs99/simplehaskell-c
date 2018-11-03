@@ -342,7 +342,7 @@ void process_text(const char *input, dict **glob){
     struct syntax_tree tl = undefined;
     while((tl = accept_block(&input)).type != UNDEFINED){
         if(tl.type==IMPORT){
-            char *path = calloc(tl.val.length + 26, sizeof (char));
+            char *path = calloc(tl.val.length + 40, sizeof (char));
             const char *fn = get_name(tl);
             strcat(path, PATH);
             strcat(path, fn);
@@ -354,7 +354,7 @@ void process_text(const char *input, dict **glob){
             }
             fseek(in, 0, SEEK_END);
             unsigned long len = (unsigned long)ftell(in);
-            char *all = calloc(len, sizeof (char));
+            char *all = calloc(len+1, sizeof (char));
             rewind(in);
             fread(all, 1, len, in);
             fclose(in);
@@ -380,5 +380,8 @@ void process_text(const char *input, dict **glob){
 dict* process_all(const char *input){
     dict **glob = calloc(1, sizeof (dict *));
     process_text(input, glob);
-    return *glob;
+    dict *ret = *glob;
+    free(glob);
+    glob = NULL;
+    return ret;
 }

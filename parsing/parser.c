@@ -189,6 +189,10 @@ struct syntax_tree accept_definition(const char **input){
 }
 
 void skip_el(const char **input){
+    if(!input)
+        return;
+    if(!*input)
+        return;
     while (**input <= ' ' && **input) {
         (*input)++;
     }
@@ -207,6 +211,8 @@ struct syntax_tree accept_function(const char **input){
         const char *line = *input;
 
         struct syntax_tree pat = accept_definition(input);
+        if(pat.type == UNDEFINED)
+            break;
         if(pat.val.length != ret.val.length){
             *input = line;
             break;

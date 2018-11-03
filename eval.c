@@ -27,8 +27,15 @@ void print_object(const object o){
     printf("%s ", o.name);
     for(int i = 0; i < o.argc; i++){
         printf("(");
-        print_object(*promise_eval(o.args + i));
+        eval_promise *ep = o.args + i;
+        object *x = promise_eval(ep);
+        if(!x){
+            printf("\n\n");
+            return;
+        }
+        print_object(*x);
         printf(")");
+        fflush(stdout);
     }
 }
 /**
@@ -87,16 +94,22 @@ eval_tree* eval_make(Fun *f){
 eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *param){
     if(depth == 0)
         return param;
+    if(!param){
+        fprintf(stderr, "Expected paramenet for extraction");
+        return NULL;
+    }
+    if(!param->val)
+        promise_eval(param);
     return extract_var(depth-1, lid+1, param->val->args + (*lid));
 }
 eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn){
     eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
-    for(const eval_tree *arg = tree->arg; arg; arg = arg->next){
-        if(!params){
-            args[i++] = (eval_promise){glob, arg, params, NULL};
+    for(const eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
+        if(!params || !arg->f->ids){
+            args[i] = (eval_promise){glob, arg, params, NULL};
         } else {
-            args[i++] = *extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
+            args[i] = *extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
         }
     }
     return args;
@@ -127,6 +140,10 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
             res = promise_eval(extract_var(f->id_depth, f->ids+1, params + (*f->ids)));//evaluate it
         } else {//if it is indeed a function
             const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
+            if(!sa){
+                fprintf(stderr, "Pattern matching failed\n");
+                return NULL;
+            }
             return eval_expr(glob, sa->arg, args);//and perform the calculation
         }
     }
@@ -161,6 +178,8 @@ Fun* eval_string(const dict *glob, const char *input){
     }
     Fun *ret = calloc(1, sizeof (Fun));
     object *val = eval_expr(glob, pr.et->val->t, NULL);
+    if(!val)
+        return NULL;
     ret->type = pr.type;
     ret->val = val;
     return ret;
@@ -174,6 +193,10 @@ object* promise_eval(eval_promise *ep){
     if(ep->val)
         return ep->val;
     object *ret = eval_expr(ep->glob, ep->input, ep->params);
+    if(!ret){
+        fprintf(stderr, "Evaluation failed of function %s has failed", ep->input->f->name);
+        return NULL;
+    }
     ep->val = ret;
     return ret;
 }
