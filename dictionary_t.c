@@ -56,7 +56,9 @@ bool pattern_match(const pattern *p, const eval_promise *args, const dict *glob)
     if(!args)
         return true;
     int n = 0;
-    for(arg_list *i = p->args; i; i = i->next, n++){
+    for(arg_list *i = p->args->next; i; i = i->next, n++){
+        if(*i->val->match->name == '_')
+            continue;
         if(!match_arg(i->val, args[n], glob)){
             return false;
         }
@@ -90,7 +92,7 @@ void dict_add(dict **d, Fun *value){
     list_add(dict, d, pattern_from_et(eval_make(value)));
 }
 void args_add(arg_list **d, struct arg *value){
-    list_add(arg_list, d, value);
+    list_add_last(arg_list, d, value);
 }
 void args_add_self(arg_list **d, Fun *value){
     struct arg *self = malloc(sizeof (struct arg));
