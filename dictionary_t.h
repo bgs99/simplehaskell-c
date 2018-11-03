@@ -14,15 +14,15 @@ define_list(Type, type_list)
  * @param d Dictionary to search
  * @param name Name of the function to find
  */
-const Fun* dict_get(const dict *d, const char *name);
+Fun* dict_get(const dict *d, const char *name);
 /**
  * @brief Gets evaluation tree from a dictionary
  * @param d Dictionary to search
  * @param name Name of the function to find
  */
-const eval_tree* dict_get_eval(const dict *d,  const char *name, const struct eval_promise *args);
-
-void dict_add(dict **d, const Fun *value);
+eval_tree* dict_get_eval(const dict *d,  const char *name, const struct eval_promise *args);
+bool is_const(const char *input);
+void dict_add(dict **d, Fun *value);
 void generics_add(Type *t, const char *name);
 
 void generics_merge(Type *to, Type *from);

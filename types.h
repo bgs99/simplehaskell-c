@@ -67,11 +67,6 @@ typedef struct Fun{
     id_list *lid;//NULL if not parameter
 } Fun;
 
-typedef struct Parsed{
-    Type *ret;
-    const char *left;
-} Parsed;
-
 struct generics{
     /**
      * @brief Next element of the list
@@ -96,7 +91,7 @@ struct eval_tree{
     /**
      * @brief A function to be called
      */
-    const Fun *f; //Function
+    Fun *f; //Function
     /**
      * @brief Number of arguments
      */
@@ -116,11 +111,18 @@ struct eval_tree{
  */
 typedef struct eval_tree eval_tree;
 
+struct arg;
+define_list(struct arg, arg_list)
 
+struct arg{
+    bool complex;
+    Fun *match;
+    arg_list *args;
+};
 
 typedef struct pattern{
     eval_tree *t;
-    const Fun **match;
+    arg_list *args;
 } pattern;
 
 define_list(pattern, pattern_list)

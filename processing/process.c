@@ -3,20 +3,23 @@
 #include "../eval.h"
 #include "../types.h"
 #include <malloc.h>
+#include "../dictionary_t.h"
 #define PATH "/home/bgs99c/sandbox/shs/"
 
-bool is_const(const char *input){
-    char c = *input;
-    return (c >= '0' && c <='9') || (c >= 'A' && c <= 'Z');
-}
-
-const Fun* get_fun(const dict *glob, const dict *local, const char *name){
+/**
+ * @brief Finds function in dictionaries
+ * @param glob Global dictionary of names
+ * @param local Local dictionary of names
+ * @param name Name of the function
+ * @return Function on succes, NULL otherwise
+ */
+Fun* get_fun(const dict *glob, const dict *local, const char *name){
     char c = *name;
     if(('0' <= c && '9' >= c) || c == '-'){
         return NULL;//parse_num(name);
     }
 
-    const Fun *ret = dict_get(local, name);
+    Fun *ret = dict_get(local, name);
     if(!ret)
         ret = dict_get(glob, name);
     if(!ret){
@@ -25,7 +28,11 @@ const Fun* get_fun(const dict *glob, const dict *local, const char *name){
     }
     return ret;
 }
-
+/**
+ * @brief Makes pattern patch from evaluation tree
+ * @param et Evaluation tree
+ * @return Pattern match
+ */
 pattern_list* pattern_from_et(eval_tree *et){
     pattern *p = calloc(1, sizeof (pattern));
         *p = (pattern){et, NULL};
@@ -34,40 +41,60 @@ pattern_list* pattern_from_et(eval_tree *et){
     return ret;
 }
 
-Parsed parse_t(struct syntax_tree input);
-
+Type *parse_t(struct syntax_tree input);
+/**
+ * @brief Processes type annotation of a function
+ * @param input Syntax tree of type annotation
+ * @return Function definition with right type and name on success, empty struct otherwise
+ */
 struct fun_def process_tan(struct syntax_tree input){
     if(input.type != ANNOTATION) return (struct fun_def){NULL,NULL};
     const char *name = get_name(input);
+
     Fun *res = calloc(1, sizeof (Fun));
     res->name = name;
-    Parsed p = parse_t(*input.args->val);
-    res->type = p.ret;
+    res->type = parse_t(*input.args->val);
+
     eval_tree *et = eval_make(res);
     return (struct fun_def){NULL, pattern_from_et(et)};
 }
-void process_left(const Fun *f, dict **local, struct syntax_tree input){
+
+void process_par(Type *t, dict **local, struct syntax_tree input, id_list *lid){
+    const char *id = get_name(input);
+    Fun *af = calloc(1, sizeof (Fun));
+    af->name = id;
+    //const Type *t = i->simple ? i : i->arg;
+    af->type = t;
+    af->lid = calloc(1, sizeof (id_list));
+    af->lid->val = malloc(sizeof (unsigned int));
+    *af->lid->val = lid++;
+    dict_add(local, af);
+}
+
+/**
+ * @brief process_left fills local dictionary with function parameters from input
+ * @param t Type of the function
+ * @param local dictionary of local names, 'out' parameter
+ * @param input syntax tree of the function definition
+ */
+void process_left(Type *t, dict **local, struct syntax_tree input){
     if(input.type != DEFINITION) return;
-    Type *i = f->type;
     unsigned int lid = 0;
     struct tree_args *cur;
     for(cur = input.args->next; cur; cur = cur->next){
-        const char *id = get_name(*cur->val);
-        Fun *af = calloc(1, sizeof (Fun));
-        af->name = id;
-        //const Type *t = i->simple ? i : i->arg;
-        af->type = i->arg;
-        i = i->ret;
-        af->lid = calloc(1, sizeof (id_list));
-        af->lid->val = malloc(sizeof (unsigned int));
-        *af->lid->val = lid++;
-        dict_add(local, af);
+        process_par(t, local, *cur->val, lid);
     }
 }
 
 struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tree input);
 struct fun_def process_f_f(const dict *local, const dict *glob, struct syntax_tree input);
-
+/**
+ * @brief process_app processes function application and returns function definition
+ * @param local dictionary of local names
+ * @param glob dictionary of global names
+ * @param input syntax tree of the function definition
+ * @return defined function on success, empty struct on fail
+ */
 struct fun_def process_app(const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type == UNDEFINED) return (struct fun_def){NULL,NULL};
     struct fun_def pr = process_f_f(local, glob, input);
@@ -85,16 +112,30 @@ struct fun_def process_app(const dict *local, const dict *glob, struct syntax_tr
     }
     return (struct fun_def){f, pattern_from_et(ret)};
 }
-
+/**
+ * @brief process_f_f gets function for application
+ * @param local dictionary of local names
+ * @param glob dictionary of global names
+ * @param input syntax tree of the function definition
+ * @return function definition on success, empty struct on fail
+ */
 struct fun_def process_f_f(const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
     const char *name = get_name(input);
 
-    const Fun *ff = get_fun(glob, local, name);
+    Fun *ff = get_fun(glob, local, name);
+    if(!ff)
+        return (struct fun_def) {NULL, NULL};
     return (struct fun_def){ff->type, pattern_from_et(eval_make(ff))};
 }
-
+/**
+ * @brief process_arg gets function argument for application
+ * @param local dictionary of local names
+ * @param glob dictionary of global names
+ * @param input syntax tree of the function definition
+ * @return arg's function definition on success, empty struct on fail
+ */
 struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
@@ -104,11 +145,20 @@ struct fun_def process_arg(const dict *local, const dict *glob, struct syntax_tr
         return ret;
     }
     const char *name = get_name(input);
-    const Fun *ff = get_fun(glob, local, name);
+    Fun *ff = get_fun(glob, local, name);
+    if(!ff)
+        return (struct fun_def) {NULL, NULL};
     return (struct fun_def){ff->type, pattern_from_et(eval_make(ff))};
 }
 
-
+/**
+ * @brief process_right processes right side of function's definition
+ * @param f type of the function
+ * @param local dictionary of local names
+ * @param glob dictionary of global names
+ * @param input syntax tree of the expression on the right
+ * @return expression's definition on success, empty struct on fail
+ */
 struct fun_def process_right(const Type *f, const dict *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
@@ -127,7 +177,11 @@ struct fun_def process_right(const Type *f, const dict *local, const dict *glob,
     return tr;
 }
 
-
+/**
+ * @brief pattern_add adds new pattern match to function definition
+ * @param pr function definition
+ * @param np new pattern match
+ */
 void pattern_add(struct fun_def *pr, struct fun_def np){
     if(!pr->et){
         pr->et = np.et;
@@ -140,30 +194,52 @@ void pattern_add(struct fun_def *pr, struct fun_def np){
     i->next = np.et;
 }
 
-void eval_tree_wrap(struct fun_def *pr, const Fun *f, unsigned int argn){
+/**
+ * @brief eval_tree_wrap creates evaluation tree from function
+ * @param pr function definition
+ * @param f function
+ * @param argn number of function's arguments
+ */
+void eval_tree_wrap(struct fun_def *pr, Fun *f, unsigned int argn){
     eval_tree *et = eval_make(f);
     eval_add_arg(et, pr->et->val->t);
     pr->et->val->t = et;
     pr->et->val->t->argn = argn;
 }
-
+/**
+ * @brief pattern_add_matches generates pattern match from local dictionary
+ * @param p pattern list that points to a pattern that should be generated
+ * @param local local dictionary of names
+ */
 void pattern_add_matches(pattern_list *p, const dict *local){
-    p->val->match = calloc(p->val->t->argn, sizeof (Fun));
+    p->val->args = NULL;
     unsigned int j = p->val->t->argn-1;
     for(const dict *i = local->next; i; i = i->next, j--){
         if(i->val->val->t->f->name){
-            if(is_const(i->val->val->t->f->name))
-                p->val->match[j] = i->val->val->t->f;
+            struct arg *a = malloc(sizeof (struct arg));
+            a->complex = false;
+            a->match = i->val->val->t->f;
+            list_add_last(arg_list, p->val->args, a);
         }
     }
 }
+/**
+ * @brief process_type generates simple type from name
+ * @param input syntax tree with name of the type
+ * @return generated type
+ */
 Type* process_type(struct syntax_tree input){
     Type *ret = calloc(1, sizeof(Type));
     ret->simple = true;
     ret->name = get_name(input);
     return ret;
 }
-
+/**
+ * @brief process_constructor adds to global dictionary a new constructor
+ * @param name name of the type that constructor belongs to
+ * @param input syntax tree of constructor
+ * @param glob global dictionary of names
+ */
 void process_constructor(Type *name, struct syntax_tree input, dict **glob){
     if(input.type != CONSTRUCTOR)
         return;
@@ -196,7 +272,12 @@ void process_constructor(Type *name, struct syntax_tree input, dict **glob){
     }
     dict_add(glob, ret);
 }
-
+/**
+ * @brief process_datatype adds new datatype to the global dictionary
+ * @param name name of the datatype
+ * @param input syntax tree of the datatype
+ * @param glob global dictionary of names
+ */
 void process_datatype(Type *name, struct syntax_tree input, dict **glob){
     if(input.type != DATATYPE)
            return;
@@ -204,6 +285,12 @@ void process_datatype(Type *name, struct syntax_tree input, dict **glob){
         process_constructor(name, *i->val, glob);
     }
 }
+/**
+ * @brief process_fun creates function from syntax tree
+ * @param glob global dictionary of names
+ * @param block syntax tree of the function
+ * @return created function on success, empty struct on fail
+ */
 struct fun_def process_fun(const dict *glob, struct syntax_tree block){
     struct fun_def a = process_tan(*block.args->val);
 #ifdef LOGALL
@@ -217,7 +304,7 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
 
         dict **l = calloc(1, sizeof (dict *));
 
-        process_left(a.et->val->t->f, l, *i->val);
+        process_left(c.type, l, *i->val);
         unsigned int argn = (*l) ? *(**l).val->val->t->f->lid->val + 1 : 0;
         dict_add(l, a.et->val->t->f);
 
@@ -229,7 +316,11 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
     }
     return c;
 }
-
+/**
+ * @brief process_text processes all text
+ * @param input text to be processed
+ * @param glob global dictionary of names, 'out' parameter
+ */
 void process_text(const char *input, dict **glob){
     struct syntax_tree tl = undefined;
     while((tl = accept_block(&input)).type != UNDEFINED){
@@ -264,7 +355,11 @@ void process_text(const char *input, dict **glob){
         list_add(dict, glob, f.et);
     }
 }
-
+/**
+ * @brief process_all generates global dictionary by processing all text
+ * @param input text to be processed
+ * @return global dictionary of names
+ */
 dict* process_all(const char *input){
     dict **glob = calloc(1, sizeof (dict *));
     process_text(input, glob);

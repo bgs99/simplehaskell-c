@@ -1,5 +1,6 @@
 #pragma once
 #include "dictionary_t.h"
+#include "types.h"
 
 bool print_res(const Fun f);
 const Type* generics_sub(const Type *t, generics *context);
@@ -15,7 +16,7 @@ object* promise_eval(eval_promise ep);
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg);
 
-eval_tree* eval_make(const Fun *f);
+eval_tree* eval_make(Fun *f);
 
 object *eval_expr(const dict *glob, const eval_tree *input, const eval_promise *params);
 

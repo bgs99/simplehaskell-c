@@ -5,8 +5,22 @@
 #include "parsing/parser.h"
 #include "processing/process.h"
 
-
-char s_equal(const char *a, const char *b){
+/**
+ * @brief Checks if name corresponds to a constant
+ * @param input name
+ * @return true if constant, false otherwise
+ */
+bool is_const(const char *input){
+    char c = *input;
+    return (c >= '0' && c <='9') || (c >= 'A' && c <= 'Z');
+}
+/**
+ * @brief Checks if two stricgs are equal (yes, it's redundant)
+ * @param a first string
+ * @param b second string
+ * @return true if equal, false otherwise
+ */
+bool s_equal(const char *a, const char *b){
     for(int i = 0; ;i++){
         if(a[i]!=b[i])
             return false;
@@ -15,43 +29,78 @@ char s_equal(const char *a, const char *b){
     }
 }
 
-bool pattern_match(const pattern *p, const eval_promise *args, const char *name, const dict *glob){
-    if(!p)
-        return false;
-    if(!s_equal(name, p->t->f->name))
-        return false;
-    if(!args)
+bool match_arg(const struct arg *pat, const eval_promise arg, const dict *glob){
+    if(!is_const(pat->match->name))
         return true;
-    for(unsigned int i = 0; i < p->t->argn; i++){
-        if(!p->match[i])
-            continue;
-        object val = *dict_get(glob, p->match[i]->name)->val;
-        object pat = *promise_eval(args[i]);
-        if(!object_equal(val, pat)) return false;
-        //if(val.i_val != promise_eval(args[i])->i_val) return false;
+    object par = *promise_eval(arg);
+    if(!s_equal(pat->match->name, par.name))
+        return false;
+    int n = 0;
+    for(arg_list *i = pat->args; i; i = i->next, n++){
+        if(!match_arg(i->val, par.args[n], glob)){
+            return false;
+        }
     }
     return true;
 }
-const eval_tree* dict_get_eval(const dict *d, const char *name, const eval_promise *args){
+/**
+ * @brief Checks if arguments correspond to a pattern
+ * @param p pattern
+ * @param args arguments
+ * @param glob global dictionary of names
+ * @return true if they correspond, false otherwise
+ */
+bool pattern_match(const pattern *p, const eval_promise *args, const dict *glob){
+    if(!p)
+        return false;
+    if(!args)
+        return true;
+    int n = 0;
+    for(arg_list *i = p->args; i; i = i->next, n++){
+        if(!match_arg(i->val, args[n], glob)){
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * @brief Gets evaluation tree that correspond to a function and an array of arguments
+ * @param d dictionary of names
+ * @param name name of the function
+ * @param args array of arguments
+ * @return evaluation tree on success, NULL on fail
+ */
+eval_tree *dict_get_eval(const dict *d, const char *name, const eval_promise *args){
     if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
+        if(!s_equal(name, i->val->val->t->f->name))
+            continue;
         for(const pattern_list *j = i->val; j; j = j->next)
-            if( pattern_match(j->val, args, name, d))
+            if( pattern_match(j->val, args, d))
                 return j->val->t;
     }
     return NULL;
 }
-
-void dict_add(dict **d, const Fun *value){
+/**
+ * @brief Adds evaluation tree from a function to the dictionary
+ * @param d dictionary of names
+ * @param value function
+ */
+void dict_add(dict **d, Fun *value){
     list_add(dict, d, pattern_from_et(eval_make(value)));
 }
-
-const Fun* dict_get(const dict *d, const char *name){
+/**
+ * @brief Gets function from dictionary
+ * @param d dictionary of names
+ * @param name name of the function
+ * @return function on success, NULL on fail
+ */
+Fun* dict_get(const dict *d, const char *name){
     const eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
 }
 /**
- * @brief generics_add Adds type variable to a type description. NULL-safe. Should be
+ * @brief Adds type variable to a type description
  * @param t Destination
  * @param name Type variable's name
  */
@@ -86,7 +135,13 @@ void generics_merge(Type *to,  Type *from){
     }
     generics_free(from->gen);
 }
-
+/**
+ * @brief Binds generic argument to a type
+ * @param g generics context
+ * @param name name of the argument
+ * @param t Type
+ * @return true if argument is generic and can be bound, false otherwise
+ */
 bool generics_bind(generics *g, const char *name, const Type *t){
     for(generics *i = g; i; i = i->next){
         if(strcmp(i->key, name)==0){
@@ -103,12 +158,18 @@ bool generics_bind(generics *g, const char *name, const Type *t){
 
     return false;
 }
-
+/**
+ * @brief Removes bindings from a context
+ * @param g generic context
+ */
 void generics_reset(generics *g){
     for(generics *i = g; i; i = i->next)
         i->val = NULL;
 }
-
+/**
+ * @brief Removes bindings from contexts in whole dictionary
+ * @param d Dictionary of names
+ */
 void dict_generics_reset(dict *d){
     for(const dict *i = d; i; i = i->next)
         generics_reset(i->val->val->t->f->type->gen);
