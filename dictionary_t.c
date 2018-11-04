@@ -95,6 +95,14 @@ void dict_add(dict **d, Fun *value){
     pattern_list *p = pattern_from_et(eval_make(value));
     list_add(dict, d, p);
 }
+
+void dict_it(dict **d, Fun *value){
+    pattern_list *p = pattern_from_et(eval_make(value));
+    if(name_equal((*d)->val->val->t->f->name, value->name))
+        (*d)->val = p;
+    else list_add(dict, d, p);
+}
+
 void args_add(arg_list **d, struct arg *value){
     list_add_last(arg_list, d, value);
 }

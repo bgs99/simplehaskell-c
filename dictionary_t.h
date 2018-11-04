@@ -11,6 +11,7 @@ struct arg *args_get(const arg_list *d, struct word name);
 eval_tree* dict_get_eval(const dict *d, struct word name, struct eval_promise *args);
 bool is_const(struct word input);
 void dict_add(dict **d, Fun *value);
+void dict_it(dict **d, Fun *value);
 void args_add(arg_list **d, struct arg *value);
 void args_add_self(arg_list **d, Fun *value);
 void generics_add(struct Type *t, struct word name);

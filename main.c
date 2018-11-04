@@ -71,14 +71,16 @@ int main(int argc, char **argv)
     printf("%s \n", all);
 
     char *ui;
-
     while((ui = readline("> "))!=NULL){
         if(*ui == '\0'){
             free(ui);
             continue;
         }
-
-        print_res(eval_string(ad,ui));
+        Fun *res = eval_string(ad,ui);
+        print_res(res);
+        res->name.begin = "it";
+        res->name.length = 2;
+        dict_it(&ad, res);
         printf("\n");
         add_history(ui);
         free(ui);
