@@ -109,12 +109,12 @@ eval_tree *eval_make(Fun *f){
  * @return Evaluation promises of arguments
  */
 eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *param){
-    if(depth == 0)
-        return param;
     if(!param){
-        fprintf(stderr, "Expected paramenet for extraction");
+        fprintf(stderr, "\nExpected parameter for extraction\n");
         return NULL;
     }
+    if(depth == 0)
+        return param;
     if(!param->val)
         promise_eval(param);
     return extract_var(depth-1, lid+1, param->val->args + (*lid));
@@ -128,7 +128,12 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
         if(!params || !arg->f->ids){
             args[i] = (eval_promise){glob, arg, params, parn, NULL};
         } else {
-            args[i] = *extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
+            eval_promise *a = extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
+            if(!a){
+                free(args);
+                return NULL;
+            }
+            args[i] = *a;
         }
     }
     return args;
@@ -154,6 +159,8 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     const Fun *f = input->f;
 
     eval_promise *args = collect_args(glob, input, params, input->argn, parn);
+    if(!args && input->argn)
+        return NULL;
     if(f->ids){//if it is variable
         f = extract_var(f->id_depth, f->ids+1, params + (*f->ids))->input->f;
     }
@@ -214,7 +221,7 @@ object* promise_eval(eval_promise *ep){
         return ep->val;
     object *ret = eval_expr(ep->glob, ep->input, ep->params, ep->paramc);
     if(!ret){
-        fprintf(stderr, "Evaluation failed of function %.*s has failed", (int)ep->input->f->name.length, ep->input->f->name.begin);
+        fprintf(stderr, "Evaluation of function %.*s has failed", (int)ep->input->f->name.length, ep->input->f->name.begin);
         return NULL;
     }
     ep->val = ret;
