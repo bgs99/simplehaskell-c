@@ -14,7 +14,8 @@ SOURCES += \
     parsing/expression_parser.c \
     parsing/pattern_parser.c \
     processing/process.c \
-    freemem.c
+    freemem.c \
+    pretty.c
 
 HEADERS += \
     types.h \
@@ -27,7 +28,8 @@ HEADERS += \
     parsing/expression_parser.h \
     parsing/pattern_parser.h \
     processing/process.h \
-    freemem.h
+    freemem.h \
+    pretty.h
 
 DISTFILES += \
     README.md \

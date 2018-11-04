@@ -6,6 +6,7 @@
 #include "processing/process.h"
 #include "types.h"
 #include "freemem.h"
+#include "pretty.h"
 
 /**
  * @brief Gets struct Type that correspond to the generic struct Type in a context
@@ -25,9 +26,21 @@ struct Type* generics_sub(struct Type *t, generics *context){
  * @param o Object to be printed
  */
 void print_object(const object o){
-    printf("%.*s ", (int)o.name.length, o.name.begin);
-    for(int i = 0; i < o.argc; i++){
+    if(name_is(o.name, "S") || name_is(o.name, "Z")){
+        printf("%d", get_nat(o));
+        return;
+    }
+
+    if(name_is(o.name, "Cons") || name_is(o.name, "Nil")){
+        print_list(o);
+        return;
+    }
+
+    if(o.argc)
         printf("(");
+    printf("%.*s", (int)o.name.length, o.name.begin);
+    for(int i = 0; i < o.argc; i++){
+        printf(" ");
         eval_promise *ep = o.args + i;
         object *x = promise_eval(ep);
         if(!x){
@@ -35,9 +48,11 @@ void print_object(const object o){
             return;
         }
         print_object(*x);
-        printf(")");
         fflush(stdout);
     }
+
+    if(o.argc)
+        printf(")");
 }
 /**
  * @brief Prints content of value-struct Type function

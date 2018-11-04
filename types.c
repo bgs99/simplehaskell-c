@@ -11,6 +11,11 @@ bool name_equal(struct word a, struct word b){
         return false;
     return strncmp(a.begin, b.begin, a.length) == 0;
 }
+bool name_is(struct word a, const char *b){
+    if(a.length != strlen(b))
+        return false;
+    return strncmp(a.begin, b, a.length) == 0;
+}
 
 /**
  * @brief Checks for struct Type equality

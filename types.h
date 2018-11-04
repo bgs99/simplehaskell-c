@@ -150,3 +150,4 @@ bool object_equal(object a, object b);
 void reset_generics(struct Type *t);
 
 bool name_equal(struct word a, struct word b);
+bool name_is(struct word a, const char *b);
