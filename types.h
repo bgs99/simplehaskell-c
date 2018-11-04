@@ -13,6 +13,10 @@ struct generics;
 struct syntax_tree;
 struct fun_list;
 
+
+/**
+ * @brief struct Type of the function
+ */
 struct Type{
     union{
         struct{
@@ -27,26 +31,21 @@ struct Type{
              */
             struct Type *arg;
             /**
-             * @brief Return type of the complex function
+             * @brief Return struct Type of the complex function
              */
             struct Type *ret;
 
         };
     };
     /**
-     * @brief List of type variables and substitutions.
+     * @brief List of struct Type variables and substitutions.
      */
     struct generics *gen;
     /**
-     * @brief If simple, function has only a name, otherwise it has argument and return type
+     * @brief If simple, function has only a name, otherwise it has argument and return struct Type
      */
     bool simple;
 };
-/**
- * @struct Type
- * @brief Type of the function
- */
-typedef struct Type Type;
 
 struct eval_promise;
 
@@ -61,7 +60,7 @@ typedef struct object object;
 
 typedef struct Fun{
     struct word name;
-    Type *type;
+    struct Type *type;
     object *val;
     unsigned id_depth;
     unsigned int *ids;//NULL if not parameter
@@ -73,17 +72,17 @@ struct generics{
      */
     struct generics *next;
     /**
-     * @brief Name of generic type
+     * @brief Name of generic struct Type
      */
     struct word key;
     /**
-     * @brief Actual type, if present
+     * @brief Actual struct Type, if present
      */
-    Type *val;
+    struct Type *val;
 };
 /**
  * @struct generics
- * @brief This structure represents list of type substitutions
+ * @brief This structure represents list of struct Type substitutions
  */
 typedef  struct generics generics;
 
@@ -128,13 +127,13 @@ typedef struct pattern{
 define_list(pattern, pattern_list)
 
 
-Type* last_type(Type *t);
+struct Type* last_type(struct Type *t);
 
-bool equal_t(Type *a, Type *b, generics *context);
+bool equal_t(struct Type *a, struct Type *b, generics *context);
 
-Type *apply_t(const Type *a, Type *b);
+struct Type *apply_t(const struct Type *a, struct Type *b);
 
-void fprint_t(const Type *t, FILE *f);
+void fprint_t(const struct Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)
 #define log_t(type) fprint_t(type, stderr)
 
@@ -142,12 +141,12 @@ void fprint_context(generics *g, FILE *f);
 #define print_context(gen) fprint_context(gen, stdout)
 #define log_context(gen) fprint_context(gen, stderr)
 
-bool generic(Type t);
+bool generic(struct Type t);
 
-Type* type_make(struct word name);
-Type* type_add(Type *fun, Type *arg);
+struct Type* type_make(struct word name);
+struct Type* type_add(struct Type *fun, struct Type *arg);
 
 bool object_equal(object a, object b);
-void reset_generics(Type *t);
+void reset_generics(struct Type *t);
 
 bool name_equal(struct word a, struct word b);

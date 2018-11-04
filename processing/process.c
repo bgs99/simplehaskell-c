@@ -46,11 +46,11 @@ pattern_list *pattern_from_et(eval_tree *et){
     return pl;
 }
 
-Type *parse_t(struct syntax_tree input);
+struct Type *parse_t(struct syntax_tree input);
 /**
- * @brief Processes type annotation of a function
- * @param input Syntax tree of type annotation
- * @return Function definition with right type and name on success, empty struct otherwise
+ * @brief Processes struct Type annotation of a function
+ * @param input Syntax tree of struct Type annotation
+ * @return Function definition with right struct Type and name on success, empty struct otherwise
  */
 struct fun_def process_tan(struct syntax_tree input){
     if(input.type != ANNOTATION)
@@ -65,7 +65,7 @@ struct fun_def process_tan(struct syntax_tree input){
     return (struct fun_def){NULL, pattern_from_et(et)};
 }
 
-struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth, const dict *glob){
+struct arg *process_par(struct Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth, const dict *glob){
     struct word id = input.val;
     Fun *f = dict_get(glob, id);
     struct arg *af = calloc(1, sizeof (struct arg));
@@ -78,7 +78,7 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
     mark_ptr(af->match);
     if(!input.args)
         return af;
-    Type *i = f->type;
+    struct Type *i = f->type;
     unsigned int liid = 0;
     for(struct tree_args *cur = input.args; cur; cur = cur->next, i = i->ret){
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
@@ -92,14 +92,14 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
 
 /**
  * @brief process_left fills local dictionary with function parameters from input
- * @param t Type of the function
+ * @param t struct Type of the function
  * @param local dictionary of local names, 'out' parameter
  * @param input syntax tree of the function definition
  */
-void process_left(Type *t, arg_list **local, struct syntax_tree input, const dict *glob){
+void process_left(struct Type *t, arg_list **local, struct syntax_tree input, const dict *glob){
     if(input.type != DEFINITION) return;
     unsigned int liid = 0;
-    Type *at = t;
+    struct Type *at = t;
     for(struct tree_args *cur = input.args->next; cur; cur = cur->next, liid++){
         unsigned *lid = malloc(sizeof (unsigned));
         *lid = liid;
@@ -121,7 +121,7 @@ struct fun_def process_app(const arg_list *local, const dict *glob, struct synta
     if(input.type == UNDEFINED)
         return (struct fun_def){NULL, NULL};
     struct fun_def pr = process_f_f(local, glob, input);
-    Type *f = pr.type;
+    struct Type *f = pr.type;
     if(!f){
         return (struct fun_def){NULL, NULL};
     }
@@ -179,20 +179,20 @@ struct fun_def process_arg(const arg_list *local, const dict *glob, struct synta
 
 /**
  * @brief process_right processes right side of function's definition
- * @param f type of the function
+ * @param f struct Type of the function
  * @param local dictionary of local names
  * @param glob dictionary of global names
  * @param input syntax tree of the expression on the right
  * @return expression's definition on success, empty struct on fail
  */
-struct fun_def process_right(Type *f, const arg_list *local, const dict *glob, struct syntax_tree input){
+struct fun_def process_right(struct Type *f, const arg_list *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL, NULL};
     struct fun_def tr = process_app(local, glob, input);
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), f->gen)){
-        fprintf(stderr, "Return types do not match: \n %.*s has type ",(int)f->name.length, f->name.begin);
+        fprintf(stderr, "Return types do not match: \n %.*s has struct Type ",(int)f->name.length, f->name.begin);
         log_t(last_type(f));
-        fprintf(stderr, "\n%.*s has type ", (int)tr.et->val->t->f->name.length, tr.et->val->t->f->name.begin);
+        fprintf(stderr, "\n%.*s has struct Type ", (int)tr.et->val->t->f->name.length, tr.et->val->t->f->name.begin);
         log_t(last_type(tr.type));
         fprintf(stderr, " in a context: \n");
         log_context(tr.type->gen);
@@ -241,23 +241,23 @@ void pattern_add_matches(pattern_list *p, arg_list *local){
     p->val->args = local;
 }
 /**
- * @brief process_type generates simple type from name
- * @param input syntax tree with name of the type
- * @return generated type
+ * @brief process_type generates simple struct Type from name
+ * @param input syntax tree with name of the struct Type
+ * @return generated struct Type
  */
-Type* process_type(struct syntax_tree input){
-    Type *ret = calloc(1, sizeof(Type));
+struct Type* process_type(struct syntax_tree input){
+    struct Type *ret = calloc(1, sizeof(struct Type));
     ret->simple = true;
     ret->name = input.val;
     return ret;
 }
 /**
  * @brief process_constructor adds to global dictionary a new constructor
- * @param name name of the type that constructor belongs to
+ * @param name name of the struct Type that constructor belongs to
  * @param input syntax tree of constructor
  * @param glob global dictionary of names
  */
-void process_constructor(Type *name, struct syntax_tree input, dict **glob){
+void process_constructor(struct Type *name, struct syntax_tree input, dict **glob){
     if(input.type != CONSTRUCTOR)
         return;
     struct word cname = input.val;
@@ -267,18 +267,18 @@ void process_constructor(Type *name, struct syntax_tree input, dict **glob){
     *p = (object){0, cname, NULL};
     ret->val = p;
     ret->type = name;
-    Type *last = NULL, *first = NULL;
+    struct Type *last = NULL, *first = NULL;
 
     for(tree_args *i = input.args; i; i = i->next){
-        Type *arg = process_type(*i->val);
+        struct Type *arg = process_type(*i->val);
         if(!last){
-            last = calloc(1, sizeof (Type));
+            last = calloc(1, sizeof (struct Type));
             last->simple = false;
             last->arg = arg;
             first = last;
             continue;
         }
-        last->ret = calloc(1, sizeof (Type));
+        last->ret = calloc(1, sizeof (struct Type));
         last->ret->simple = false;
         last->ret->arg = arg;
         last = last->ret;
@@ -296,7 +296,7 @@ void process_constructor(Type *name, struct syntax_tree input, dict **glob){
  * @param input syntax tree of the datatype
  * @param glob global dictionary of names
  */
-void process_datatype(Type *name, struct syntax_tree input, dict **glob){
+void process_datatype(struct Type *name, struct syntax_tree input, dict **glob){
     if(input.type != DATATYPE)
            return;
     for(tree_args *i = input.args; i; i = i->next){
@@ -312,7 +312,7 @@ void process_datatype(Type *name, struct syntax_tree input, dict **glob){
 struct fun_def process_fun(const dict *glob, struct syntax_tree block){
     struct fun_def a = process_tan(*block.args->val);
 #ifdef LOGALL
-    log("&&Parsing function %s of type ", name);
+    log("&&Parsing function %s of struct Type ", name);
     log_t(a.et->val->t->f->type);
     log(" &&\n");
 #endif
@@ -378,7 +378,7 @@ void process_text(const char *input, dict **glob){
             continue;
         }
         if(tl.type == DATATYPE){
-            Type *t = type_make(tl.val);
+            struct Type *t = type_make(tl.val);
             process_datatype(t, tl, glob);
             syntax_tree_free(tl);
             continue;

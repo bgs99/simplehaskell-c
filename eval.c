@@ -8,12 +8,12 @@
 #include "freemem.h"
 
 /**
- * @brief Gets type that correspond to the generic type in a context
- * @param t Generic type
+ * @brief Gets struct Type that correspond to the generic struct Type in a context
+ * @param t Generic struct Type
  * @param context Generics context
- * @return Bound type if type is generic and bound, source type otherwise
+ * @return Bound struct Type if struct Type is generic and bound, source struct Type otherwise
  */
-Type* generics_sub(Type *t, generics *context){
+struct Type* generics_sub(struct Type *t, generics *context){
     if(!generic(*t)) return t;
     for(generics *g = context; g; g = g->next)
         if(name_equal(g->key, t->name))
@@ -40,14 +40,14 @@ void print_object(const object o){
     }
 }
 /**
- * @brief Prints content of value-type function
+ * @brief Prints content of value-struct Type function
  * @param f Function to be printed
- * @return true if function is value-type function, false otherwise
+ * @return true if function is value-struct Type function, false otherwise
  */
 bool print_res(const Fun *f){
     if(!f)
         return false;
-    const Type *valtype = generics_sub(f->type, f->type->gen);
+    const struct Type *valtype = generics_sub(f->type, f->type->gen);
     if(!valtype) return false;
     if(!valtype->simple) return false;
     print_object(*f->val);
@@ -105,6 +105,8 @@ eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *par
     return extract_var(depth-1, lid+1, param->val->args + (*lid));
 }
 eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *params, int argn, unsigned parn){
+    if(argn == 0)
+        return NULL;
     eval_promise *args = calloc((unsigned)argn, sizeof(eval_promise));
     int i = 0;
     for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
@@ -116,7 +118,8 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
     }
     return args;
 }
-//equals (S (S Z)) (S Z)
+
+
 /**
  * @brief Evaluates an expression
  * @param glob Global dictionary of names
@@ -139,14 +142,16 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     eval_promise *args = collect_args(glob, input, params, input->argn, parn);
     if(!res){//if function is not constant
         if(f->ids){//if it is variable
-            res = promise_eval(extract_var(f->id_depth, f->ids+1, params + (*f->ids)));//evaluate it
+            eval_promise *argument_function = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
+            eval_promise *function_args = params + 1;
+            const eval_tree *sa =  dict_get_eval(glob, f->name, args);
         } else {//if it is indeed a function
             const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
             if(!sa){
                 fprintf(stderr, "Pattern matching failed\n");
                 return NULL;
             }
-            return eval_expr(glob, sa->arg, args, (unsigned)input->argn);//and perform the calculation
+            return eval_expr(glob, sa->arg, args, (unsigned)sa->arg->argn);//and perform the calculation
         }
     }
     if(!input->arg){
@@ -164,7 +169,7 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
  * @brief Evaluates an expression from a string
  * @param glob Global dictionary of names
  * @param input Exrpression
- * @return Value-type function that contatins the result of expression evaluation and it's type
+ * @return Value-struct Type function that contatins the result of expression evaluation and it's struct Type
  */
 Fun* eval_string(dict *glob, const char *input){
     struct syntax_tree tl = accept_expression(&input);
@@ -175,7 +180,7 @@ Fun* eval_string(dict *glob, const char *input){
     }
     reset_generics(pr.type);
     if(!pr.type->simple){
-        fprintf(stderr, "Expression doesn't have primitive type\n");
+        fprintf(stderr, "Expression doesn't have primitive struct Type\n");
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));
@@ -186,6 +191,7 @@ Fun* eval_string(dict *glob, const char *input){
     ret->val = val;
     return ret;
 }
+
 /**
  * @brief Evaluates an evaluation promise
  * @param ep Evaluation promise

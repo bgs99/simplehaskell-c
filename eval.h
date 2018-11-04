@@ -3,7 +3,7 @@
 #include "types.h"
 
 bool print_res(const Fun *f);
-Type *generics_sub(Type *t, generics *context);
+struct Type *generics_sub(struct Type *t, generics *context);
 
 typedef struct eval_promise{
     dict *glob;

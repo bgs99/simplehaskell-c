@@ -34,7 +34,7 @@ void free_log(){
 
 void eval_tree_free(eval_tree *t);
 void object_free(object *o);
-void type_free(Type *t);
+void type_free(struct Type *t);
 
 void promise_free(eval_promise *p){
     if(!p)
@@ -75,7 +75,7 @@ void object_free(object *o){
     }
 }
 
-void type_free(Type *t){
+void type_free(struct Type *t){
     if(!t)
         return;
     if(t->simple)

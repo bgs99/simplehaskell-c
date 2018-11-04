@@ -81,7 +81,7 @@ struct syntax_tree accept_fun_type(const char **input){
     if(accept(input, '(')){
         head = accept_fun_type(input);
         if(!accept(input, ')')){
-            fprintf(stderr, "Expected ')' after '(' in type");
+            fprintf(stderr, "Expected ')' after '(' in struct Type");
             return ret;
         }
     } else {

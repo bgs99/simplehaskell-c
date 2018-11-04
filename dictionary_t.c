@@ -126,11 +126,11 @@ struct arg* args_get(const arg_list *d, struct word name){
     return NULL;
 }
 /**
- * @brief Adds type variable to a type description
+ * @brief Adds struct Type variable to a struct Type description
  * @param t Destination
- * @param name Type variable's name
+ * @param name struct Type variable's name
  */
-void generics_add(Type *t, struct word name){
+void generics_add(struct Type *t, struct word name){
     for(const generics *i = t->gen; i; i = i->next){
         if(name_equal(i->key, name))
                return;
@@ -142,11 +142,11 @@ void generics_add(Type *t, struct word name){
     mark_ptr(ret);
 }
 /**
- * @brief generics_merge Moves type variables from one type to another. NULL-safe
+ * @brief generics_merge Moves struct Type variables from one struct Type to another. NULL-safe
  * @param to Destination
  * @param from Source
  */
-void generics_merge(Type *to,  Type *from){
+void generics_merge(struct Type *to,  struct Type *from){
     if(!from->gen) return;
     for(const generics *i = from->gen; i; i = i->next){
         generics_add(to, i->key);
@@ -154,21 +154,21 @@ void generics_merge(Type *to,  Type *from){
     //generics_free(from->gen);
 }
 /**
- * @brief Binds generic argument to a type
+ * @brief Binds generic argument to a struct Type
  * @param g generics context
  * @param name name of the argument
- * @param t Type
+ * @param t struct Type
  * @return true if argument is generic and can be bound, false otherwise
  */
-bool generics_bind(generics *g, struct word name, Type *t){
+bool generics_bind(generics *g, struct word name, struct Type *t){
     for(generics *i = g; i; i = i->next){
         if(name_equal(i->key, name)){
             if(i->val) return equal_t(i->val,t,i->val->gen);
             i->val = t;
 #ifdef LOGALL
-            fprintf(stderr, "&&Assigned type ");
+            fprintf(stderr, "&&Assigned struct Type ");
             log_t(t);
-            fprintf(stderr, " to type var %s\n", name);
+            fprintf(stderr, " to struct Type var %s\n", name);
 #endif
             return true;
         }

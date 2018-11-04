@@ -10,7 +10,7 @@ void mark_ptr(void *ptr);
 void promise_free(struct eval_promise *p);
 void generics_free(generics *g);
 void object_free(object *o);
-void type_free(Type *t);
+void type_free(struct Type *t);
 void function_free(Fun *f);
 void arg_free(struct arg *a);
 void eval_tree_free(eval_tree *t);

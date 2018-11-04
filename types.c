@@ -13,13 +13,13 @@ bool name_equal(struct word a, struct word b){
 }
 
 /**
- * @brief Checks for type equality
- * @param a First type
- * @param b Second type
+ * @brief Checks for struct Type equality
+ * @param a First struct Type
+ * @param b Second struct Type
  * @param context Generics context
- * @return return true if types are equal or type a can be substitued with type b
+ * @return return true if types are equal or struct Type a can be substitued with struct Type b
  */
-bool equal_t(Type *a, Type *b, generics *context){
+bool equal_t(struct Type *a, struct Type *b, generics *context){
     if(a->simple && generic(*a)){
         if(b->simple && generic(*b) && name_equal(a->name, b->name))
             return true;
@@ -34,14 +34,14 @@ bool equal_t(Type *a, Type *b, generics *context){
         return false;//if args are different
     return equal_t(a->ret, b->ret, context);//comparing return types
 }
-Type *parse_t(struct syntax_tree input);
+struct Type *parse_t(struct syntax_tree input);
 /**
- * @brief Calculates type of the application of function
- * @param a Type of a function
- * @param b Type of an argument
- * @return Result type if appliable, NULL otherwise
+ * @brief Calculates struct Type of the application of function
+ * @param a struct Type of a function
+ * @param b struct Type of an argument
+ * @return Result struct Type if appliable, NULL otherwise
  */
-Type* apply_t(const Type *a, Type *b){
+struct Type* apply_t(const struct Type *a, struct Type *b){
     if(a->simple){
         fprintf(stderr, "Trying to apply function of type ");
         log_t(b);
@@ -65,16 +65,16 @@ Type* apply_t(const Type *a, Type *b){
 }
 
 /**
- * @brief Parses Type of a function's argument
- * @param input Syntax tree of a type
+ * @brief Parses struct Type of a function's argument
+ * @param input Syntax tree of a struct Type
  * @return Parse result
  */
-Type *_parse_arg(struct syntax_tree input){
-    Type *res;
+struct Type *_parse_arg(struct syntax_tree input){
+    struct Type *res;
     if(input.type == FUN_TYPE){
         return parse_t(input);
     }
-    res = calloc(1, sizeof (Type));
+    res = calloc(1, sizeof (struct Type));
     res->simple = true;
     const struct word name = input.val;
     res->name = name;
@@ -83,15 +83,15 @@ Type *_parse_arg(struct syntax_tree input){
     return res;
 }
 /**
- * @brief Parses type of a function
- * @param input Syntax tree of a function's type
- * @return Result type
+ * @brief Parses struct Type of a function
+ * @param input Syntax tree of a function's struct Type
+ * @return Result struct Type
  */
-Type *parse_t(struct syntax_tree input){
+struct Type *parse_t(struct syntax_tree input){
     if(input.type == VALUE_TYPE)
         return _parse_arg(input);
-    Type *res = calloc(1, sizeof (Type));
-    Type *arg, *ret;
+    struct Type *res = calloc(1, sizeof (struct Type));
+    struct Type *arg, *ret;
 
     arg = _parse_arg(*input.args->val);
 
@@ -111,13 +111,13 @@ Type *parse_t(struct syntax_tree input){
     return res;
 }
 /**
- * @brief Prints type to a file
- * @param t Type
+ * @brief Prints struct Type to a file
+ * @param t struct Type
  * @param dest File
  */
-void fprint_t(const Type *t, FILE *dest){
+void fprint_t(const struct Type *t, FILE *dest){
     if(!t){
-        fprintf(dest, "No type provided\n");
+        fprintf(dest, "No struct Type provided\n");
         return;
     }
     if(t->simple){
@@ -137,22 +137,22 @@ void fprint_t(const Type *t, FILE *dest){
 }
 
 /**
- * @brief Gets final return type of a function
- * @param t Type of a function
- * @return Result type
+ * @brief Gets final return struct Type of a function
+ * @param t struct Type of a function
+ * @return Result struct Type
  */
-Type* last_type(Type *t){
+struct Type* last_type(struct Type *t){
     if(t->simple || !t->ret)
         return t;
     return last_type(t->ret);
 }
 
 /**
- * @brief Checks if type is generic
- * @param t Type
+ * @brief Checks if struct Type is generic
+ * @param t struct Type
  * @return true if generic, false otherwise
  */
-bool generic(Type t){
+bool generic(struct Type t){
     if(!t.simple) return false;
     char c = *t.name.begin;
     return (c >= 'a') && (c <= 'z');
@@ -164,7 +164,7 @@ bool generic(Type t){
  */
 void fprint_context(generics *g, FILE *f){
     if(!g) {
-        fprintf(f, "No type vars\n");
+        fprintf(f, "No struct Type vars\n");
         return;
     }
     for(generics *i = g; i; i = i->next){
@@ -175,12 +175,12 @@ void fprint_context(generics *g, FILE *f){
 }
 
 /**
- * @brief Creates type from a name
+ * @brief Creates struct Type from a name
  * @param name Name
- * @return Result type
+ * @return Result struct Type
  */
-Type* type_make(struct word name){
-    Type *ret = calloc(1, sizeof (Type));
+struct Type* type_make(struct word name){
+    struct Type *ret = calloc(1, sizeof (struct Type));
     ret->simple = true;
     ret->name = name;
     if(generic(*ret))
@@ -189,23 +189,23 @@ Type* type_make(struct word name){
 }
 
 /**
- * @brief Adds return type to a function's type
- * @param fun Function's type
- * @param arg Return type
+ * @brief Adds return struct Type to a function's struct Type
+ * @param fun Function's struct Type
+ * @param arg Return struct Type
  * @return
  */
-Type* type_add(Type *fun, Type *arg){
+struct Type* type_add(struct Type *fun, struct Type *arg){
     generics_merge(fun, arg);
     if(fun->simple){
-        Type *r = calloc(1, sizeof (r));
+        struct Type *r = calloc(1, sizeof (r));
         r->arg = fun;
         r->ret = arg;
         r->simple = false;
         return r;
     }
-    Type *i;
+    struct Type *i;
     for(i = fun; !i->ret->simple; i = i->ret);
-    Type *r = calloc(1, sizeof (r));
+    struct Type *r = calloc(1, sizeof (r));
     r->arg = i->ret;
     r->simple = false;
     r->ret = arg;
@@ -234,10 +234,10 @@ bool object_equal(object a, object b){
 }
 
 /**
- * @brief Resets generics binding of a type
- * @param t Type
+ * @brief Resets generics binding of a struct Type
+ * @param t struct Type
  */
-void reset_generics(Type *t){
+void reset_generics(struct Type *t){
     for(generics *i = t->gen; i; i = i->next){
         i->val = NULL;
     }
