@@ -5,17 +5,12 @@
 #include "eval.h"
 #include <string.h>
 
-/**
- * @brief Reallocates string from static memory to dynamic
- * @param name Static string. Don't pass dynamically allocated strings
- * @return
- */
-const char* alloc_name(const char* name){
-    unsigned long len = strlen(name);
-    char *ret = calloc(len+1, sizeof (char));
-    strcpy(ret, name);
-    return ret;
+bool name_equal(struct word a, struct word b){
+    if(a.length != b.length)
+        return false;
+    return strncmp(a.begin, b.begin, a.length) == 0;
 }
+
 /**
  * @brief Checks for type equality
  * @param a First type
@@ -25,14 +20,14 @@ const char* alloc_name(const char* name){
  */
 bool equal_t(Type *a, Type *b, generics *context){
     if(a->simple && generic(*a)){
-        if(b->simple && generic(*b) && strcmp(a->name, b->name) == 0)
+        if(b->simple && generic(*b) && name_equal(a->name, b->name))
             return true;
         return generics_bind(context, a->name, b);
     }
     if(a->simple != b->simple)
         return false;//if a is function and b is val
     if(a->simple)
-        return !strcmp(a->name, b->name);//if both val compare names
+        return name_equal(a->name, b->name);//if both val compare names
 
     if(!equal_t(a->arg, b->arg, context))
         return false;//if args are different
@@ -80,7 +75,7 @@ Type *_parse_arg(struct syntax_tree input){
     }
     res = calloc(1, sizeof (Type));
     res->simple = true;
-    char *name = get_name(input);
+    const struct word name = input.val;
     res->name = name;
     if(generic(*res))
         generics_add(res, name);
@@ -125,7 +120,7 @@ void fprint_t(const Type *t, FILE *dest){
         return;
     }
     if(t->simple){
-        fprintf(dest, "%s", t->name);
+        fprintf(dest, "%.*s", (int)t->name.length, t->name.begin);
         return;
     }
     if(t->arg->simple){
@@ -158,7 +153,7 @@ Type* last_type(Type *t){
  */
 bool generic(Type t){
     if(!t.simple) return false;
-    char c = *t.name;
+    char c = *t.name.begin;
     return (c >= 'a') && (c <= 'z');
 }
 /**
@@ -172,7 +167,7 @@ void fprint_context(generics *g, FILE *f){
         return;
     }
     for(generics *i = g; i; i = i->next){
-        fprintf(f, "\t%s = ",g->key);
+        fprintf(f, "\t%.*s = ",(int)g->key.length, g->key.begin);
         fprint_t(g->val, f);
         fprintf(f, "\n");
     }
@@ -183,13 +178,12 @@ void fprint_context(generics *g, FILE *f){
  * @param name Name
  * @return Result type
  */
-Type* type_make(const char *name){
-    char *id = strdup(name);
+Type* type_make(struct word name){
     Type *ret = calloc(1, sizeof (Type));
     ret->simple = true;
-    ret->name = id;
+    ret->name = name;
     if(generic(*ret))
-        generics_add(ret, id);
+        generics_add(ret, name);
     return ret;
 }
 
@@ -227,7 +221,7 @@ Type* type_add(Type *fun, Type *arg){
 bool object_equal(object a, object b){
     if(a.argc != b.argc)
         return false;
-    if(strcmp(a.name, b.name) != 0)
+    if(!name_equal(a.name, b.name))
         return false;
     for(int i = 0; i < a.argc; i++){
         object x = *promise_eval(a.args + i);

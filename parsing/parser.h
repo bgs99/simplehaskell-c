@@ -4,4 +4,3 @@ struct syntax_tree accept_block(const char **input);
 struct syntax_tree accept_expression(const char **input);
 struct syntax_tree accept_file(const char *filename);
 
-char *get_name(struct syntax_tree tree);

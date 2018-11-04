@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "list.h"
+#include "parsing/parser_common.h"
 
 const char* alloc_name(const char* name);
 
@@ -15,11 +16,10 @@ struct fun_list;
 struct Type{
     union{
         struct{
-            struct fun_list *constructors;
             /**
              * @brief Name of the simple function
              */
-            char *name;
+            struct word name;
         };
         struct {
             /**
@@ -30,13 +30,13 @@ struct Type{
              * @brief Return type of the complex function
              */
             struct Type *ret;
-            /**
-             * @brief List of type variables and substitutions.
-             * Only useful for complex functions
-             */
-            struct generics *gen;
+
         };
     };
+    /**
+     * @brief List of type variables and substitutions.
+     */
+    struct generics *gen;
     /**
      * @brief If simple, function has only a name, otherwise it has argument and return type
      */
@@ -52,7 +52,7 @@ struct eval_promise;
 
 struct object{
     int argc;
-    char *name;
+    struct word name;
     struct eval_promise *args;
 };
 
@@ -60,7 +60,7 @@ typedef struct object object;
 
 
 typedef struct Fun{
-    char *name;
+    struct word name;
     Type *type;
     object *val;
     unsigned id_depth;
@@ -75,7 +75,7 @@ struct generics{
     /**
      * @brief Name of generic type
      */
-    char *key;
+    struct word key;
     /**
      * @brief Actual type, if present
      */
@@ -95,7 +95,7 @@ struct eval_tree{
     /**
      * @brief Number of arguments
      */
-    unsigned int argn;
+    int argn;
     /**
      * @brief Pointer to first arg
      */
@@ -144,8 +144,10 @@ void fprint_context(generics *g, FILE *f);
 
 bool generic(Type t);
 
-Type* type_make(const char *name);
+Type* type_make(struct word name);
 Type* type_add(Type *fun, Type *arg);
 
 bool object_equal(object a, object b);
 void reset_generics(Type *t);
+
+bool name_equal(struct word a, struct word b);

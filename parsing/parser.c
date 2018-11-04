@@ -233,21 +233,12 @@ struct syntax_tree accept_function(const char **input){
 
 struct syntax_tree accept_block(const char **input){
     skip_el(input);
-    struct syntax_tree *block = malloc(sizeof (struct syntax_tree));
-    *block = accept_import(input);
-    if(block->type == UNDEFINED)
-        *block = accept_datatype(input);
-    if(block->type == UNDEFINED)
-        *block = accept_function(input);
-    if(block->type == UNDEFINED){
-        free(block);
-        return undefined;
-    }
-    return *block;
-}
+    struct syntax_tree block;
+    block = accept_import(input);
+    if(block.type == UNDEFINED)
+        block = accept_datatype(input);
+    if(block.type == UNDEFINED)
+        block = accept_function(input);
 
-char *get_name(struct syntax_tree tree){
-    char *ret = calloc(tree.val.length+1, 1);
-    strncpy(ret, tree.val.begin, tree.val.length);
-    return ret;
+    return block;
 }

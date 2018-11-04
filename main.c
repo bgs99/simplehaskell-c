@@ -7,7 +7,7 @@
 #include "freemem.h"
 
 static dict *ad = NULL;
-static const char **names;
+static struct word *names;
 char * function_name_generator(const char *text, int state);
 
 char **function_completion(const char *text, int start, int end){
@@ -21,16 +21,16 @@ char **function_completion(const char *text, int start, int end){
 char *function_name_generator(const char *text, int state){
 
     static unsigned long list_index, len;
-    const char *name;
+    struct word name;
 
     if (!state) {
         list_index = 0;
         len = strlen(text);
     }
 
-    while ((name = names[list_index++])) {
-        if (strncmp(name, text, len) == 0) {
-            return strdup(name);
+    while ((name = names[list_index++]).begin) {
+        if (strncmp(name.begin, text, len) == 0) {
+            return strndup(name.begin, name.length);
         }
     }
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     unsigned long adl = 0;
     for(dict *td = ad; td; td = td->next)
         adl++;
-    names = calloc(adl+1, sizeof (char *));
+    names = calloc(adl+1, sizeof (struct word));
     int i = 0;
     for(dict *td = ad; td; td = td->next, i++){
         names[i] = td->val->val->t->f->name;
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if(print_res(eval_string(ad,ui)))
+        print_res(eval_string(ad,ui));
         printf("\n");
         add_history(ui);
         free(ui);

@@ -20,16 +20,15 @@ void mark_ptr(void *ptr){
     log = new;
 }
 
-void free_log(struct memlog *ml){
-    if(!ml)
-        return;
-
-    free_log(ml->next);
-    free(ml->next);
-    ml->next = NULL;
-
-    free(ml->ptr);
-    ml->ptr = NULL;
+void free_log(){
+    while(log){
+        struct memlog *ml = log;
+        log = log->next;
+        free(ml->ptr);
+        ml->ptr = NULL;
+        ml->next = NULL;
+        free(ml);
+    }
 }
 
 
@@ -62,8 +61,6 @@ void generics_free(generics *g){
     generics_free(g->next);
     mark_ptr(g->next);
     g->next = NULL;
-    mark_ptr(g->key);
-    g->key = NULL;
     type_free(g->val);
     mark_ptr(g->val);
     g->val = NULL;
@@ -72,11 +69,6 @@ void generics_free(generics *g){
 void object_free(object *o){
     if(!o)
         return;
-
-    if(o->name && *o->name)
-        free(o->name);
-    o->name = NULL;
-
     for(int i = 0; i < o->argc; i++){
         promise_free(o->args + i);
         mark_ptr(o->args + i);
@@ -86,9 +78,6 @@ void object_free(object *o){
 void type_free(Type *t){
     if(!t)
         return;
-    if(t->name && *t->name)
-        free(t->name);
-    t->name = NULL;
     if(t->simple)
         return;
     generics_free(t->gen);
@@ -105,9 +94,6 @@ void type_free(Type *t){
 void function_free(Fun *f){
     if(!f)
         return;
-    if(f->name && *f->name)
-        free(f->name);
-    f->name = NULL;
     mark_ptr(f->ids);
     f->ids = NULL;
     type_free(f->type);
@@ -138,13 +124,14 @@ void arg_free(struct arg *a){
 void eval_tree_free(eval_tree *t){
     if(!t)
         return;
-    unsigned arg_old = t->argn;
-    t->argn = 0;
+    if(t->argn < 0)
+        return;
+    t->argn = -t->argn;
     t->next = NULL;
     function_free(t->f);
     mark_ptr(t->f);
     t->f = NULL;
-    for(unsigned i = 0; i < arg_old; i++){
+    for(int i = 0; (i < -t->argn) && t->arg; i++){
         eval_tree_free(t->arg + i);
         mark_ptr(t->arg + i);
     }
@@ -197,7 +184,7 @@ void dict_free(dict *d){
 
 void free_all(dict *d){
     dict_free(d);
-    free_log(log);
+    free_log();
     free(log);
     log = NULL;
 }

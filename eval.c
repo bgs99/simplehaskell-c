@@ -15,7 +15,7 @@
 Type* generics_sub(Type *t, generics *context){
     if(!generic(*t)) return t;
     for(generics *g = context; g; g = g->next)
-        if(strcmp(g->key, t->name)==0)
+        if(name_equal(g->key, t->name))
             return g->val ? g->val : t;
     return t;
 }
@@ -24,7 +24,7 @@ Type* generics_sub(Type *t, generics *context){
  * @param o Object to be printed
  */
 void print_object(const object o){
-    printf("%s ", o.name);
+    printf("%.*s ", (int)o.name.length, o.name.begin);
     for(int i = 0; i < o.argc; i++){
         printf("(");
         eval_promise *ep = o.args + i;
@@ -77,7 +77,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
  * @param f Function
  * @return Evaluation tree
  */
-eval_tree* eval_make(Fun *f){
+eval_tree *eval_make(Fun *f){
     eval_tree *ret = malloc(sizeof (eval_tree));
     *ret = (eval_tree){f, 0, NULL, NULL};
     return ret;
@@ -102,8 +102,8 @@ eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *par
         promise_eval(param);
     return extract_var(depth-1, lid+1, param->val->args + (*lid));
 }
-eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn, unsigned parn){
-    eval_promise *args = calloc(argn, sizeof(eval_promise));
+eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *params, int argn, unsigned parn){
+    eval_promise *args = calloc((unsigned)argn, sizeof(eval_promise));
     int i = 0;
     for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
         if(!params || !arg->f->ids){
@@ -144,13 +144,13 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
                 fprintf(stderr, "Pattern matching failed\n");
                 return NULL;
             }
-            return eval_expr(glob, sa->arg, args, input->argn);//and perform the calculation
+            return eval_expr(glob, sa->arg, args, (unsigned)input->argn);//and perform the calculation
         }
     }
     if(!input->arg){
         return res;
     }
-    char *name = res->name;
+    struct word name = res->name;
     res = malloc(sizeof (object));
     res->name = name;
     res->args = args;
@@ -194,7 +194,7 @@ object* promise_eval(eval_promise *ep){
         return ep->val;
     object *ret = eval_expr(ep->glob, ep->input, ep->params, ep->paramc);
     if(!ret){
-        fprintf(stderr, "Evaluation failed of function %s has failed", ep->input->f->name);
+        fprintf(stderr, "Evaluation failed of function %.*s has failed", (int)ep->input->f->name.length, ep->input->f->name.begin);
         return NULL;
     }
     ep->val = ret;

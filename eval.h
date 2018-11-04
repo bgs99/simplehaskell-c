@@ -18,7 +18,7 @@ object* promise_eval(eval_promise *ep);
 
 void eval_add_arg(eval_tree *tree, eval_tree *arg);
 
-eval_tree* eval_make(Fun *f);
+eval_tree *eval_make(Fun *f);
 
 object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsigned parn);
 

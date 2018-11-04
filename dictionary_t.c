@@ -11,10 +11,11 @@
  * @param input name
  * @return true if constant, false otherwise
  */
-bool is_const(const char *input){
-    char c = *input;
+bool is_const(struct word input){
+    char c = *input.begin;
     return (c >= '0' && c <='9') || (c >= 'A' && c <= 'Z');
 }
+
 /**
  * @brief Checks if two stricgs are equal (yes, it's redundant)
  * @param a first string
@@ -35,7 +36,7 @@ bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
         return true;
     object *par = promise_eval(arg);
 
-    if(!s_equal(pat->match->name, par->name))
+    if(!name_equal(pat->match->name, par->name))
         return false;
     int n = 0;
     for(arg_list *i = pat->args; i; i = i->next, n++){
@@ -59,7 +60,7 @@ bool pattern_match(const pattern *p, eval_promise *args, const dict *glob){
         return true;
     int n = 0;
     for(arg_list *i = p->args->next; i; i = i->next, n++){
-        if(*i->val->match->name == '_')
+        if(*i->val->match->name.begin == '_')
             continue;
         if(!match_arg(i->val, args + n, glob)){
             return false;
@@ -74,10 +75,10 @@ bool pattern_match(const pattern *p, eval_promise *args, const dict *glob){
  * @param args array of arguments
  * @return evaluation tree on success, NULL on fail
  */
-eval_tree *dict_get_eval(const dict *d, const char *name, eval_promise *args){
+eval_tree *dict_get_eval(const dict *d, struct word name, eval_promise *args){
     if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
-        if(!s_equal(name, i->val->val->t->f->name))
+        if(!name_equal(name, i->val->val->t->f->name))
             continue;
         for(const pattern_list *j = i->val; j; j = j->next)
             if( pattern_match(j->val, args, d))
@@ -91,7 +92,8 @@ eval_tree *dict_get_eval(const dict *d, const char *name, eval_promise *args){
  * @param value function
  */
 void dict_add(dict **d, Fun *value){
-    list_add(dict, d, pattern_from_et(eval_make(value)));
+    pattern_list *p = pattern_from_et(eval_make(value));
+    list_add(dict, d, p);
 }
 void args_add(arg_list **d, struct arg *value){
     list_add_last(arg_list, d, value);
@@ -109,13 +111,13 @@ void args_add_self(arg_list **d, Fun *value){
  * @param name name of the function
  * @return function on success, NULL on fail
  */
-Fun* dict_get(const dict *d, const char *name){
+Fun* dict_get(const dict *d, struct word name){
     const eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
 }
-struct arg* args_get(const arg_list *d, const char *name){
+struct arg* args_get(const arg_list *d, struct word name){
     for(const arg_list *i = d; i; i = i->next){
-        if((!i->val->args) && (strcmp(i->val->match->name, name) == 0))
+        if((!i->val->args) && (name_equal(i->val->match->name, name)))
             return i->val;
         struct arg *rec = args_get(i->val->args, name);
         if(rec)
@@ -128,13 +130,13 @@ struct arg* args_get(const arg_list *d, const char *name){
  * @param t Destination
  * @param name Type variable's name
  */
-void generics_add(Type *t, char *name){
+void generics_add(Type *t, struct word name){
     for(const generics *i = t->gen; i; i = i->next){
-        if(strcmp(i->key, name) == 0)
+        if(name_equal(i->key, name))
                return;
     }
     generics *ret = calloc(1, sizeof (generics));
-    ret ->key = name;
+    ret->key = name;
     ret->next = t->gen;
     t->gen = ret;
 }
@@ -157,9 +159,9 @@ void generics_merge(Type *to,  Type *from){
  * @param t Type
  * @return true if argument is generic and can be bound, false otherwise
  */
-bool generics_bind(generics *g, char *name, Type *t){
+bool generics_bind(generics *g, struct word name, Type *t){
     for(generics *i = g; i; i = i->next){
-        if(strcmp(i->key, name)==0){
+        if(name_equal(i->key, name)){
             if(i->val) return equal_t(i->val,t,i->val->gen);
             i->val = t;
 #ifdef LOGALL
