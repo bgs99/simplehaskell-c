@@ -164,7 +164,11 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     if(!args && input->argn)
         return NULL;
     if(f->ids){//if it is variable
-        f = extract_var(f->id_depth, f->ids+1, params + (*f->ids))->input->f;
+        eval_tree *fin = NULL;
+        fin = extract_var(f->id_depth, f->ids+1, params + (*f->ids))->input;
+        if(fin->arg)
+            return eval_expr(glob, fin, args, (unsigned)fin->argn);
+        else f = fin->f;
     }
     object *res = f->val;
     if(!res){//if function is not constant
