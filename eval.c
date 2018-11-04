@@ -128,7 +128,9 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
         if(!params || !arg->f->ids){
             args[i] = (eval_promise){glob, arg, params, parn, NULL};
         } else {
-            eval_promise *a = extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
+            Fun *f = arg->f;
+
+            eval_promise *a = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
             if(!a){
                 free(args);
                 return NULL;
@@ -168,7 +170,7 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     if(!res){//if function is not constant
         const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
         if(!sa){
-            fprintf(stderr, "Pattern matching failed\n");
+            fprintf(stderr, "Pattern matching for function %.*s failed\n", (int)f->name.length, f->name.begin);
             return NULL;
         }
         return eval_expr(glob, sa->arg, args, (unsigned)input->argn);//and perform the calculation
@@ -199,7 +201,7 @@ Fun* eval_string(dict *glob, const char *input){
     }
     reset_generics(pr.type);
     if(!pr.type->simple){
-        fprintf(stderr, "Expression doesn't have primitive struct Type\n");
+        fprintf(stderr, "Expression doesn't have primitive type\n");
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));

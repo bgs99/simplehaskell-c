@@ -169,7 +169,7 @@ bool generic(struct Type t){
  */
 void fprint_context(generics *g, FILE *f){
     if(!g) {
-        fprintf(f, "No struct Type vars\n");
+        fprintf(f, "No type vars\n");
         return;
     }
     for(generics *i = g; i; i = i->next){

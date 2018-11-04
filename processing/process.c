@@ -83,7 +83,7 @@ struct arg *process_par(struct Type *t, struct syntax_tree input, unsigned int *
     for(struct tree_args *cur = input.args; cur; cur = cur->next, i = i->ret){
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
         mark_ptr(ll);
-        memcpy(ll, lid, depth+1);
+        memcpy(ll, lid, sizeof (unsigned) * depth+1);
         ll[depth+1] = liid++;
         list_add_last(arg_list, &af->args, process_par(i->arg, *cur->val, ll, depth +1, glob));
     }
@@ -190,9 +190,9 @@ struct fun_def process_right(struct Type *f, const arg_list *local, const dict *
         return (struct fun_def){NULL, NULL};
     struct fun_def tr = process_app(local, glob, input);
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), f->gen)){
-        fprintf(stderr, "Return types do not match: \n %.*s has struct Type ",(int)f->name.length, f->name.begin);
+        fprintf(stderr, "Return types do not match: \n %.*s has type ",(int)f->name.length, f->name.begin);
         log_t(last_type(f));
-        fprintf(stderr, "\n%.*s has struct Type ", (int)tr.et->val->t->f->name.length, tr.et->val->t->f->name.begin);
+        fprintf(stderr, "\n%.*s has type ", (int)tr.et->val->t->f->name.length, tr.et->val->t->f->name.begin);
         log_t(last_type(tr.type));
         fprintf(stderr, " in a context: \n");
         log_context(tr.type->gen);
