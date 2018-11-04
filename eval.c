@@ -125,9 +125,9 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
     eval_promise *args = calloc((unsigned)argn, sizeof(eval_promise));
     int i = 0;
     for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
-        if(!params || !arg->f->ids){
+        //if(!params || !arg->f->ids){
             args[i] = (eval_promise){glob, arg, params, parn, NULL};
-        } else {
+        /*} else {
             Fun *f = arg->f;
 
             eval_promise *a = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
@@ -136,7 +136,7 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
                 return NULL;
             }
             args[i] = *a;
-        }
+        }*/
     }
     return args;
 }
@@ -165,7 +165,10 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
         return NULL;
     if(f->ids){//if it is variable
         eval_tree *fin = NULL;
-        fin = extract_var(f->id_depth, f->ids+1, params + (*f->ids))->input;
+        eval_promise *ep = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
+        if(!ep)
+            return NULL;
+        fin = ep->input;
         if(fin->arg)
             return eval_expr(glob, fin, args, (unsigned)fin->argn);
         else f = fin->f;

@@ -35,7 +35,8 @@ bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
     if(!is_const(pat->match->name))
         return true;
     object *par = promise_eval(arg);
-
+    if(!par)
+        return false;
     if(!name_equal(pat->match->name, par->name))
         return false;
     int n = 0;

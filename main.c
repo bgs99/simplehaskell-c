@@ -78,9 +78,11 @@ int main(int argc, char **argv)
         }
         Fun *res = eval_string(ad,ui);
         print_res(res);
-        res->name.begin = "it";
-        res->name.length = 2;
-        dict_it(&ad, res);
+        if(res){
+            res->name.begin = "it";
+            res->name.length = 2;
+            dict_it(&ad, res);
+        }
         printf("\n");
         add_history(ui);
         free(ui);

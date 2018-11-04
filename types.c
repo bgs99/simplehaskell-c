@@ -122,7 +122,7 @@ struct Type *parse_t(struct syntax_tree input){
  */
 void fprint_t(const struct Type *t, FILE *dest){
     if(!t){
-        fprintf(dest, "No struct Type provided\n");
+        fprintf(dest, "No type provided\n");
         return;
     }
     if(t->simple){

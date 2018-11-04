@@ -84,6 +84,9 @@ struct arg *process_par(struct Type *t, struct syntax_tree input, unsigned int *
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
         mark_ptr(ll);
         memcpy(ll, lid, sizeof (unsigned) * depth+1);
+        for(unsigned i = 0; i < depth+1;i++){
+            ll[i] = lid[i];
+        }
         ll[depth+1] = liid++;
         list_add_last(arg_list, &af->args, process_par(i->arg, *cur->val, ll, depth +1, glob));
     }
@@ -129,6 +132,8 @@ struct fun_def process_app(const arg_list *local, const dict *glob, struct synta
     for(tree_args *i = input.args; i; i = i->next){
         pr = process_arg(local, glob, *i->val);
         f = apply_t(f, pr.type);
+        if(!f)
+            return (struct fun_def){NULL, NULL};
 #ifdef LOGALL
         log("&&logging context\n");
         log_context(f->gen);
@@ -361,7 +366,7 @@ void process_text(const char *input, dict **glob){
             FILE *in = fopen(path, "r");
             free(path);
             if(!in){
-                printf("Cannot open file %s, halting", fn);
+                printf("Cannot open file %s, halting\n", fn);
                 syntax_tree_free(tl);
                 return;
             }
