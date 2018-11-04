@@ -19,11 +19,11 @@ Fun* get_fun(const dict *glob, const arg_list *local, struct word name){
     if(('0' <= c && '9' >= c) || c == '-'){
         return NULL;//parse_num(name);
     }
-    struct arg *loc = args_get(local, name);
-    Fun *ret = NULL;
-    if(!loc)
-        ret = dict_get(glob, name);
-    else ret = loc->match;
+    Fun *ret = dict_get(glob, name);
+    if(!ret){
+        struct arg *loc = args_get(local, name);
+        ret = loc ? loc->match : NULL;
+    }
 
     if(!ret){
         fprintf(stderr, "Function \"%.*s\" is not found in global dictionary and arguments\n", (int)name.length, name.begin);
