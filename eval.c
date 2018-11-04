@@ -12,7 +12,7 @@
  * @param context Generics context
  * @return Bound type if type is generic and bound, source type otherwise
  */
-const Type* generics_sub(const Type *t, generics *context){
+Type* generics_sub(Type *t, generics *context){
     if(!generic(*t)) return t;
     for(generics *g = context; g; g = g->next)
         if(strcmp(g->key, t->name)==0)
@@ -78,8 +78,8 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
  * @return Evaluation tree
  */
 eval_tree* eval_make(Fun *f){
-    eval_tree *ret = calloc(1, sizeof (eval_tree));
-    ret->f = f;
+    eval_tree *ret = malloc(sizeof (eval_tree));
+    *ret = (eval_tree){f, 0, NULL, NULL};
     return ret;
 }
 
@@ -102,12 +102,12 @@ eval_promise* extract_var(unsigned depth, const unsigned *lid, eval_promise *par
         promise_eval(param);
     return extract_var(depth-1, lid+1, param->val->args + (*lid));
 }
-eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn){
+eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *params, unsigned int argn, unsigned parn){
     eval_promise *args = calloc(argn, sizeof(eval_promise));
     int i = 0;
-    for(const eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
+    for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
         if(!params || !arg->f->ids){
-            args[i] = (eval_promise){glob, arg, params, NULL};
+            args[i] = (eval_promise){glob, arg, params, parn, NULL};
         } else {
             args[i] = *extract_var(arg->f->id_depth, arg->f->ids+1, params + (*arg->f->ids));
         }
@@ -122,7 +122,7 @@ eval_promise* collect_args(const dict *glob, const eval_tree *tree, eval_promise
  * @param params Passed values
  * @return Result value
  */
-object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params){
+object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsigned parn){
     if(!input){
         fprintf(stderr, "Nothing to evaluate\n");
         return NULL;
@@ -134,7 +134,7 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
     const Fun *f = input->f;
 
     object *res = f->val;
-    eval_promise *args = collect_args(glob, input, params, input->argn);
+    eval_promise *args = collect_args(glob, input, params, input->argn, parn);
     if(!res){//if function is not constant
         if(f->ids){//if it is variable
             res = promise_eval(extract_var(f->id_depth, f->ids+1, params + (*f->ids)));//evaluate it
@@ -144,13 +144,13 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
                 fprintf(stderr, "Pattern matching failed\n");
                 return NULL;
             }
-            return eval_expr(glob, sa->arg, args);//and perform the calculation
+            return eval_expr(glob, sa->arg, args, input->argn);//and perform the calculation
         }
     }
     if(!input->arg){
         return res;
     }
-    const char *name = res->name;
+    char *name = res->name;
     res = malloc(sizeof (object));
     res->name = name;
     res->args = args;
@@ -164,7 +164,7 @@ object *eval_expr(const dict *glob, const eval_tree *input, eval_promise *params
  * @param input Exrpression
  * @return Value-type function that contatins the result of expression evaluation and it's type
  */
-Fun* eval_string(const dict *glob, const char *input){
+Fun* eval_string(dict *glob, const char *input){
     struct syntax_tree tl = accept_expression(&input);
     struct fun_def pr = process_app(NULL,glob, tl);
     if(!pr.type){
@@ -177,7 +177,7 @@ Fun* eval_string(const dict *glob, const char *input){
         return NULL;
     }
     Fun *ret = calloc(1, sizeof (Fun));
-    object *val = eval_expr(glob, pr.et->val->t, NULL);
+    object *val = eval_expr(glob, pr.et->val->t, NULL, 0);
     if(!val)
         return NULL;
     ret->type = pr.type;
@@ -192,7 +192,7 @@ Fun* eval_string(const dict *glob, const char *input){
 object* promise_eval(eval_promise *ep){
     if(ep->val)
         return ep->val;
-    object *ret = eval_expr(ep->glob, ep->input, ep->params);
+    object *ret = eval_expr(ep->glob, ep->input, ep->params, ep->paramc);
     if(!ret){
         fprintf(stderr, "Evaluation failed of function %s has failed", ep->input->f->name);
         return NULL;

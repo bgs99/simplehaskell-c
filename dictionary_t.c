@@ -4,6 +4,7 @@
 #include "eval.h"
 #include "parsing/parser.h"
 #include "processing/process.h"
+#include "freemem.h"
 
 /**
  * @brief Checks if name corresponds to a constant
@@ -127,7 +128,7 @@ struct arg* args_get(const arg_list *d, const char *name){
  * @param t Destination
  * @param name Type variable's name
  */
-void generics_add(Type *t, const char *name){
+void generics_add(Type *t, char *name){
     for(const generics *i = t->gen; i; i = i->next){
         if(strcmp(i->key, name) == 0)
                return;
@@ -136,15 +137,6 @@ void generics_add(Type *t, const char *name){
     ret ->key = name;
     ret->next = t->gen;
     t->gen = ret;
-}
-/**
- * @brief generics_free Frees memory of generics struct, leaves names. Currently disabled
- * @param d Generics struct
- */
-void generics_free(generics *d){
-    if(!d) return;
-    generics_free(d->next);
-    //free(d);
 }
 /**
  * @brief generics_merge Moves type variables from one type to another. NULL-safe
@@ -156,7 +148,7 @@ void generics_merge(Type *to,  Type *from){
     for(const generics *i = from->gen; i; i = i->next){
         generics_add(to, i->key);
     }
-    generics_free(from->gen);
+    //generics_free(from->gen);
 }
 /**
  * @brief Binds generic argument to a type
@@ -165,7 +157,7 @@ void generics_merge(Type *to,  Type *from){
  * @param t Type
  * @return true if argument is generic and can be bound, false otherwise
  */
-bool generics_bind(generics *g, const char *name, const Type *t){
+bool generics_bind(generics *g, char *name, Type *t){
     for(generics *i = g; i; i = i->next){
         if(strcmp(i->key, name)==0){
             if(i->val) return equal_t(i->val,t,i->val->gen);
@@ -198,6 +190,3 @@ void dict_generics_reset(dict *d){
         generics_reset(i->val->val->t->f->type->gen);
 }
 
-void dict_free(dict *d){
-
-}

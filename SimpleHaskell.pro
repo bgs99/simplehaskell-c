@@ -13,7 +13,8 @@ SOURCES += \
     parsing/type_parser.c \
     parsing/expression_parser.c \
     parsing/pattern_parser.c \
-    processing/process.c
+    processing/process.c \
+    freemem.c
 
 HEADERS += \
     types.h \
@@ -25,7 +26,8 @@ HEADERS += \
     parsing/parser_common.h \
     parsing/expression_parser.h \
     parsing/pattern_parser.h \
-    processing/process.h
+    processing/process.h \
+    freemem.h
 
 DISTFILES += \
     README.md \

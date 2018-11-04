@@ -19,7 +19,7 @@ struct Type{
             /**
              * @brief Name of the simple function
              */
-            const char *name;
+            char *name;
         };
         struct {
             /**
@@ -52,7 +52,7 @@ struct eval_promise;
 
 struct object{
     int argc;
-    const char *name;
+    char *name;
     struct eval_promise *args;
 };
 
@@ -60,7 +60,7 @@ typedef struct object object;
 
 
 typedef struct Fun{
-    const char *name;
+    char *name;
     Type *type;
     object *val;
     unsigned id_depth;
@@ -75,11 +75,11 @@ struct generics{
     /**
      * @brief Name of generic type
      */
-    const char *key;
+    char *key;
     /**
      * @brief Actual type, if present
      */
-    const Type *val;
+    Type *val;
 };
 /**
  * @struct generics
@@ -128,11 +128,11 @@ typedef struct pattern{
 define_list(pattern, pattern_list)
 
 
-const Type* last_type(const Type *t);
+Type* last_type(Type *t);
 
-bool equal_t(const Type *a, const Type *b, generics *context);
+bool equal_t(Type *a, Type *b, generics *context);
 
-Type *apply_t(const Type *a, const Type *b);
+Type *apply_t(const Type *a, Type *b);
 
 void fprint_t(const Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)

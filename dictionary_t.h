@@ -13,9 +13,9 @@ bool is_const(const char *input);
 void dict_add(dict **d, Fun *value);
 void args_add(arg_list **d, struct arg *value);
 void args_add_self(arg_list **d, Fun *value);
-void generics_add(Type *t, const char *name);
+void generics_add(Type *t, char *name);
 
 void generics_merge(Type *to, Type *from);
-bool generics_bind(generics *g, const char *name, const Type *t);
+bool generics_bind(generics *g, char *name, Type *t);
 void dict_generics_reset(dict *d);
 void dict_free(dict *d);

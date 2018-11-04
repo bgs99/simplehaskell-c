@@ -23,7 +23,7 @@ const char* alloc_name(const char* name){
  * @param context Generics context
  * @return return true if types are equal or type a can be substitued with type b
  */
-bool equal_t(const Type *a, const Type *b, generics *context){
+bool equal_t(Type *a, Type *b, generics *context){
     if(a->simple && generic(*a)){
         if(b->simple && generic(*b) && strcmp(a->name, b->name) == 0)
             return true;
@@ -45,7 +45,7 @@ Type *parse_t(struct syntax_tree input);
  * @param b Type of an argument
  * @return Result type if appliable, NULL otherwise
  */
-Type* apply_t(const Type *a, const Type *b){
+Type* apply_t(const Type *a, Type *b){
     if(a->simple){
         fprintf(stderr, "Trying to apply function of type ");
         log_t(b);
@@ -80,7 +80,7 @@ Type *_parse_arg(struct syntax_tree input){
     }
     res = calloc(1, sizeof (Type));
     res->simple = true;
-    const char *name = get_name(input);
+    char *name = get_name(input);
     res->name = name;
     if(generic(*res))
         generics_add(res, name);
@@ -145,7 +145,7 @@ void fprint_t(const Type *t, FILE *dest){
  * @param t Type of a function
  * @return Result type
  */
-const Type* last_type(const Type *t){
+Type* last_type(Type *t){
     if(t->simple || !t->ret)
         return t;
     return last_type(t->ret);
@@ -184,7 +184,7 @@ void fprint_context(generics *g, FILE *f){
  * @return Result type
  */
 Type* type_make(const char *name){
-    const char *id = alloc_name(name);
+    char *id = strdup(name);
     Type *ret = calloc(1, sizeof (Type));
     ret->simple = true;
     ret->name = id;

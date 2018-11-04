@@ -51,7 +51,7 @@ Type *parse_t(struct syntax_tree input);
  */
 struct fun_def process_tan(struct syntax_tree input){
     if(input.type != ANNOTATION) return (struct fun_def){NULL,NULL};
-    const char *name = get_name(input);
+    char *name = get_name(input);
 
     Fun *res = calloc(1, sizeof (Fun));
     res->name = name;
@@ -62,7 +62,7 @@ struct fun_def process_tan(struct syntax_tree input){
 }
 
 struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth, const dict *glob){
-    const char *id = get_name(input);
+    char *id = get_name(input);
     Fun *f = dict_get(glob, id);
     struct arg *af = calloc(1, sizeof (struct arg));
     af->match = calloc(1, sizeof (Fun));
@@ -178,7 +178,7 @@ struct fun_def process_arg(const arg_list *local, const dict *glob, struct synta
  * @param input syntax tree of the expression on the right
  * @return expression's definition on success, empty struct on fail
  */
-struct fun_def process_right(const Type *f, const arg_list *local, const dict *glob, struct syntax_tree input){
+struct fun_def process_right(Type *f, const arg_list *local, const dict *glob, struct syntax_tree input){
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL,NULL};
     struct fun_def tr = process_app(local, glob, input);
@@ -253,7 +253,7 @@ Type* process_type(struct syntax_tree input){
 void process_constructor(Type *name, struct syntax_tree input, dict **glob){
     if(input.type != CONSTRUCTOR)
         return;
-    const char *cname = get_name(input);
+    char *cname = get_name(input);
     Fun *ret = calloc(1, sizeof(Fun));
     ret->name = cname;
     object *p = malloc(sizeof (object));

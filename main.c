@@ -4,6 +4,7 @@
 #include "processing/process.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include "freemem.h"
 
 static dict *ad = NULL;
 static const char **names;
@@ -70,6 +71,7 @@ int main(int argc, char **argv)
     printf("%s \n", all);
 
     char *ui;
+    free_all(ad);
 
     while((ui = readline("> "))!=NULL){
         if(*ui == '\0'){
@@ -81,6 +83,6 @@ int main(int argc, char **argv)
         add_history(ui);
         free(ui);
     }
-
+    free_all(ad);
     return 0;
 }
