@@ -1,5 +1,7 @@
 #include "expression_parser.h"
 #include <malloc.h>
+#include "freemem.h"
+
 
 struct syntax_tree accept_expression(const char **input){
     struct syntax_tree ret = undefined;
@@ -25,6 +27,7 @@ struct syntax_tree accept_expression(const char **input){
         if(arg.type == UNDEFINED)
             break;
         struct syntax_tree *arg_p = malloc(sizeof (struct syntax_tree));
+        mark_ptr(arg_p);
         *arg_p = arg;
         list_add_last(tree_args, &ret.args, arg_p);
     }

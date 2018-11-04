@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 
     while((ui = readline("> "))!=NULL){
         if(*ui == '\0'){
+            free(ui);
             continue;
         }
 
@@ -82,6 +83,8 @@ int main(int argc, char **argv)
         add_history(ui);
         free(ui);
     }
+    free(all);
+    free(names);
     free_all(ad);
     return 0;
 }

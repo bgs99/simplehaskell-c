@@ -4,6 +4,7 @@
 #include "dictionary_t.h"
 #include "eval.h"
 #include <string.h>
+#include "freemem.h"
 
 bool name_equal(struct word a, struct word b){
     if(a.length != b.length)

@@ -5,6 +5,7 @@
 #include "parsing/expression_parser.h"
 #include "processing/process.h"
 #include "types.h"
+#include "freemem.h"
 
 /**
  * @brief Gets type that correspond to the generic type in a context
@@ -80,6 +81,7 @@ void eval_add_arg(eval_tree *tree, eval_tree *arg){
 eval_tree *eval_make(Fun *f){
     eval_tree *ret = malloc(sizeof (eval_tree));
     *ret = (eval_tree){f, 0, NULL, NULL};
+    mark_ptr(ret);
     return ret;
 }
 

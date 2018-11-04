@@ -15,7 +15,7 @@
 #define list_add_last(name, dict, value) \
     { \
         if(!*dict){ \
-            *dict = malloc(sizeof(name));\
+            *dict = malloc(sizeof(name)); \
             (*dict)->val = value; \
             (*dict)->next = NULL; \
         } else { \

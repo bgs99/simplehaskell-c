@@ -41,6 +41,8 @@ pattern_list *pattern_from_et(eval_tree *et){
     *p = (pattern){et, NULL};
     pattern_list *pl = NULL;
     list_add(pattern_list, &pl, p);
+    mark_ptr(pl);
+    mark_ptr(p);
     return pl;
 }
 
@@ -67,17 +69,20 @@ struct arg *process_par(Type *t, struct syntax_tree input, unsigned int *lid, un
     struct word id = input.val;
     Fun *f = dict_get(glob, id);
     struct arg *af = calloc(1, sizeof (struct arg));
+    mark_ptr(af);
     af->match = calloc(1, sizeof (Fun));
     af->match->name = id;
     af->match->type = f ? f->type : t;
     af->match->ids = lid;
     af->match->id_depth = depth;
+    mark_ptr(af->match);
     if(!input.args)
         return af;
     Type *i = f->type;
     unsigned int liid = 0;
     for(struct tree_args *cur = input.args; cur; cur = cur->next, i = i->ret){
         unsigned int *ll = malloc(sizeof (int) * (depth + 2));
+        mark_ptr(ll);
         memcpy(ll, lid, depth+1);
         ll[depth+1] = liid++;
         list_add_last(arg_list, &af->args, process_par(i->arg, *cur->val, ll, depth +1, glob));
@@ -316,7 +321,7 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
     for(tree_args *i = block.args->next; i; i = i->next){
 
         arg_list **l = calloc(1, sizeof (arg_list *));
-
+        mark_ptr(l);
         process_left(c.type, l, *i->val, glob);
 
 
@@ -354,8 +359,10 @@ void process_text(const char *input, dict **glob){
             strcat(path, ".shs");
             free(fn);
             FILE *in = fopen(path, "r");
+            free(path);
             if(!in){
                 printf("Cannot open file %s, halting", fn);
+                syntax_tree_free(tl);
                 return;
             }
             fseek(in, 0, SEEK_END);
@@ -367,15 +374,18 @@ void process_text(const char *input, dict **glob){
             fclose(in);
 
             process_text(all, glob);
+            syntax_tree_free(tl);
             continue;
         }
         if(tl.type == DATATYPE){
             Type *t = type_make(tl.val);
             process_datatype(t, tl, glob);
+            syntax_tree_free(tl);
             continue;
         }
         struct fun_def f = process_fun(*glob, tl);
         list_add(dict, glob, f.et);
+        syntax_tree_free(tl);
     }
 }
 /**

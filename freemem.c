@@ -178,7 +178,7 @@ void dict_free(dict *d){
         mark_ptr(i->val);
         i->val = NULL;
     }
- }
+}
 
 
 
@@ -187,4 +187,12 @@ void free_all(dict *d){
     free_log();
     free(log);
     log = NULL;
+}
+
+void syntax_tree_free(struct syntax_tree tree){
+    for(tree_args *ta = tree.args; ta; ta = ta->next){
+        syntax_tree_free(*ta->val);
+        mark_ptr(ta->val);
+        mark_ptr(ta);
+    }
 }

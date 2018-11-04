@@ -139,6 +139,7 @@ void generics_add(Type *t, struct word name){
     ret->key = name;
     ret->next = t->gen;
     t->gen = ret;
+    mark_ptr(ret);
 }
 /**
  * @brief generics_merge Moves type variables from one type to another. NULL-safe

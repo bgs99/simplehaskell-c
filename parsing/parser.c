@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "freemem.h"
 #include "type_parser.h"
 #include "expression_parser.h"
 #include "pattern_parser.h"
@@ -176,6 +177,7 @@ struct syntax_tree accept_definition(const char **input){
         return ret;
     }
     struct syntax_tree *exp_p = malloc(sizeof (struct syntax_tree));
+    mark_ptr(exp_p);
     *exp_p = accept_expression(input);
     if(exp_p->type == UNDEFINED){
         *input = start;
@@ -201,6 +203,7 @@ void skip_el(const char **input){
 struct syntax_tree accept_function(const char **input){
     skip_el(input);
     struct syntax_tree *ann = malloc(sizeof (struct syntax_tree));
+    mark_ptr(ann);
     *ann = accept_annotation(input);
     if(ann->type == UNDEFINED)
         return *ann;
