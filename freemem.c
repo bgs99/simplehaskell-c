@@ -124,9 +124,9 @@ void arg_free(struct arg *a){
 void eval_tree_free(eval_tree *t){
     if(!t)
         return;
-    if(t->argn < 0)
+    if(!t->f)
         return;
-    t->argn = -t->argn;
+    t->argn = t->argn;
     t->next = NULL;
     function_free(t->f);
     mark_ptr(t->f);

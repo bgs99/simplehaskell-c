@@ -71,7 +71,6 @@ int main(int argc, char **argv)
     printf("%s \n", all);
 
     char *ui;
-    free_all(ad);
 
     while((ui = readline("> "))!=NULL){
         if(*ui == '\0'){
