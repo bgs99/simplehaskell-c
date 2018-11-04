@@ -138,21 +138,18 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     }
     const Fun *f = input->f;
 
-    object *res = f->val;
     eval_promise *args = collect_args(glob, input, params, input->argn, parn);
+    if(f->ids){//if it is variable
+        f = extract_var(f->id_depth, f->ids+1, params + (*f->ids))->input->f;
+    }
+    object *res = f->val;
     if(!res){//if function is not constant
-        if(f->ids){//if it is variable
-            eval_promise *argument_function = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
-            eval_promise *function_args = params + 1;
-            const eval_tree *sa =  dict_get_eval(glob, f->name, args);
-        } else {//if it is indeed a function
-            const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
-            if(!sa){
-                fprintf(stderr, "Pattern matching failed\n");
-                return NULL;
-            }
-            return eval_expr(glob, sa->arg, args, (unsigned)sa->arg->argn);//and perform the calculation
+        const eval_tree *sa =  dict_get_eval(glob, f->name, args);//find how to calculate it
+        if(!sa){
+            fprintf(stderr, "Pattern matching failed\n");
+            return NULL;
         }
+        return eval_expr(glob, sa->arg, args, (unsigned)input->argn);//and perform the calculation
     }
     if(!input->arg){
         return res;

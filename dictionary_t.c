@@ -163,7 +163,8 @@ void generics_merge(struct Type *to,  struct Type *from){
 bool generics_bind(generics *g, struct word name, struct Type *t){
     for(generics *i = g; i; i = i->next){
         if(name_equal(i->key, name)){
-            if(i->val) return equal_t(i->val,t,i->val->gen);
+            if(i->val)
+                return equal_t(i->val,t,i->val->gen);
             i->val = t;
 #ifdef LOGALL
             fprintf(stderr, "&&Assigned struct Type ");
