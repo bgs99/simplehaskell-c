@@ -16,7 +16,7 @@ Current restrictions:
     - There's no termination check, either compiletime or runtime
     - No type derivation, but type chcking algorithm is pretty close to it
     - You have to give a function all the arguments it has in it's type
-    - No syntatic sugar, no preloaded libraries
+    - No syntactic sugar, no preloaded libraries
         - ...though I have Prelude on my PC that i include for complex tests
     - Only simple include, no multiple inclusion checks, qualified includes and features like that. Only vanilla C-like straight up text inclusion
     - No comments for now and it is not simple enough to add to make me do it soon
