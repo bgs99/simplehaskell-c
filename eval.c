@@ -125,18 +125,7 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
     eval_promise *args = calloc((unsigned)argn, sizeof(eval_promise));
     int i = 0;
     for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
-        //if(!params || !arg->f->ids){
-            args[i] = (eval_promise){glob, arg, params, parn, NULL};
-        /*} else {
-            Fun *f = arg->f;
-
-            eval_promise *a = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
-            if(!a){
-                free(args);
-                return NULL;
-            }
-            args[i] = *a;
-        }*/
+        args[i] = (eval_promise){glob, arg, params, parn, NULL};
     }
     return args;
 }
@@ -164,14 +153,10 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     if(!args && input->argn)
         return NULL;
     if(f->ids){//if it is variable
-        eval_tree *fin = NULL;
-        eval_promise *ep = extract_var(f->id_depth, f->ids+1, params + (*f->ids));
+        eval_promise *ep = extract_var(f->id_depth, f->ids+1, params + (*f->ids));//get it from args
         if(!ep)
             return NULL;
-        fin = ep->input;
-        if(fin->arg)
-            return eval_expr(glob, fin, args, (unsigned)fin->argn);
-        else f = fin->f;
+        return promise_eval(ep);//and return it's value
     }
     object *res = f->val;
     if(!res){//if function is not constant
