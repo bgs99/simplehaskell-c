@@ -87,6 +87,9 @@ int main(int argc, char **argv)
         add_history(ui);
         free(ui);
     }
+    if(ad)
+        ad = ad->next;
+
     free(all);
     free(names);
     free_all(ad);

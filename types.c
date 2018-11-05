@@ -50,7 +50,7 @@ struct Type* apply_t(const struct Type *a, struct Type *b){
     if(a->simple){
         fprintf(stderr, "Trying to apply function of type ");
         log_t(b);
-        fprintf(stderr, "to a primitive value of type ");
+        fprintf(stderr, " to a primitive value of type ");
         log_t(a);
         fprintf(stderr, "\n");
         return NULL;

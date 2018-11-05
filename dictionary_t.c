@@ -93,7 +93,11 @@ eval_tree *dict_get_eval(const dict *d, struct word name, eval_promise *args){
  * @param value function
  */
 void dict_add(dict **d, Fun *value){
+    if(!value)
+        return;
     pattern_list *p = pattern_from_et(eval_make(value));
+    if(!p)
+        return;
     list_add(dict, d, p);
 }
 

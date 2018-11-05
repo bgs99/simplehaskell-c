@@ -123,6 +123,7 @@ eval_promise* collect_args(dict *glob, const eval_tree *tree, eval_promise *para
     if(argn == 0)
         return NULL;
     eval_promise *args = calloc((unsigned)argn, sizeof(eval_promise));
+    mark_ptr(args);
     int i = 0;
     for(eval_tree *arg = tree->arg; arg; arg = arg->next, i++){
         args[i] = (eval_promise){glob, arg, params, parn, NULL};
@@ -172,6 +173,7 @@ object *eval_expr(dict *glob, const eval_tree *input, eval_promise *params, unsi
     }
     struct word name = res->name;
     res = malloc(sizeof (object));
+    mark_ptr(res);
     res->name = name;
     res->args = args;
     res->argc = (int)input->argn;

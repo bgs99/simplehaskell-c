@@ -104,10 +104,23 @@ void process_left(struct Type *t, arg_list **local, struct syntax_tree input, co
     unsigned int liid = 0;
     struct Type *at = t;
     for(struct tree_args *cur = input.args->next; cur; cur = cur->next, liid++){
+        if(at->simple){
+            arg_list_free(*local);
+            *local = NULL;
+            fprintf(stderr, "Too many args for a function %.*s\n", (int)input.val.length, input.val.begin);
+            return;
+        }
+
         unsigned *lid = malloc(sizeof (unsigned));
         *lid = liid;
         args_add(local, process_par(at->arg, *cur->val, lid, 0, glob));
         at = at->ret;
+    }
+    if(!at->simple){
+        fprintf(stderr, "Not enough args for a function %.*s\n", (int)input.val.length, input.val.begin);
+        arg_list_free(*local);
+        *local = NULL;
+        return;
     }
 }
 
@@ -194,11 +207,13 @@ struct fun_def process_right(struct Type *f, const arg_list *local, const dict *
     if(input.type != EXPRESSION)
         return (struct fun_def){NULL, NULL};
     struct fun_def tr = process_app(local, glob, input);
+    if(!(tr.et || tr.type))
+        return (struct fun_def){NULL, NULL};
     if(!equal_t(last_type(f), generics_sub(tr.type, tr.type->gen), f->gen)){
-        fprintf(stderr, "Return types do not match: \n %.*s has type ",(int)f->name.length, f->name.begin);
+        fprintf(stderr, "Return types do not match: function has type ");
         log_t(last_type(f));
-        fprintf(stderr, "\n%.*s has type ", (int)tr.et->val->t->f->name.length, tr.et->val->t->f->name.begin);
-        log_t(last_type(tr.type));
+        fprintf(stderr, "\nresult has type ");
+        log_t(tr.type);
         fprintf(stderr, " in a context: \n");
         log_context(tr.type->gen);
         fprintf(stderr, "\n");
@@ -328,6 +343,10 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
         arg_list **l = calloc(1, sizeof (arg_list *));
         mark_ptr(l);
         process_left(c.type, l, *i->val, glob);
+        if(!*l){
+            free(l);
+            return (struct fun_def){NULL, NULL};
+        }
 
 
         unsigned int argn = 0;
@@ -389,6 +408,10 @@ void process_text(const char *input, dict **glob){
             continue;
         }
         struct fun_def f = process_fun(*glob, tl);
+        if(!(f.et && f.type)){
+            fprintf(stderr, "Malformed function definition\n");
+            return;
+        }
         list_add(dict, glob, f.et);
         syntax_tree_free(tl);
     }
