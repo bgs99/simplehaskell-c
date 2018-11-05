@@ -28,3 +28,7 @@ Available features:
     - Line editing and commands history via GNU readline
 
 For most of the other things this interpretator's language is similar to Haskell
+
+To build
+$ cmake --build build
+inside project root
