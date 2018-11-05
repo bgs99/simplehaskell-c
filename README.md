@@ -2,6 +2,7 @@
 Simple Haskell-like language interpreter with call-by-name evaluation and basic type system
 
 Current restrictions:
+
     - Expressions with unnecessary parenthesises won't work
     - Datatypes cannot contain functions (not tested)
     - Datatypes cannot have arguments (no generic datatypes)
@@ -22,6 +23,7 @@ Current restrictions:
     - Parsing errors don't contain position in code, but parsers have part of the information needed
 
 Available features:
+
     - GHCI's 'it' keyword that contains result of the previous succsessful evaluation
     - Line editing and commands history via GNU readline
 
