@@ -34,4 +34,15 @@ To build
     $ cmake .
     $ make
 
-inside project root
+    inside project root
+
+Usage:
+    
+    $ SimpleHaskell
+    opens REPL and loads file input.shs
+    
+    $ SimpleHaskell filename
+    opens REPL and loads file 'filename' 
+    
+    in processing/process.c it is possible to modify default path to modules
+    
