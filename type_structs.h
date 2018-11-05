@@ -55,17 +55,20 @@ struct object{
     struct eval_promise *args;
 };
 
-typedef struct object object;
 
 
-typedef struct Fun{
+struct Fun{
     struct word name;
     struct Type *type;
-    object *val;
+    struct object *val;
     unsigned id_depth;
     unsigned int *ids;//NULL if not parameter
-} Fun;
+};
 
+/**
+ * @struct generics
+ * @brief This structure represents list of struct Type substitutions
+ */
 struct generics{
     /**
      * @brief Next element of the list
@@ -80,17 +83,16 @@ struct generics{
      */
     struct Type *val;
 };
-/**
- * @struct generics
- * @brief This structure represents list of struct Type substitutions
- */
-typedef  struct generics generics;
 
+/**
+ * @struct eval_tree
+ * @brief This structure represents evaluation tree
+ */
 struct eval_tree{
     /**
      * @brief A function to be called
      */
-    Fun *f; //Function
+    struct Fun *f; //Function
     /**
      * @brief Number of arguments
      */
@@ -104,32 +106,27 @@ struct eval_tree{
      */
     struct eval_tree *next;
 };
-/**
- * @struct eval_tree
- * @brief This structure represents evaluation tree
- */
-typedef struct eval_tree eval_tree;
 
 struct arg;
 define_list(struct arg, arg_list)
 
 struct arg{
     bool complex;
-    Fun *match;
+    struct Fun *match;
     arg_list *args;
 };
 
-typedef struct pattern{
-    eval_tree *t;
+struct pattern{
+    struct eval_tree *t;
     arg_list *args;
-} pattern;
+};
 
-define_list(pattern, pattern_list)
+define_list(struct pattern, pattern_list)
 
 
 struct Type* last_type(struct Type *t);
 
-bool equal_t(struct Type *a, struct Type *b, generics *context);
+bool equal_t(struct Type *a, struct Type *b, struct generics *context);
 
 struct Type *apply_t(const struct Type *a, struct Type *b);
 
@@ -137,7 +134,7 @@ void fprint_t(const struct Type *t, FILE *f);
 #define print_t(type) fprint_t(type, stdout)
 #define log_t(type) fprint_t(type, stderr)
 
-void fprint_context(generics *g, FILE *f);
+void fprint_context(struct generics *g, FILE *f);
 #define print_context(gen) fprint_context(gen, stdout)
 #define log_context(gen) fprint_context(gen, stderr)
 
@@ -146,7 +143,7 @@ bool generic(struct Type t);
 struct Type* type_make(struct word name);
 struct Type* type_add(struct Type *fun, struct Type *arg);
 
-bool object_equal(object a, object b);
+bool object_equal(struct object a, struct object b);
 void reset_generics(struct Type *t);
 
 bool name_equal(struct word a, struct word b);

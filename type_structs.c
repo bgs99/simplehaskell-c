@@ -1,4 +1,4 @@
-#include "types.h"
+#include "type_structs.h"
 #include <malloc.h>
 #include "parsing/parser.h"
 #include "dictionary_t.h"
@@ -24,7 +24,7 @@ bool name_is(struct word a, const char *b){
  * @param context Generics context
  * @return return true if types are equal or struct Type a can be substitued with struct Type b
  */
-bool equal_t(struct Type *a, struct Type *b, generics *context){
+bool equal_t(struct Type *a, struct Type *b, struct generics *context){
     if(a->simple && generic(*a)){
         if(b->simple && generic(*b) && name_equal(a->name, b->name))
             return true;
@@ -167,12 +167,12 @@ bool generic(struct Type t){
  * @param g Generics context
  * @param f File
  */
-void fprint_context(generics *g, FILE *f){
+void fprint_context(struct generics *g, FILE *f){
     if(!g) {
         fprintf(f, "No type vars\n");
         return;
     }
-    for(generics *i = g; i; i = i->next){
+    for(struct generics *i = g; i; i = i->next){
         fprintf(f, "\t%.*s = ",(int)g->key.length, g->key.begin);
         fprint_t(g->val, f);
         fprintf(f, "\n");
@@ -224,14 +224,14 @@ struct Type* type_add(struct Type *fun, struct Type *arg){
  * @param b Second object
  * @return true if equal, false otherwise
  */
-bool object_equal(object a, object b){
+bool object_equal(struct object a, struct object b){
     if(a.argc != b.argc)
         return false;
     if(!name_equal(a.name, b.name))
         return false;
     for(int i = 0; i < a.argc; i++){
-        object x = *promise_eval(a.args + i);
-        object y = *promise_eval(b.args + i);
+        struct object x = *promise_eval(a.args + i);
+        struct object y = *promise_eval(b.args + i);
         if(!object_equal(x, y))
             return false;
     }
@@ -243,7 +243,7 @@ bool object_equal(object a, object b){
  * @param t struct Type
  */
 void reset_generics(struct Type *t){
-    for(generics *i = t->gen; i; i = i->next){
+    for(struct generics *i = t->gen; i; i = i->next){
         i->val = NULL;
     }
 }

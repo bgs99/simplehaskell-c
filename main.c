@@ -5,6 +5,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "freemem.h"
+#include <string.h>
 
 static dict *ad = NULL;
 static struct word *names;
@@ -30,7 +31,9 @@ char *function_name_generator(const char *text, int state){
 
     while ((name = names[list_index++]).begin) {
         if (strncmp(name.begin, text, len) == 0) {
-            return strndup(name.begin, name.length);
+            char *ret = malloc(sizeof (char) *(name.length+1));
+            ret[name.length] = '\0';
+            return strncpy(ret, name.begin, (size_t)name.length);
         }
     }
 
@@ -76,7 +79,7 @@ int main(int argc, char **argv)
             free(ui);
             continue;
         }
-        Fun *res = eval_string(ad,ui);
+        struct Fun *res = eval_string(ad,ui);
         print_res(res);
         if(res){
             res->name.begin = "it";

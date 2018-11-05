@@ -32,11 +32,11 @@ void free_log(){
 }
 
 
-void eval_tree_free(eval_tree *t);
-void object_free(object *o);
+void eval_tree_free(struct eval_tree *t);
+void object_free(struct object *o);
 void type_free(struct Type *t);
 
-void promise_free(eval_promise *p){
+void promise_free(struct eval_promise *p){
     if(!p)
         return;
     dict_free(p->glob);
@@ -55,7 +55,7 @@ void promise_free(eval_promise *p){
     p->paramc = 0;
 }
 
-void generics_free(generics *g){
+void generics_free(struct generics *g){
     if(!g)
         return;
     generics_free(g->next);
@@ -66,7 +66,7 @@ void generics_free(generics *g){
     g->val = NULL;
 }
 
-void object_free(object *o){
+void object_free(struct object *o){
     if(!o)
         return;
     for(int i = 0; i < o->argc; i++){
@@ -91,7 +91,7 @@ void type_free(struct Type *t){
     t->ret = NULL;
 }
 
-void function_free(Fun *f){
+void function_free(struct Fun *f){
     if(!f)
         return;
     mark_ptr(f->ids);
@@ -121,7 +121,7 @@ void arg_free(struct arg *a){
     }
 }
 
-void eval_tree_free(eval_tree *t){
+void eval_tree_free(struct eval_tree *t){
     if(!t)
         return;
     if(!t->f)
@@ -150,7 +150,7 @@ void arg_list_free(arg_list *al){
     mark_ptr(al);
 }
 
-void pattern_free(pattern *p){
+void pattern_free(struct pattern *p){
     if(!p)
         return;
     eval_tree_free(p->t);

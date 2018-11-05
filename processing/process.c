@@ -1,10 +1,10 @@
 #include "process.h"
 #include "../parsing/parser.h"
 #include "../eval.h"
-#include "../types.h"
+#include "../type_structs.h"
 #include <malloc.h>
 #include "../dictionary_t.h"
-#include "freemem.h"
+#include "../freemem.h"
 #define PATH "/home/bgs99c/sandbox/shs/"
 
 /**
@@ -14,12 +14,12 @@
  * @param name Name of the function
  * @return Function on succes, NULL otherwise
  */
-Fun* get_fun(const dict *glob, const arg_list *local, struct word name){
+struct Fun* get_fun(const dict *glob, const arg_list *local, struct word name){
     char c = *name.begin;
     if(('0' <= c && '9' >= c) || c == '-'){
         return NULL;//parse_num(name);
     }
-    Fun *ret = dict_get(glob, name);
+    struct Fun *ret = dict_get(glob, name);
     if(!ret){
         struct arg *loc = args_get(local, name);
         ret = loc ? loc->match : NULL;
@@ -36,9 +36,9 @@ Fun* get_fun(const dict *glob, const arg_list *local, struct word name){
  * @param et Evaluation tree
  * @return Pattern match
  */
-pattern_list *pattern_from_et(eval_tree *et){
-    pattern *p = malloc(sizeof ( pattern));
-    *p = (pattern){et, NULL};
+pattern_list *pattern_from_et(struct eval_tree *et){
+    struct pattern *p = malloc(sizeof (struct pattern));
+    *p = (struct pattern){et, NULL};
     pattern_list *pl = NULL;
     list_add(pattern_list, &pl, p);
     mark_ptr(pl);
@@ -57,20 +57,20 @@ struct fun_def process_tan(struct syntax_tree input){
         return (struct fun_def){NULL, NULL};
     struct word name = input.val;
 
-    Fun *res = calloc(1, sizeof (Fun));
+    struct Fun *res = calloc(1, sizeof (struct Fun));
     res->name = name;
     res->type = parse_t(*input.args->val);
 
-    eval_tree *et = eval_make(res);
+    struct eval_tree *et = eval_make(res);
     return (struct fun_def){NULL, pattern_from_et(et)};
 }
 
 struct arg *process_par(struct Type *t, struct syntax_tree input, unsigned int *lid, unsigned int depth, const dict *glob){
     struct word id = input.val;
-    Fun *f = dict_get(glob, id);
+    struct Fun *f = dict_get(glob, id);
     struct arg *af = calloc(1, sizeof (struct arg));
     mark_ptr(af);
-    af->match = calloc(1, sizeof (Fun));
+    af->match = calloc(1, sizeof (struct Fun));
     af->match->name = id;
     af->match->type = f ? f->type : t;
     af->match->ids = lid;
@@ -141,7 +141,7 @@ struct fun_def process_app(const arg_list *local, const dict *glob, struct synta
     if(!f){
         return (struct fun_def){NULL, NULL};
     }
-    eval_tree* ret = pr.et->val->t;
+    struct eval_tree* ret = pr.et->val->t;
     for(tree_args *i = input.args; i; i = i->next){
         pr = process_arg(local, glob, *i->val);
         f = apply_t(f, pr.type);
@@ -168,7 +168,7 @@ struct fun_def process_f_f(const arg_list *local, const dict *glob, struct synta
         return (struct fun_def){NULL,NULL};
     struct word name = input.val;
 
-    Fun *ff = get_fun(glob, local, name);
+    struct Fun *ff = get_fun(glob, local, name);
     if(!ff)
         return (struct fun_def) {NULL, NULL};
     return (struct fun_def){ff->type, pattern_from_et(eval_make(ff))};
@@ -189,7 +189,7 @@ struct fun_def process_arg(const arg_list *local, const dict *glob, struct synta
         return ret;
     }
     struct word name = input.val;
-    Fun *ff = get_fun(glob, local, name);
+    struct Fun *ff = get_fun(glob, local, name);
     if(!ff)
         return (struct fun_def) {NULL, NULL};
     return (struct fun_def){ff->type, pattern_from_et(eval_make(ff))};
@@ -246,8 +246,8 @@ void pattern_add(struct fun_def *pr, struct fun_def np){
  * @param f function
  * @param argn number of function's arguments
  */
-void eval_tree_wrap(struct fun_def *pr, Fun *f, unsigned int argn){
-    eval_tree *et = eval_make(f);
+void eval_tree_wrap(struct fun_def *pr, struct Fun *f, unsigned int argn){
+    struct eval_tree *et = eval_make(f);
     eval_add_arg(et, pr->et->val->t);
     pr->et->val->t = et;
     pr->et->val->t->argn = (int)argn;
@@ -281,10 +281,10 @@ void process_constructor(struct Type *name, struct syntax_tree input, dict **glo
     if(input.type != CONSTRUCTOR)
         return;
     struct word cname = input.val;
-    Fun *ret = calloc(1, sizeof(Fun));
+    struct Fun *ret = calloc(1, sizeof(struct Fun));
     ret->name = cname;
-    object *p = malloc(sizeof (object));
-    *p = (object){0, cname, NULL};
+    struct object *p = malloc(sizeof (struct object));
+    *p = (struct object){0, cname, NULL};
     ret->val = p;
     ret->type = name;
     struct Type *last = NULL, *first = NULL;
@@ -377,15 +377,13 @@ void process_text(const char *input, dict **glob){
     while((tl = accept_block(&input)).type != UNDEFINED){
         if(tl.type==IMPORT){
             char *path = calloc(tl.val.length + 40, sizeof (char));
-            char *fn = strndup(tl.val.begin, tl.val.length);
             strcat(path, PATH);
-            strcat(path, fn);
+            strncat(path, tl.val.begin, tl.val.length);
             strcat(path, ".shs");
-            free(fn);
             FILE *in = fopen(path, "r");
             free(path);
             if(!in){
-                printf("Cannot open file %s, halting\n", fn);
+                printf("Cannot open module %.*s, halting\n", (int)tl.val.length, tl.val.begin);
                 syntax_tree_free(tl);
                 return;
             }

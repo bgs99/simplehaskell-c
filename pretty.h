@@ -1,5 +1,5 @@
 #pragma once
-#include "types.h"
+#include "type_structs.h"
 
-unsigned get_nat(object val);
-void print_list(object val);
+unsigned get_nat(struct object val);
+void print_list(struct object val);

@@ -3,14 +3,14 @@
 <datatype> ::= "data" <word> "=" <constructor_list>
 <constructor_list> ::= <constructor> | <constructor> "|" <constructor_list>
 <constructor> ::= <Word> | <Word> <type_list>
-<type_list> ::= <struct Type> | <struct Type> <type_list>
-<struct Type> ::= <simple_type> | <fun_type> | "(" <struct Type ")"
-<fun_type> ::= <simple_type> "->" <struct Type> | "(" <fun_type> ")" -> <struct Type>
+<type_list> ::= <struct struct Type> | <struct struct Type> <type_list>
+<struct struct Type> ::= <simple_type> | <fun_type> | "(" <struct struct Type ")"
+<fun_type> ::= <simple_type> "->" <struct struct Type> | "(" <fun_type> ")" -> <struct struct Type>
 <simple_type> ::= <Word> | <constructor>
 
 <import> ::= "!"<word>
 
-<annotation> ::= <word> "::" <struct Type>
+<annotation> ::= <word> "::" <struct struct Type>
 <definition> ::= <word> <arg_list> "=" <expression>
 <arg_list> ::= <arg> | <arg> <arg_list>
 <arg> ::= <word> | <Word> | "(" <complex_arg> ")"

@@ -31,10 +31,10 @@ bool s_equal(const char *a, const char *b){
     }
 }
 
-bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
+bool match_arg(const struct arg *pat, struct eval_promise *arg, const dict *glob){
     if(!is_const(pat->match->name))
         return true;
-    object *par = promise_eval(arg);
+    struct object *par = promise_eval(arg);
     if(!par)
         return false;
     if(!name_equal(pat->match->name, par->name))
@@ -54,7 +54,7 @@ bool match_arg(const struct arg *pat, eval_promise *arg, const dict *glob){
  * @param glob global dictionary of names
  * @return true if they correspond, false otherwise
  */
-bool pattern_match(const pattern *p, eval_promise *args, const dict *glob){
+bool pattern_match(const struct pattern *p, struct eval_promise *args, const dict *glob){
     if(!p)
         return false;
     if(!args)
@@ -76,7 +76,7 @@ bool pattern_match(const pattern *p, eval_promise *args, const dict *glob){
  * @param args array of arguments
  * @return evaluation tree on success, NULL on fail
  */
-eval_tree *dict_get_eval(const dict *d, struct word name, eval_promise *args){
+struct eval_tree *dict_get_eval(const dict *d, struct word name, struct eval_promise *args){
     if(!d) return NULL;
     for(const dict* i = d; i; i = i->next){
         if(!name_equal(name, i->val->val->t->f->name))
@@ -92,7 +92,7 @@ eval_tree *dict_get_eval(const dict *d, struct word name, eval_promise *args){
  * @param d dictionary of names
  * @param value function
  */
-void dict_add(dict **d, Fun *value){
+void dict_add(dict **d, struct Fun *value){
     if(!value)
         return;
     pattern_list *p = pattern_from_et(eval_make(value));
@@ -101,7 +101,7 @@ void dict_add(dict **d, Fun *value){
     list_add(dict, d, p);
 }
 
-void dict_it(dict **d, Fun *value){
+void dict_it(dict **d, struct Fun *value){
     pattern_list *p = pattern_from_et(eval_make(value));
     if(name_equal((*d)->val->val->t->f->name, value->name))
         (*d)->val = p;
@@ -111,7 +111,7 @@ void dict_it(dict **d, Fun *value){
 void args_add(arg_list **d, struct arg *value){
     list_add_last(arg_list, d, value);
 }
-void args_add_self(arg_list **d, Fun *value){
+void args_add_self(arg_list **d, struct Fun *value){
     struct arg *self = malloc(sizeof (struct arg));
     self->args = NULL;
     self->complex = false;
@@ -124,8 +124,8 @@ void args_add_self(arg_list **d, Fun *value){
  * @param name name of the function
  * @return function on success, NULL on fail
  */
-Fun* dict_get(const dict *d, struct word name){
-    const eval_tree *tree = dict_get_eval(d, name, NULL);
+struct Fun* dict_get(const dict *d, struct word name){
+    const struct eval_tree *tree = dict_get_eval(d, name, NULL);
     return tree ? tree->f : NULL;
 }
 struct arg* args_get(const arg_list *d, struct word name){
@@ -144,11 +144,11 @@ struct arg* args_get(const arg_list *d, struct word name){
  * @param name struct Type variable's name
  */
 void generics_add(struct Type *t, struct word name){
-    for(const generics *i = t->gen; i; i = i->next){
+    for(const struct generics *i = t->gen; i; i = i->next){
         if(name_equal(i->key, name))
                return;
     }
-    generics *ret = calloc(1, sizeof (generics));
+    struct generics *ret = calloc(1, sizeof (struct generics));
     ret->key = name;
     ret->next = t->gen;
     t->gen = ret;
@@ -161,7 +161,7 @@ void generics_add(struct Type *t, struct word name){
  */
 void generics_merge(struct Type *to,  struct Type *from){
     if(!from->gen) return;
-    for(const generics *i = from->gen; i; i = i->next){
+    for(const struct generics *i = from->gen; i; i = i->next){
         generics_add(to, i->key);
     }
     //generics_free(from->gen);
@@ -173,8 +173,8 @@ void generics_merge(struct Type *to,  struct Type *from){
  * @param t struct Type
  * @return true if argument is generic and can be bound, false otherwise
  */
-bool generics_bind(generics *g, struct word name, struct Type *t){
-    for(generics *i = g; i; i = i->next){
+bool generics_bind(struct generics *g, struct word name, struct Type *t){
+    for(struct generics *i = g; i; i = i->next){
         if(name_equal(i->key, name)){
             if(i->val)
                 return equal_t(i->val,t,i->val->gen);
@@ -194,8 +194,8 @@ bool generics_bind(generics *g, struct word name, struct Type *t){
  * @brief Removes bindings from a context
  * @param g generic context
  */
-void generics_reset(generics *g){
-    for(generics *i = g; i; i = i->next)
+void generics_reset(struct generics *g){
+    for(struct generics *i = g; i; i = i->next)
         i->val = NULL;
 }
 /**
