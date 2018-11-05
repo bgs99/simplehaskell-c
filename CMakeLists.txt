@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 set(EXECUTABLE_OUTPUT_PATH build)
 project(SimpleHaskell)
-
+set(CMAKE_BUILD_TYPE Debug)
 include_directories(.)
 
 set(SOURCES

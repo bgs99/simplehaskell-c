@@ -1,0 +1,72 @@
+data Bool = True | False
+data Nat = Z | S Nat
+data List = Nil | Cons Nat List
+data Maybe = Just Nat | Nothing
+
+equals :: Nat -> Nat -> Bool
+equals Z Z = True
+equals Z _ = False
+equals _ Z = False
+equals (S x) (S y) = equals x y
+
+if :: Bool -> a -> a -> a
+if True  x _ = x
+if False _ y = y
+
+not :: Bool -> Bool
+not True = False
+not False = True
+
+and :: Bool -> Bool -> Bool
+and True True = True
+and _ _ = False
+
+or :: Bool -> Bool -> Bool
+or False False = False
+or _ _ = True
+
+const :: a -> b -> b
+const a b = b
+
+flip :: (a -> b -> c) -> b -> a -> c
+flip f a b = f b a
+
+id :: a -> a
+id x = x
+
+comp :: (b -> c) -> (a -> b) -> a -> c
+comp f g x = f (g x)
+
+null :: List -> Bool
+null Nil = True
+null _ = False
+
+head :: List -> Nat
+head (Cons x _) = x
+
+tail :: List -> List
+tail (Cons _ t) = t
+
+inc :: Nat -> Nat
+inc x = S x
+
+
+dec :: Nat -> Nat
+dec Z = Z
+dec (S x) = x
+
+last :: List -> Nat
+last (Cons x Nil) = x
+last (Cons _ l) = last l
+
+dropLast :: List -> List
+dropLast (Cons x (Cons _ Nil)) = Cons x Nil
+dropLast (Cons x y) = Cons x (dropLast y)
+
+append :: List -> Nat -> List
+append Nil x = Cons x Nil
+append (Cons x t) y = Cons x (append t y)
+
+iterate :: Nat -> List
+iterate Z = Nil
+iterate (S x) = Cons x (iterate x)

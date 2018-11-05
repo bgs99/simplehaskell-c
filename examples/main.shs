@@ -1,0 +1,93 @@
+import Prelude
+
+
+data Pos = Pos List List
+
+data Op = Inc | Dec | Read | Write | Start | End | Left | Right
+
+fromOp :: Op -> Nat
+fromOp Inc = Z
+fromOp Dec = S Z
+fromOp Read = S (S Z)
+fromOp Write = S (fromOp Read)
+fromOp Start = S (fromOp Write)
+fromOp End = S (fromOp Start)
+fromOp Left = S (fromOp End)
+fromOp Right = S (fromOp Left)
+
+
+posStart :: List -> Pos
+posStart l = Pos Nil l
+
+posBack :: Pos -> Pos
+posBack (Pos a b) = Pos (tail a) (Cons (head a) b)
+
+posForw :: Pos -> Pos
+posForw (Pos a (Cons b bs)) = Pos (Cons b a) bs
+
+memLeft :: Pos -> Pos
+memLeft (Pos Nil b) = Pos Nil (Cons Z b)
+memLeft p = posBack p
+
+memRight :: Pos -> Pos
+memRight (Pos a (Cons x Nil)) = Pos (Cons x a) (Cons Z Nil)
+memRight p = posForw p
+
+data State = State List Pos Pos List Nat
+
+
+rewindLoop :: Nat -> State -> State
+rewindLoop sl (State i (Pos (Cons a as) (Cons (S (S (S (S Z)))) b)) m o l) = if (equals sl l) (State i (Pos (Cons a as) (Cons (fromOp Start) b)) m o (dec l)) (rewindLoop sl (State i (Pos as (Cons a (Cons (fromOp Start) b))) m o (dec l)))
+rewindLoop sl (State i (Pos (Cons a as) (Cons (S (S (S (S (S Z))))) b)) m o l) = rewindLoop sl (State i (Pos as (Cons a (Cons (fromOp End) b))) m o (S l))
+rewindLoop sl (State i c m o l) = rewindLoop sl (State i (posBack c) m o l)
+
+skipLoop :: Nat -> State -> State
+skipLoop sl (State i (Pos a (Cons (S (S (S (S (S Z))))) b)) m o l) = if (equals sl l) (State i (Pos (Cons (fromOp End) a) b) m o l) (skipLoop sl (State i (Pos (Cons (fromOp End) a) b) m o (dec l)))
+skipLoop sl (State i (Pos a (Cons (S (S (S (S Z)))) b)) m o l) = skipLoop sl (State i (Pos (Cons (fromOp Start) a) b) m o (S l))
+skipLoop sl (State i c m o l) = skipLoop sl (State i (posForw c) m o l)
+
+doOp :: Op -> State -> State
+doOp Inc (State i c  (Pos a (Cons x b))   o l) = State i (posForw c) (Pos a (Cons (S x) b)) o l
+doOp Dec (State i c (Pos a (Cons x b)) o l) = State i (posForw c) (Pos a (Cons (dec x) b)) o l
+doOp Read (State (Cons i is) c (Pos a (Cons x b)) o l) = State is (posForw c) (Pos a (Cons i b)) o l
+doOp Write (State i c (Pos a (Cons x b)) o l) = State i (posForw c) (Pos a (Cons x b)) (Cons x o) l
+doOp Start (State i c (Pos a (Cons Z b)) o l) = skipLoop l (State i (posForw c) (Pos a (Cons Z b)) o l)
+doOp Start (State i c (Pos a (Cons x b)) o l) = State i (posForw c) (Pos a (Cons x b)) o (S l)
+doOp End (State i c m o l) = rewindLoop l (State i (posBack c) m o l)
+doOp Left (State i c m o l) = State i (posForw c) (memLeft m) o l
+doOp Right (State i c m o l) = State i (posForw c) (memRight m) o l
+
+sumc :: Pos
+sumc = posStart (Cons (fromOp Read) (Cons (fromOp Right) (Cons (fromOp Read) (Cons (fromOp Start) (Cons (fromOp Dec) (Cons (fromOp Left) (Cons (fromOp Inc) (Cons (fromOp Right) (Cons (fromOp End) (Cons (fromOp Left) (Cons (fromOp Write) Nil)))))))))))
+
+memc :: Pos
+memc = posStart (Cons Z Nil)
+
+inpc :: List
+inpc = Cons (S (S Z)) (Cons (S (S Z)) Nil)
+
+stc :: State
+stc = State inpc sumc memc Nil Z
+
+
+step :: State -> State
+step (State i (Pos a (Cons Z cs)) m o l) = doOp Inc (State i (Pos a (Cons Z cs)) m o l)
+step (State i (Pos a (Cons (S Z) cs)) m o l) = doOp Dec (State i (Pos a (Cons (S Z) cs)) m o l)
+step (State i (Pos a (Cons (S (S Z)) cs)) m o l) = doOp Read (State i (Pos a (Cons (S (S Z)) cs)) m o l)
+step (State i (Pos a (Cons (S (S (S Z))) cs)) m o l) = doOp Write (State i (Pos a (Cons (S (S (S Z))) cs)) m o l)
+step (State i (Pos a (Cons (S (S (S (S Z)))) cs)) m o l) = doOp Start (State i (Pos a (Cons (S (S (S (S Z)))) cs)) m o l)
+step (State i (Pos a (Cons (S (S (S (S (S Z))))) cs)) m o l) = doOp End (State i (Pos a (Cons (S (S (S (S (S Z))))) cs)) m o l)
+step (State i (Pos a (Cons (S (S (S (S (S (S Z)))))) cs)) m o l) = doOp Left (State i (Pos a (Cons (S (S (S (S (S (S Z)))))) cs)) m o l)
+step (State i (Pos a (Cons (S (S (S (S (S (S (S Z))))))) cs)) m o l) = doOp Right (State i (Pos a (Cons (S (S (S (S (S (S (S Z))))))) cs)) m o l)
+step p = p
+
+
+run :: State -> List
+run (State _ (Pos _ Nil) _ o _) = o
+run sn = run (step sn)
+
+
+makez :: Nat -> Nat
+makez (S (S x)) = makez (inc x)
+makez (S x) = makez x
+makez Z = Z

@@ -5,8 +5,11 @@
 #include <malloc.h>
 #include "../dictionary_t.h"
 #include "../freemem.h"
-#define PATH "/home/bgs99c/sandbox/shs/"
-
+#ifdef DEBUG
+#define PATH "../examples/import/"
+#else
+#define PATH "/home/bgs99c/Projects/SimpleHaskell/examples/import/"
+#endif
 /**
  * @brief Finds function in dictionaries
  * @param glob Global dictionary of names
@@ -343,11 +346,6 @@ struct fun_def process_fun(const dict *glob, struct syntax_tree block){
         arg_list **l = calloc(1, sizeof (arg_list *));
         mark_ptr(l);
         process_left(c.type, l, *i->val, glob);
-        if(!*l){
-            free(l);
-            return (struct fun_def){NULL, NULL};
-        }
-
 
         unsigned int argn = 0;
 
@@ -376,12 +374,11 @@ void process_text(const char *input, dict **glob){
     struct syntax_tree tl = undefined;
     while((tl = accept_block(&input)).type != UNDEFINED){
         if(tl.type==IMPORT){
-            char *path = calloc(tl.val.length + 40, sizeof (char));
+            char *path = calloc(tl.val.length + strlen(PATH)+5, sizeof (char));
             strcat(path, PATH);
             strncat(path, tl.val.begin, tl.val.length);
             strcat(path, ".shs");
             FILE *in = fopen(path, "r");
-            free(path);
             if(!in){
                 printf("Cannot open module %.*s, halting\n", (int)tl.val.length, tl.val.begin);
                 syntax_tree_free(tl);
@@ -397,6 +394,7 @@ void process_text(const char *input, dict **glob){
 
             process_text(all, glob);
             syntax_tree_free(tl);
+            free(path);
             continue;
         }
         if(tl.type == DATATYPE){
