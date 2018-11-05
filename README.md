@@ -26,6 +26,7 @@ Available features:
 
     - GHCI's 'it' keyword that contains result of the previous succsessful evaluation
     - Line editing and commands history via GNU readline
+    - Prettifier for Nats and Lists from Prelude in examples/import/Prelude.shs
 
 For most of the other things this interpretator's language is similar to Haskell
 
@@ -44,5 +45,12 @@ Usage:
     $ SimpleHaskell filename
     opens REPL and loads file 'filename' 
     
-    in processing/process.c it is possible to modify default path to modules
+    In processing/process.c it is possible to modify default path to modules
+    
+    You could run examples by running 
+    $ SimpleHaskell ../examples/main.shs
+    
+    For example, command
+    > run stc
+    will run Turing machine that sums two Nats from input
     
