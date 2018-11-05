@@ -31,6 +31,7 @@ For most of the other things this interpretator's language is similar to Haskell
 
 To build
 
-    $ cmake --build build
+    $ cmake .
+    $ make
 
 inside project root
